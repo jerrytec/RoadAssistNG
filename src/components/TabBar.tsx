@@ -6,6 +6,7 @@ interface Tab {
 
 const tabs: Tab[] = [
   { id: "help", icon: "🚗", label: "Need help" },
+  { id: "history", icon: "📜", label: "History" },
   { id: "provider", icon: "🚐", label: "Provider" },
   { id: "mechanic", icon: "🔩", label: "Mechanic" },
   { id: "register", icon: "📋", label: "Register" },
