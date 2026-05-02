@@ -31,7 +31,7 @@ const Index = () => {
         <>
           {activeTab === "help" && <NeedHelpScreen onSelectProvider={handleSelectProvider} />}
           {activeTab === "history" && <BookingHistoryScreen />}
-          {activeTab === "payment" && <PaymentGatewayScreen />}
+          
           {activeTab === "provider" && <ProviderDashboard />}
           {activeTab === "mechanic" && <MechanicScreen onSelectProvider={handleSelectProvider} />}
           {activeTab === "register" && <RegisterScreen />}
