@@ -1,4 +1,4 @@
-import { useState } from "react";
+import ThemeToggle from "./ThemeToggle";
 
 interface Props {
   onOpenNotifications: () => void;
@@ -11,6 +11,7 @@ const AppHeader = ({ onOpenNotifications, unreadCount }: Props) => (
       Road<span className="text-primary-light">Assist</span> NG
     </h1>
     <div className="flex items-center gap-2.5">
+      <ThemeToggle />
       <button
         onClick={onOpenNotifications}
         className="relative bg-white/[.18] text-primary-foreground text-sm px-2 py-1 rounded-full border border-white/30 cursor-pointer"
