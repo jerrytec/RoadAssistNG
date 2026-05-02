@@ -3,6 +3,27 @@ import type { Provider } from "@/components/ProviderCard";
 
 const steps = ["Book", "Quote", "Chat", "Pay", "Review"];
 
+type PayMethod = "card" | "bank" | "ussd" | "cash";
+type PaySubStep = "select" | "details" | "processing";
+
+const banks = [
+  { name: "GTBank", code: "058", icon: "🏦" },
+  { name: "First Bank", code: "011", icon: "🏦" },
+  { name: "Zenith Bank", code: "057", icon: "🏦" },
+  { name: "Access Bank", code: "044", icon: "🏦" },
+  { name: "UBA", code: "033", icon: "🏦" },
+  { name: "Kuda Bank", code: "090267", icon: "🏦" },
+];
+
+const ussdCodes = [
+  { bank: "GTBank", code: "*737*Amount*MerchantCode#" },
+  { bank: "First Bank", code: "*894*Amount#" },
+  { bank: "Zenith Bank", code: "*966*Amount*MerchantCode#" },
+  { bank: "Access Bank", code: "*901*Amount#" },
+  { bank: "UBA", code: "*919*Amount#" },
+  { bank: "Stanbic IBTC", code: "*909*Amount#" },
+];
+
 interface Props {
   provider: Provider;
   onClose: () => void;
@@ -16,7 +37,6 @@ const avatarColors: Record<string, string> = {
 
 const WorkflowModal = ({ provider, onClose }: Props) => {
   const [step, setStep] = useState(0);
-  const [selectedPay, setSelectedPay] = useState(0);
   const [rating, setRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -25,6 +45,17 @@ const WorkflowModal = ({ provider, onClose }: Props) => {
     { me: true, text: "Thank you! I'm at the bus stop junction. I have a white Toyota Camry.", time: "2:15 PM" },
     { me: false, text: "Perfect, I can see you on the map. On my way now!", time: "2:15 PM" },
   ]);
+
+  // Payment state
+  const [payMethod, setPayMethod] = useState<PayMethod>("card");
+  const [paySubStep, setPaySubStep] = useState<PaySubStep>("select");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [selectedBank, setSelectedBank] = useState("");
+  const [selectedUssd, setSelectedUssd] = useState("");
+  const amount = 12128;
 
   const next = () => setStep((s) => Math.min(s + 1, 4));
 
@@ -37,13 +68,44 @@ const WorkflowModal = ({ provider, onClose }: Props) => {
     setChatInput("");
   };
 
+  const formatCard = (v: string) => {
+    const digits = v.replace(/\D/g, "").slice(0, 16);
+    return digits.replace(/(.{4})/g, "$1 ").trim();
+  };
+
+  const formatExpiry = (v: string) => {
+    const digits = v.replace(/\D/g, "").slice(0, 4);
+    if (digits.length >= 3) return digits.slice(0, 2) + "/" + digits.slice(2);
+    return digits;
+  };
+
+  const canPayProceed = () => {
+    if (payMethod === "card") return cardNumber.replace(/\s/g, "").length === 16 && expiry.length === 5 && cvv.length >= 3 && cardName.length > 1;
+    if (payMethod === "bank") return selectedBank !== "";
+    if (payMethod === "ussd") return selectedUssd !== "";
+    if (payMethod === "cash") return true;
+    return false;
+  };
+
+  const handlePayConfirm = () => {
+    if (payMethod === "cash") {
+      next();
+      return;
+    }
+    setPaySubStep("processing");
+    setTimeout(() => {
+      setPaySubStep("select");
+      next();
+    }, 2500);
+  };
+
   const ProviderMini = () => (
     <div className="flex items-center gap-2.5 p-2.5 bg-background rounded-lg mb-3">
       <div className={`w-[38px] h-[38px] rounded-lg flex items-center justify-center text-base shrink-0 ${avatarColors[provider.avatarBg]}`}>
         {provider.icon}
       </div>
       <div className="flex-1">
-        <div className="text-[13px] font-semibold">{provider.name}</div>
+        <div className="text-[13px] font-semibold text-foreground">{provider.name}</div>
         <div className="text-[11px] text-muted-foreground">{provider.type} · {provider.location}</div>
       </div>
       <div className="text-right">
@@ -86,7 +148,7 @@ const WorkflowModal = ({ provider, onClose }: Props) => {
         </div>
 
         {/* Body */}
-        <div className="p-4">
+        <div className="p-4 max-h-[60vh] overflow-y-auto">
           {/* Step 1: Book */}
           {step === 0 && (
             <div className="animate-fade-in">
@@ -176,54 +238,227 @@ const WorkflowModal = ({ provider, onClose }: Props) => {
             </div>
           )}
 
-          {/* Step 4: Pay */}
+          {/* Step 4: Pay — Full Payment Gateway */}
           {step === 3 && (
             <div className="animate-fade-in">
-              <div className="bg-primary-light rounded-lg p-3 flex justify-between items-center mb-3">
-                <div>
-                  <div className="text-xs text-primary font-medium">Amount due</div>
-                  <div className="text-[10px] text-muted-foreground">Agreed total</div>
+              {/* Processing overlay */}
+              {paySubStep === "processing" ? (
+                <div className="py-6 text-center">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary-light flex items-center justify-center">
+                    <div className="w-7 h-7 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <h3 className="text-sm font-bold text-foreground mb-1">Processing Payment</h3>
+                  <p className="text-[11px] text-muted-foreground mb-3">Please do not close this window...</p>
+                  <div className="bg-background rounded-lg p-2.5 text-left">
+                    <div className="flex justify-between text-xs py-1">
+                      <span className="text-muted-foreground">Amount</span>
+                      <span className="font-semibold text-foreground">₦{amount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-xs py-1">
+                      <span className="text-muted-foreground">Method</span>
+                      <span className="font-medium text-foreground capitalize">{payMethod === "ussd" ? "USSD" : payMethod === "bank" ? "Bank Transfer" : "Card"}</span>
+                    </div>
+                    <div className="flex justify-between text-xs py-1">
+                      <span className="text-muted-foreground">Ref</span>
+                      <span className="font-mono text-foreground text-[10px]">RA-{Date.now().toString(36).toUpperCase()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-lg font-bold text-primary">₦12,128</div>
-              </div>
+              ) : (
+                <>
+                  {/* Amount + method selector */}
+                  <div className="bg-primary-light rounded-lg p-3 flex justify-between items-center mb-3">
+                    <div>
+                      <div className="text-xs text-primary font-medium">Amount due</div>
+                      <div className="text-[10px] text-muted-foreground">After service</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-primary font-medium">🔒</span>
+                      <div className="text-lg font-bold text-primary">₦{amount.toLocaleString()}</div>
+                    </div>
+                  </div>
 
-              <p className="text-[11px] text-muted-foreground mb-2">Select payment method</p>
+                  {/* Payment method tabs */}
+                  <div className="flex gap-1.5 mb-3">
+                    {([
+                      { id: "card" as PayMethod, icon: "💳", label: "Card" },
+                      { id: "bank" as PayMethod, icon: "🏦", label: "Bank" },
+                      { id: "ussd" as PayMethod, icon: "📱", label: "USSD" },
+                      { id: "cash" as PayMethod, icon: "💵", label: "Cash" },
+                    ]).map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => setPayMethod(m.id)}
+                        className={`flex-1 py-2 rounded-lg text-[11px] font-semibold border cursor-pointer transition-all ${
+                          payMethod === m.id
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-muted-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        {m.icon} {m.label}
+                      </button>
+                    ))}
+                  </div>
 
-              <div className="flex flex-col gap-2 mb-3">
-                {[
-                  { icon: "🏦", label: "Bank transfer", sub: "GTB, Zenith, First Bank & more" },
-                  { icon: "💳", label: "Card payment", sub: "Visa, Mastercard via Paystack" },
-                  { icon: "📱", label: "USSD / mobile money", sub: "*737#, *770# and others" },
-                  { icon: "💵", label: "Cash on completion", sub: "Pay provider directly" },
-                ].map((p, i) => (
+                  {/* Card form */}
+                  {payMethod === "card" && (
+                    <div className="space-y-2 mb-3">
+                      <div>
+                        <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Card Number</label>
+                        <input
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(formatCard(e.target.value))}
+                          placeholder="0000 0000 0000 0000"
+                          className="w-full py-2 px-3 border border-border rounded-md text-xs bg-background text-foreground outline-none focus:border-primary font-mono"
+                          maxLength={19}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Expiry</label>
+                          <input
+                            value={expiry}
+                            onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+                            placeholder="MM/YY"
+                            className="w-full py-2 px-3 border border-border rounded-md text-xs bg-background text-foreground outline-none focus:border-primary font-mono"
+                            maxLength={5}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-[11px] font-medium text-muted-foreground mb-1 block">CVV</label>
+                          <input
+                            value={cvv}
+                            onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                            placeholder="***"
+                            type="password"
+                            className="w-full py-2 px-3 border border-border rounded-md text-xs bg-background text-foreground outline-none focus:border-primary font-mono"
+                            maxLength={4}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Cardholder Name</label>
+                        <input
+                          value={cardName}
+                          onChange={(e) => setCardName(e.target.value)}
+                          placeholder="As shown on card"
+                          className="w-full py-2 px-3 border border-border rounded-md text-xs bg-background text-foreground outline-none focus:border-primary"
+                        />
+                      </div>
+                      <div className="flex gap-1 mt-1">
+                        {["Visa", "Mastercard", "Verve"].map((b) => (
+                          <span key={b} className="text-[9px] bg-background px-1.5 py-0.5 rounded text-muted-foreground border border-border">{b}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Bank transfer */}
+                  {payMethod === "bank" && (
+                    <div className="mb-3">
+                      <p className="text-[11px] text-muted-foreground mb-2">Select your bank to generate a transfer account</p>
+                      <div className="grid grid-cols-2 gap-1.5 mb-2.5">
+                        {banks.map((b) => (
+                          <button
+                            key={b.code}
+                            onClick={() => setSelectedBank(b.code)}
+                            className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-left transition-all ${
+                              selectedBank === b.code
+                                ? "border-primary bg-primary-light"
+                                : "border-border bg-background hover:border-primary/40"
+                            }`}
+                          >
+                            <span>{b.icon}</span>
+                            <span className="text-[11px] font-medium text-foreground">{b.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                      {selectedBank && (
+                        <div className="bg-background rounded-lg p-3 border border-border">
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mb-1.5">Transfer to</p>
+                          {[
+                            { l: "Bank", v: banks.find((b) => b.code === selectedBank)?.name },
+                            { l: "Account", v: "8012345678" },
+                            { l: "Name", v: "RoadAssist NG / Paystack" },
+                            { l: "Amount", v: `₦${amount.toLocaleString()}` },
+                          ].map((r) => (
+                            <div key={r.l} className="flex justify-between text-xs py-1">
+                              <span className="text-muted-foreground">{r.l}</span>
+                              <span className="font-medium text-foreground">{r.v}</span>
+                            </div>
+                          ))}
+                          <div className="mt-2 p-1.5 bg-accent-light rounded flex items-center gap-1.5">
+                            <span className="text-[10px]">⏳</span>
+                            <p className="text-[9px] text-accent font-medium">Expires in 30 min. Transfer exact amount.</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* USSD */}
+                  {payMethod === "ussd" && (
+                    <div className="mb-3">
+                      <p className="text-[11px] text-muted-foreground mb-2">Dial from your registered phone number</p>
+                      <div className="space-y-1.5 mb-2.5">
+                        {ussdCodes.map((u) => (
+                          <button
+                            key={u.bank}
+                            onClick={() => setSelectedUssd(u.bank)}
+                            className={`w-full flex items-center justify-between p-2.5 rounded-lg border cursor-pointer text-left transition-all ${
+                              selectedUssd === u.bank
+                                ? "border-primary bg-primary-light"
+                                : "border-border bg-background hover:border-primary/40"
+                            }`}
+                          >
+                            <div>
+                              <span className="text-[11px] font-semibold text-foreground">{u.bank}</span>
+                              <p className="text-[10px] font-mono text-muted-foreground">{u.code}</p>
+                            </div>
+                            <span>📱</span>
+                          </button>
+                        ))}
+                      </div>
+                      {selectedUssd && (
+                        <div className="bg-secondary-light rounded-lg p-2.5">
+                          <p className="text-[11px] font-semibold text-secondary mb-1">How to pay:</p>
+                          <ol className="text-[10px] text-muted-foreground space-y-0.5 list-decimal pl-3.5">
+                            <li>Dial <span className="font-mono font-semibold text-foreground">{ussdCodes.find((u) => u.bank === selectedUssd)?.code}</span></li>
+                            <li>Follow prompts & enter PIN</li>
+                            <li>Click confirm below after completion</li>
+                          </ol>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Cash */}
+                  {payMethod === "cash" && (
+                    <div className="mb-3 bg-accent-light rounded-lg p-3 text-center">
+                      <span className="text-2xl block mb-2">💵</span>
+                      <p className="text-xs font-semibold text-foreground mb-1">Cash Payment</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        Pay ₦{amount.toLocaleString()} directly to the provider after service is complete. Please have the exact amount ready.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Security badges */}
+                  <div className="flex items-center justify-center gap-2 mb-2.5">
+                    <span className="text-[9px] text-muted-foreground">🔒 SSL</span>
+                    <span className="text-[9px] text-muted-foreground">🛡️ PCI DSS</span>
+                    <span className="text-[9px] text-muted-foreground">✅ CBN Licensed</span>
+                  </div>
+
                   <button
-                    key={i}
-                    onClick={() => setSelectedPay(i)}
-                    className={`flex items-center gap-2.5 p-2.5 px-3 border rounded-lg cursor-pointer transition-colors text-left ${
-                      selectedPay === i
-                        ? "border-primary-mid bg-primary-light"
-                        : "border-border bg-card hover:border-primary-mid"
-                    }`}
+                    onClick={handlePayConfirm}
+                    disabled={!canPayProceed()}
+                    className="w-full py-3 rounded-lg border-none bg-primary text-primary-foreground text-sm font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                   >
-                    <span className="text-lg w-[30px] text-center">{p.icon}</span>
-                    <div className="flex-1">
-                      <div className="text-xs font-medium">{p.label}</div>
-                      <div className="text-[10px] text-muted-foreground">{p.sub}</div>
-                    </div>
-                    <div className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center text-[9px] ${
-                      selectedPay === i
-                        ? "bg-primary-mid border-primary-mid text-primary-foreground"
-                        : "border-border"
-                    }`}>
-                      {selectedPay === i && "✓"}
-                    </div>
+                    {payMethod === "cash" ? "Confirm cash payment →" : payMethod === "bank" ? "I've sent the money →" : payMethod === "ussd" ? "I've completed payment →" : `Pay ₦${amount.toLocaleString()} →`}
                   </button>
-                ))}
-              </div>
-
-              <button onClick={next} className="w-full py-3 rounded-lg border-none bg-primary-mid text-primary-foreground text-sm font-semibold cursor-pointer">
-                Confirm payment →
-              </button>
+                </>
+              )}
             </div>
           )}
 
