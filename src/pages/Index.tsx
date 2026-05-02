@@ -6,7 +6,7 @@ import ProviderDashboard from "@/components/screens/ProviderDashboard";
 import MechanicScreen from "@/components/screens/MechanicScreen";
 import RegisterScreen from "@/components/screens/RegisterScreen";
 import BookingHistoryScreen from "@/components/screens/BookingHistoryScreen";
-import PaymentGatewayScreen from "@/components/screens/PaymentGatewayScreen";
+
 import WorkflowModal from "@/components/WorkflowModal";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import type { Provider } from "@/components/ProviderCard";
@@ -31,7 +31,7 @@ const Index = () => {
         <>
           {activeTab === "help" && <NeedHelpScreen onSelectProvider={handleSelectProvider} />}
           {activeTab === "history" && <BookingHistoryScreen />}
-          {activeTab === "payment" && <PaymentGatewayScreen />}
+          
           {activeTab === "provider" && <ProviderDashboard />}
           {activeTab === "mechanic" && <MechanicScreen onSelectProvider={handleSelectProvider} />}
           {activeTab === "register" && <RegisterScreen />}
