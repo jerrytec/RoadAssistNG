@@ -9,19 +9,27 @@ import BookingHistoryScreen from "@/components/screens/BookingHistoryScreen";
 
 import WorkflowModal from "@/components/WorkflowModal";
 import NotificationsPanel from "@/components/NotificationsPanel";
+import ContactSupportPanel from "@/components/ContactSupportPanel";
 import type { Provider } from "@/components/ProviderCard";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("help");
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const handleSelectProvider = (p: Provider) => setSelectedProvider(p);
 
   return (
     <div className="max-w-[700px] mx-auto min-h-screen bg-background">
       <AppHeader onOpenNotifications={() => setNotificationsOpen(true)} unreadCount={3} />
-      <TabBar active={activeTab} onChange={setActiveTab} />
+      <TabBar active={activeTab} onChange={(id) => {
+        if (id === "support") {
+          setSupportOpen(true);
+        } else {
+          setActiveTab(id);
+        }
+      }} />
 
       {selectedProvider && (
         <WorkflowModal provider={selectedProvider} onClose={() => setSelectedProvider(null)} />
@@ -31,7 +39,6 @@ const Index = () => {
         <>
           {activeTab === "help" && <NeedHelpScreen onSelectProvider={handleSelectProvider} />}
           {activeTab === "history" && <BookingHistoryScreen />}
-          
           {activeTab === "provider" && <ProviderDashboard />}
           {activeTab === "mechanic" && <MechanicScreen onSelectProvider={handleSelectProvider} />}
           {activeTab === "register" && <RegisterScreen />}
@@ -39,6 +46,7 @@ const Index = () => {
       )}
 
       <NotificationsPanel open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+      <ContactSupportPanel open={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>
   );
 };
