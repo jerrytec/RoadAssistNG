@@ -146,3 +146,12 @@
 .animate-slide-up {
   animation: slide-up 0.35s ease-out;
 }
+
+@keyframes slide-up-card {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up-card {
+  animation: slide-up-card 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
