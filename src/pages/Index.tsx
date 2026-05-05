@@ -60,7 +60,7 @@ const Index = () => {
           {activeTab === "history" && <BookingHistoryScreen />}
           {activeTab === "provider" && <ProviderDashboard />}
           {activeTab === "mechanic" && <MechanicScreen onSelectProvider={handleSelectProvider} />}
-          {activeTab === "register" && <RegisterScreen />}
+          
         </>
       )}
 
