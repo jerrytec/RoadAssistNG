@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import AppHeader from "@/components/AppHeader";
 import TabBar from "@/components/TabBar";
 import NeedHelpScreen from "@/components/screens/NeedHelpScreen";
@@ -10,6 +10,7 @@ import BookingHistoryScreen from "@/components/screens/BookingHistoryScreen";
 import WorkflowModal from "@/components/WorkflowModal";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import ContactSupportPanel from "@/components/ContactSupportPanel";
+import SplashScreen from "@/components/SplashScreen";
 import type { Provider } from "@/components/ProviderCard";
 
 const Index = () => {
