@@ -11,19 +11,30 @@ import WorkflowModal from "@/components/WorkflowModal";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import ContactSupportPanel from "@/components/ContactSupportPanel";
 import SplashScreen from "@/components/SplashScreen";
+import AuthScreen from "@/components/AuthScreen";
 import type { Provider } from "@/components/ProviderCard";
 
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
   const [activeTab, setActiveTab] = useState("help");
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
-  const handleSplashFinish = useCallback(() => setShowSplash(false), []);
+  const handleSplashFinish = useCallback(() => {
+    setShowSplash(false);
+    setShowAuth(true);
+  }, []);
+
+  const handleAuthComplete = useCallback(() => setShowAuth(false), []);
 
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
+  }
+
+  if (showAuth) {
+    return <AuthScreen onComplete={handleAuthComplete} />;
   }
 
   const handleSelectProvider = (p: Provider) => setSelectedProvider(p);
