@@ -7,10 +7,10 @@ interface Tab {
 const tabs: Tab[] = [
   { id: "help", icon: "🚗", label: "Need help" },
   { id: "history", icon: "📜", label: "History" },
-  { id: "support", icon: "🎧", label: "Support" },
   { id: "provider", icon: "🚐", label: "Provider" },
   { id: "mechanic", icon: "🔩", label: "Mechanic" },
-  { id: "register", icon: "📋", label: "Register" },
+  { id: "register", icon: "📋", label: "Signup" },
+  { id: "support", icon: "🎧", label: "Support" },
 ];
 
 interface TabBarProps {
