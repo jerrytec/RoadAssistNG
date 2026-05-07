@@ -252,6 +252,30 @@ const DetailModal = ({ booking, onClose }: { booking: Booking; onClose: () => vo
   </div>
 );
 
+/* ─── Simulated provider availability ─── */
+const providerAvailability: Record<string, boolean> = {
+  "Emeka Okafor Towing": true,
+  "Chidi AutoFix Mobile": true,
+  "Femi Tyres & Vulcanizer": false, // simulate unavailable
+  "Lagos Rescue Co.": true,
+  "Tunde Fix-It Mobile": true,
+};
+
+/* ─── Price estimate helper ─── */
+const estimateNewPrice = (oldAmount: string): { estimate: string; diff: number; percent: string } => {
+  const raw = parseInt(oldAmount.replace(/[₦,]/g, "") || "0");
+  // Simulate ±5-15% variation due to distance/availability changes
+  const variation = 1 + (Math.random() * 0.2 - 0.05); // +5% to +15% bias (new location likely farther)
+  const newAmount = Math.round(raw * variation / 100) * 100;
+  const diff = newAmount - raw;
+  const percent = raw > 0 ? ((diff / raw) * 100).toFixed(0) : "0";
+  return {
+    estimate: `₦${newAmount.toLocaleString()}`,
+    diff,
+    percent,
+  };
+};
+
 /* ─── Use Again Sheet ─── */
 const UseAgainSheet = ({
   booking,
@@ -260,14 +284,17 @@ const UseAgainSheet = ({
 }: {
   booking: Booking;
   onClose: () => void;
-  onConfirm: (preferSameProvider: boolean) => void;
+  onConfirm: (preferSameProvider: boolean, reuseVehicle: boolean) => void;
 }) => {
   const [preferSame, setPreferSame] = useState(true);
+  const [reuseVehicle, setReuseVehicle] = useState(true);
+  const isProviderAvailable = providerAvailability[booking.provider] ?? true;
+  const priceEstimate = estimateNewPrice(booking.amount);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 animate-fade-in" onClick={onClose}>
       <div
-        className="bg-card border-t border-border rounded-t-2xl w-full max-w-[700px] p-5 shadow-lg animate-slide-up-card"
+        className="bg-card border-t border-border rounded-t-2xl w-full max-w-[700px] p-5 shadow-lg animate-slide-up-card max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-border rounded-full mx-auto mb-4" />
@@ -322,11 +349,77 @@ const UseAgainSheet = ({
               🔍 Find nearest available
             </button>
           </div>
-          {preferSame && (
+          {/* Provider unavailability notice */}
+          {preferSame && !isProviderAvailable && (
+            <div className="mt-2 p-2.5 rounded-lg bg-destructive-light border border-destructive/20">
+              <div className="text-[11px] font-semibold text-destructive flex items-center gap-1.5">
+                ⚠️ {booking.provider} is currently offline
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                We'll automatically match you with the next best <span className="font-medium text-foreground">{booking.type}</span> provider nearby.
+              </p>
+            </div>
+          )}
+          {preferSame && isProviderAvailable && (
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              ⚠️ If this provider is unavailable, we'll automatically match you with the next best option.
+              ✅ {booking.provider} is currently available.
             </p>
           )}
+        </div>
+
+        {/* Reuse vehicle & preferences */}
+        <div className="mb-4">
+          <div className="text-[11px] font-semibold mb-2">Reuse preferences</div>
+          <button
+            onClick={() => setReuseVehicle(!reuseVehicle)}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+              reuseVehicle
+                ? "bg-primary-light border-primary/30"
+                : "bg-card border-border"
+            }`}
+          >
+            <span className="text-base">🚗</span>
+            <div className="flex-1 text-left">
+              <div className="text-[12px] font-medium">{booking.vehicle}</div>
+              <div className="text-[10px] text-muted-foreground">
+                {reuseVehicle ? "Will be prefilled in your request" : "You'll enter vehicle details manually"}
+              </div>
+            </div>
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+              reuseVehicle ? "border-primary bg-primary" : "border-border"
+            }`}>
+              {reuseVehicle && <span className="text-primary-foreground text-[10px]">✓</span>}
+            </div>
+          </button>
+          {booking.serviceNotes && (
+            <div className="mt-2 p-2.5 rounded-lg bg-background">
+              <div className="text-[10px] text-muted-foreground font-medium mb-0.5">Previous issue</div>
+              <div className="text-[11px] text-foreground">{booking.serviceNotes}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Price estimate changes */}
+        <div className="mb-4 p-3 rounded-lg bg-background">
+          <div className="text-[11px] font-semibold mb-2">💰 Estimated price</div>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] text-muted-foreground line-through">{booking.amount} (previous)</div>
+              <div className="text-[14px] font-bold text-primary">{priceEstimate.estimate}</div>
+            </div>
+            <div className={`text-[11px] font-medium px-2 py-1 rounded-full ${
+              priceEstimate.diff > 0
+                ? "bg-accent-light text-accent"
+                : priceEstimate.diff < 0
+                ? "bg-primary-light text-primary"
+                : "bg-background text-muted-foreground"
+            }`}>
+              {priceEstimate.diff > 0 ? "↑" : priceEstimate.diff < 0 ? "↓" : "≈"} {priceEstimate.diff === 0 ? "Same" : `${Math.abs(Number(priceEstimate.percent))}%`}
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1.5">
+            Estimate based on current location & demand. Final price confirmed after provider quote.
+          </p>
         </div>
 
         {/* What changes notice */}
@@ -339,7 +432,7 @@ const UseAgainSheet = ({
             <span className="text-primary">💰</span> Pricing: May vary based on <span className="font-medium text-foreground">distance & availability</span>
           </div>
           <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-            <span className="text-primary">🚗</span> Vehicle: <span className="font-medium text-foreground">{booking.vehicle}</span> (you can change during booking)
+            <span className="text-primary">🚗</span> Vehicle: <span className="font-medium text-foreground">{reuseVehicle ? booking.vehicle : "You'll enter new details"}</span>
           </div>
         </div>
 
@@ -351,7 +444,7 @@ const UseAgainSheet = ({
             Cancel
           </button>
           <button
-            onClick={() => onConfirm(preferSame)}
+            onClick={() => onConfirm(preferSame && isProviderAvailable, reuseVehicle)}
             className="flex-[2] py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold cursor-pointer border-none"
           >
             Continue — New {booking.type} Request
@@ -362,17 +455,35 @@ const UseAgainSheet = ({
   );
 };
 
+export interface UseAgainData {
+  serviceType: string;
+  vehicle: string;
+  description: string;
+  previousAmount: string;
+  preferSameProvider: boolean;
+  previousProvider: string;
+  reuseVehicle: boolean;
+}
+
 /* ─── Main Screen ─── */
-const BookingHistoryScreen = () => {
+const BookingHistoryScreen = ({ onUseAgain }: { onUseAgain?: (data: UseAgainData) => void }) => {
   const [receiptBooking, setReceiptBooking] = useState<Booking | null>(null);
   const [detailBooking, setDetailBooking] = useState<Booking | null>(null);
   const [useAgainBooking, setUseAgainBooking] = useState<Booking | null>(null);
 
-  const handleUseAgainConfirm = (preferSameProvider: boolean) => {
-    // In a real app, this would navigate to the booking flow pre-filled
-    console.log("Use again:", useAgainBooking?.type, "prefer same provider:", preferSameProvider);
+  const handleUseAgainConfirm = (preferSameProvider: boolean, reuseVehicle: boolean) => {
+    if (!useAgainBooking) return;
+    const data: UseAgainData = {
+      serviceType: useAgainBooking.type,
+      vehicle: reuseVehicle ? useAgainBooking.vehicle : "",
+      description: useAgainBooking.serviceNotes ?? "",
+      previousAmount: useAgainBooking.amount,
+      preferSameProvider,
+      previousProvider: useAgainBooking.provider,
+      reuseVehicle,
+    };
+    onUseAgain?.(data);
     setUseAgainBooking(null);
-    // TODO: trigger workflow modal with pre-filled service type + current location
   };
 
   return (

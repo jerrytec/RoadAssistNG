@@ -37,9 +37,19 @@ const ussdCodes = [
   { bank: "Stanbic IBTC", code: "*909*Amount#" },
 ];
 
+export interface PrefillData {
+  serviceType?: string;
+  vehicle?: string;
+  description?: string;
+  previousAmount?: number;
+  preferSameProvider?: boolean;
+  previousProvider?: string;
+}
+
 interface Props {
   provider: Provider;
   onClose: () => void;
+  prefill?: PrefillData;
 }
 
 const avatarColors: Record<string, string> = {
@@ -88,7 +98,7 @@ const clearBooking = () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
 };
 
-const WorkflowModal = ({ provider, onClose }: Props) => {
+const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const saved = loadBooking(provider.name);
 
   const [step, setStep] = useState(saved?.step ?? 0);
@@ -101,7 +111,12 @@ const WorkflowModal = ({ provider, onClose }: Props) => {
     { me: false, text: "Okay, I can handle that. The quoted price looks right. Shall we proceed?", time: "2:15 PM" },
   ]);
 
-  const [formData, setFormData] = useState(saved?.formData ?? { name: "", phone: "", location: "", description: "" });
+  const [formData, setFormData] = useState(saved?.formData ?? {
+    name: "",
+    phone: "",
+    location: prefill ? "📍 Using current GPS location" : "",
+    description: prefill?.description ?? "",
+  });
 
   // Payment method for escrow hold
   const [payMethod, setPayMethod] = useState<PayMethod>(saved?.payMethod ?? "card");
@@ -330,6 +345,21 @@ const WorkflowModal = ({ provider, onClose }: Props) => {
           {/* Step 0: Book */}
           {step === 0 && (
             <div className="animate-fade-in">
+              {prefill && (
+                <div className="bg-primary-light border border-primary/20 rounded-lg p-3 mb-3">
+                  <div className="text-[11px] font-semibold text-primary mb-1">🔄 Prefilled from previous booking</div>
+                  <div className="text-[10px] text-muted-foreground space-y-0.5">
+                    <div>Service: <span className="font-medium text-foreground">{prefill.serviceType}</span></div>
+                    {prefill.vehicle && <div>Vehicle: <span className="font-medium text-foreground">{prefill.vehicle}</span></div>}
+                    {prefill.previousAmount !== undefined && prefill.previousAmount > 0 && (
+                      <div>Previous price: <span className="font-medium text-foreground">₦{prefill.previousAmount.toLocaleString()}</span> <span className="text-muted-foreground">(may vary)</span></div>
+                    )}
+                    {prefill.preferSameProvider && (
+                      <div>Provider preference: <span className="font-medium text-foreground">{prefill.previousProvider}</span></div>
+                    )}
+                  </div>
+                </div>
+              )}
               <ProviderMini />
               {([
                 { key: "name", label: "Your name", type: "text" },
