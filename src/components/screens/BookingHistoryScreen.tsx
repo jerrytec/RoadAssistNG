@@ -455,17 +455,35 @@ const UseAgainSheet = ({
   );
 };
 
+export interface UseAgainData {
+  serviceType: string;
+  vehicle: string;
+  description: string;
+  previousAmount: string;
+  preferSameProvider: boolean;
+  previousProvider: string;
+  reuseVehicle: boolean;
+}
+
 /* ─── Main Screen ─── */
-const BookingHistoryScreen = () => {
+const BookingHistoryScreen = ({ onUseAgain }: { onUseAgain?: (data: UseAgainData) => void }) => {
   const [receiptBooking, setReceiptBooking] = useState<Booking | null>(null);
   const [detailBooking, setDetailBooking] = useState<Booking | null>(null);
   const [useAgainBooking, setUseAgainBooking] = useState<Booking | null>(null);
 
-  const handleUseAgainConfirm = (preferSameProvider: boolean) => {
-    // In a real app, this would navigate to the booking flow pre-filled
-    console.log("Use again:", useAgainBooking?.type, "prefer same provider:", preferSameProvider);
+  const handleUseAgainConfirm = (preferSameProvider: boolean, reuseVehicle: boolean) => {
+    if (!useAgainBooking) return;
+    const data: UseAgainData = {
+      serviceType: useAgainBooking.type,
+      vehicle: reuseVehicle ? useAgainBooking.vehicle : "",
+      description: useAgainBooking.serviceNotes ?? "",
+      previousAmount: useAgainBooking.amount,
+      preferSameProvider,
+      previousProvider: useAgainBooking.provider,
+      reuseVehicle,
+    };
+    onUseAgain?.(data);
     setUseAgainBooking(null);
-    // TODO: trigger workflow modal with pre-filled service type + current location
   };
 
   return (
