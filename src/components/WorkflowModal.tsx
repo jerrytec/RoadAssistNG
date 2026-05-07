@@ -98,7 +98,7 @@ const clearBooking = () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
 };
 
-const WorkflowModal = ({ provider, onClose }: Props) => {
+const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const saved = loadBooking(provider.name);
 
   const [step, setStep] = useState(saved?.step ?? 0);
@@ -111,7 +111,12 @@ const WorkflowModal = ({ provider, onClose }: Props) => {
     { me: false, text: "Okay, I can handle that. The quoted price looks right. Shall we proceed?", time: "2:15 PM" },
   ]);
 
-  const [formData, setFormData] = useState(saved?.formData ?? { name: "", phone: "", location: "", description: "" });
+  const [formData, setFormData] = useState(saved?.formData ?? {
+    name: "",
+    phone: "",
+    location: prefill ? "📍 Using current GPS location" : "",
+    description: prefill?.description ?? "",
+  });
 
   // Payment method for escrow hold
   const [payMethod, setPayMethod] = useState<PayMethod>(saved?.payMethod ?? "card");
