@@ -345,6 +345,21 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
           {/* Step 0: Book */}
           {step === 0 && (
             <div className="animate-fade-in">
+              {prefill && (
+                <div className="bg-primary-light border border-primary/20 rounded-lg p-3 mb-3">
+                  <div className="text-[11px] font-semibold text-primary mb-1">🔄 Prefilled from previous booking</div>
+                  <div className="text-[10px] text-muted-foreground space-y-0.5">
+                    <div>Service: <span className="font-medium text-foreground">{prefill.serviceType}</span></div>
+                    {prefill.vehicle && <div>Vehicle: <span className="font-medium text-foreground">{prefill.vehicle}</span></div>}
+                    {prefill.previousAmount !== undefined && prefill.previousAmount > 0 && (
+                      <div>Previous price: <span className="font-medium text-foreground">₦{prefill.previousAmount.toLocaleString()}</span> <span className="text-muted-foreground">(may vary)</span></div>
+                    )}
+                    {prefill.preferSameProvider && (
+                      <div>Provider preference: <span className="font-medium text-foreground">{prefill.previousProvider}</span></div>
+                    )}
+                  </div>
+                </div>
+              )}
               <ProviderMini />
               {([
                 { key: "name", label: "Your name", type: "text" },
