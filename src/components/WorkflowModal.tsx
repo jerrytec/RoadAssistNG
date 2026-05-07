@@ -37,9 +37,19 @@ const ussdCodes = [
   { bank: "Stanbic IBTC", code: "*909*Amount#" },
 ];
 
+export interface PrefillData {
+  serviceType?: string;
+  vehicle?: string;
+  description?: string;
+  previousAmount?: number;
+  preferSameProvider?: boolean;
+  previousProvider?: string;
+}
+
 interface Props {
   provider: Provider;
   onClose: () => void;
+  prefill?: PrefillData;
 }
 
 const avatarColors: Record<string, string> = {
