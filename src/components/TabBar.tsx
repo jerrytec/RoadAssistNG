@@ -6,10 +6,11 @@ interface Tab {
 
 const tabs: Tab[] = [
   { id: "help", icon: "🚗", label: "Need help" },
-  { id: "history", icon: "📜", label: "History" },
-  { id: "provider", icon: "🚐", label: "Provider" },
+  { id: "tow", icon: "🚐", label: "Tow vans" },
+  { id: "vulcanizer", icon: "🔧", label: "Vulcanizers" },
   { id: "mechanic", icon: "🔩", label: "Mechanic" },
   { id: "support", icon: "🎧", label: "Support" },
+  { id: "history", icon: "📜", label: "History" },
 ];
 
 interface TabBarProps {
