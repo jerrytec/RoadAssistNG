@@ -71,7 +71,7 @@ const VendorPortal = () => {
             {vendor.status === "verified" ? "✓ Verified vendor" : "⏳ Pending verification"}
           </span>
         </div>
-        <button onClick={() => signOut().then(() => navigate("/"))} className="text-[11px] text-muted-foreground">Log out</button>
+        <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
       </header>
 
       <nav className="flex border-b border-border bg-background sticky top-[57px] z-10">
