@@ -2,9 +2,8 @@ import { useState, useCallback } from "react";
 import AppHeader from "@/components/AppHeader";
 import TabBar from "@/components/TabBar";
 import NeedHelpScreen from "@/components/screens/NeedHelpScreen";
-import ProviderDashboard from "@/components/screens/ProviderDashboard";
+import ServiceListScreen from "@/components/screens/ServiceListScreen";
 import MechanicScreen from "@/components/screens/MechanicScreen";
-import RegisterScreen from "@/components/screens/RegisterScreen";
 import BookingHistoryScreen, { type UseAgainData } from "@/components/screens/BookingHistoryScreen";
 
 import WorkflowModal from "@/components/WorkflowModal";
@@ -94,9 +93,10 @@ const Index = () => {
       {!selectedProvider && (
         <>
           {activeTab === "help" && <NeedHelpScreen onSelectProvider={handleSelectProvider} />}
-          {activeTab === "history" && <BookingHistoryScreen onUseAgain={handleUseAgain} />}
-          {activeTab === "provider" && <ProviderDashboard />}
+          {activeTab === "tow" && <ServiceListScreen serviceType="tow" onSelectProvider={handleSelectProvider} />}
+          {activeTab === "vulcanizer" && <ServiceListScreen serviceType="vulcanizer" onSelectProvider={handleSelectProvider} />}
           {activeTab === "mechanic" && <MechanicScreen onSelectProvider={handleSelectProvider} />}
+          {activeTab === "history" && <BookingHistoryScreen onUseAgain={handleUseAgain} />}
           
         </>
       )}
