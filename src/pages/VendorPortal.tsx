@@ -6,8 +6,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMyVendor, useUserRoles } from "@/hooks/useUserRoles";
 import { formatNaira } from "@/lib/format";
 import { toast } from "sonner";
+import ProviderDashboard from "@/components/screens/ProviderDashboard";
 
 type Tab = "overview" | "parts" | "orders" | "settings";
+
+const TECH_ROLE_LABEL: Record<string, string> = {
+  tow_operator: "Tow Van Operator",
+  vulcanizer: "Vulcanizer",
+  mechanic: "Mechanic",
+};
 
 const VendorPortal = () => {
   const navigate = useNavigate();
@@ -20,6 +27,24 @@ const VendorPortal = () => {
   if (!user) { navigate("/"); return null; }
 
   const isVendor = roles?.includes("vendor");
+  const techRole = roles?.find((r) => ["tow_operator", "vulcanizer", "mechanic"].includes(r));
+
+  // Technician portal (tow / vulcanizer / mechanic)
+  if (techRole && !isVendor) {
+    return (
+      <Wrap>
+        <header className="px-4 py-3 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
+          <div>
+            <button onClick={() => navigate("/")} className="text-[11px] text-muted-foreground">← Back to app</button>
+            <h1 className="text-sm font-bold">{TECH_ROLE_LABEL[techRole]} portal</h1>
+            <span className="text-[10px] font-semibold text-primary">✓ Active</span>
+          </div>
+          <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
+        </header>
+        <ProviderDashboard />
+      </Wrap>
+    );
+  }
 
   if (!vLoading && !vendor && isVendor === false) {
     return (
