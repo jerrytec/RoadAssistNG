@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import AppHeader from "@/components/AppHeader";
 import TabBar from "@/components/TabBar";
 import NeedHelpScreen from "@/components/screens/NeedHelpScreen";
@@ -22,7 +23,21 @@ import { useCart } from "@/hooks/useCart";
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { data: roles } = useUserRoles();
   const { totalCount } = useCart();
+
+  // Auto-redirect providers/technicians to their portal on login
+  useEffect(() => {
+    if (!user || !roles) return;
+    const providerRoles = ["vendor", "tow_operator", "vulcanizer", "mechanic"];
+    const isProvider = roles.some((r) => providerRoles.includes(r));
+    const isOnlyProvider = isProvider && !roles.includes("buyer");
+    const alreadyRedirected = sessionStorage.getItem("portal-redirected");
+    if (isOnlyProvider && !alreadyRedirected) {
+      sessionStorage.setItem("portal-redirected", "1");
+      navigate("/vendor");
+    }
+  }, [user, roles, navigate]);
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState("help");
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
