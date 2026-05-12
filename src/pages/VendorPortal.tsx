@@ -248,7 +248,8 @@ const PartFormModal = ({ vendorId, initial, onClose, onSaved }: { vendorId: stri
 
   const handleUpload = async (file: File) => {
     setUploading(true);
-    const path = `${vendorId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+    const { data: u } = await supabase.auth.getUser();
+    const path = `${u.user!.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
     const { error } = await supabase.storage.from("parts-images").upload(path, file, { cacheControl: "3600" });
     if (error) { setUploading(false); return toast.error(error.message); }
     const { data } = supabase.storage.from("parts-images").getPublicUrl(path);
