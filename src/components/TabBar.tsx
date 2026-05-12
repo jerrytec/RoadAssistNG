@@ -9,6 +9,7 @@ const tabs: Tab[] = [
   { id: "tow", icon: "🚐", label: "Tow vans" },
   { id: "vulcanizer", icon: "🔧", label: "Vulcanizers" },
   { id: "mechanic", icon: "🔩", label: "Mechanic" },
+  { id: "parts", icon: "🧰", label: "Parts" },
   { id: "support", icon: "🎧", label: "Support" },
   { id: "history", icon: "📜", label: "History" },
 ];
