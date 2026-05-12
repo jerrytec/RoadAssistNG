@@ -53,7 +53,7 @@ const AppHeader = ({ onOpenNotifications, unreadCount }: Props) => {
           </button>
         )}
         {user && (
-          <button onClick={() => signOut()} className="bg-white/[.18] text-primary-foreground text-[11px] px-2.5 py-0.5 rounded-full border border-white/30">
+          <button onClick={() => { sessionStorage.removeItem("portal-redirected"); signOut(); }} className="bg-white/[.18] text-primary-foreground text-[11px] px-2.5 py-0.5 rounded-full border border-white/30">
             Sign out
           </button>
         )}

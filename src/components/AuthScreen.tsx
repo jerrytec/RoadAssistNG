@@ -79,6 +79,7 @@ const AuthScreen = ({ onComplete }: AuthScreenProps) => {
           password: parsed.data.password,
         });
         if (error) throw error;
+        sessionStorage.removeItem("portal-redirected");
         toast.success("Welcome back!");
         onComplete();
       }
