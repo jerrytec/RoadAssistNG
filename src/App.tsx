@@ -10,6 +10,7 @@ import PartDetail from "./pages/PartDetail.tsx";
 import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx";
 import MyOrders from "./pages/MyOrders.tsx";
+import VendorPortal from "./pages/VendorPortal.tsx";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<MyOrders />} />
+            <Route path="/vendor" element={<VendorPortal />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
