@@ -1,9 +1,9 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export interface AppNotification {
   id: string;
@@ -18,83 +18,105 @@ export interface AppNotification {
 
 export const NOTIFS_PAGE_SIZE = 10;
 
-// Module-level singleton: one channel per user, shared across mounts.
-const channels = new Map<string, { channel: RealtimeChannel; refs: number }>();
-type Listener = (n: AppNotification) => void;
-const listeners = new Map<string, Set<Listener>>();
+// Module-level singleton: ONE channel per user, shared across mounts.
+// All listeners must be attached BEFORE subscribe() is called — that's why
+// we register the postgres_changes handler here, not per-hook.
+type Listener = (n: AppNotification | null) => void;
+const channels = new Map<string, { channel: RealtimeChannel; refs: number; listeners: Set<Listener> }>();
+// Module-level dedupe: every notification id is dispatched at most once
+// (to all current listeners), even across re-mounts.
+const dispatched = new Map<string, Set<string>>();
 
-const acquireChannel = (userId: string) => {
-  const existing = channels.get(userId);
-  if (existing) {
-    existing.refs += 1;
-    return;
+const acquireChannel = (userId: string, listener: Listener) => {
+  let entry = channels.get(userId);
+  if (!entry) {
+    const listeners = new Set<Listener>();
+    const channel = supabase
+      .channel(`notifs:${userId}`) // stable per-user key
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+        (payload) => {
+          const n = payload.new as AppNotification;
+          const seen = dispatched.get(userId) ?? new Set<string>();
+          if (seen.has(n.id)) {
+            // Still notify listeners (for query refetch) but mark as dup.
+            listeners.forEach((fn) => fn(null));
+            return;
+          }
+          seen.add(n.id);
+          dispatched.set(userId, seen);
+          listeners.forEach((fn) => fn(n));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+        () => listeners.forEach((fn) => fn(null)),
+      )
+      .subscribe();
+    entry = { channel, refs: 0, listeners };
+    channels.set(userId, entry);
   }
-  const channel = supabase
-    .channel(`notifs:${userId}`) // stable key
-    .on(
-      "postgres_changes",
-      { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
-      (payload) => {
-        const n = payload.new as AppNotification;
-        listeners.get(userId)?.forEach((fn) => fn(n));
-      },
-    )
-    .on(
-      "postgres_changes",
-      { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
-      () => listeners.get(userId)?.forEach((fn) => fn(null as unknown as AppNotification)),
-    )
-    .subscribe();
-  channels.set(userId, { channel, refs: 1 });
+  entry.refs += 1;
+  entry.listeners.add(listener);
 };
 
-const releaseChannel = (userId: string) => {
+const releaseChannel = (userId: string, listener: Listener) => {
   const entry = channels.get(userId);
   if (!entry) return;
+  entry.listeners.delete(listener);
   entry.refs -= 1;
   if (entry.refs <= 0) {
     supabase.removeChannel(entry.channel);
     channels.delete(userId);
+    dispatched.delete(userId);
   }
 };
 
-export const useNotifications = () => {
+interface UseNotificationsOptions {
+  /** When true, mark all unread as read once on mount (e.g. opening a panel). */
+  markReadOnOpen?: boolean;
+  /** When true, only return unread items in the paginated list. */
+  unreadOnly?: boolean;
+}
+
+export const useNotifications = (opts: UseNotificationsOptions = {}) => {
+  const { markReadOnOpen = false, unreadOnly = false } = opts;
   const { user } = useAuth();
   const qc = useQueryClient();
   const [page, setPage] = useState(0);
+  const [filter, setFilter] = useState<"all" | "unread">(unreadOnly ? "unread" : "all");
+
+  // Reset to first page when filter flips.
+  useEffect(() => { setPage(0); }, [filter]);
 
   useEffect(() => {
     if (!user) return;
     const userId = user.id;
-    acquireChannel(userId);
-    const set = listeners.get(userId) ?? new Set<Listener>();
     const handler: Listener = (n) => {
       qc.invalidateQueries({ queryKey: ["notifications", userId] });
-      if (n && n.id) {
-        toast({ title: n.title, description: n.body ?? undefined });
-      }
+      qc.invalidateQueries({ queryKey: ["notifications-unread", userId] });
+      if (n) toast(n.title, { id: n.id, description: n.body ?? undefined });
     };
-    set.add(handler);
-    listeners.set(userId, set);
-    return () => {
-      set.delete(handler);
-      if (set.size === 0) listeners.delete(userId);
-      releaseChannel(userId);
-    };
+    acquireChannel(userId, handler);
+    return () => releaseChannel(userId, handler);
   }, [user, qc]);
 
   const listQ = useQuery({
-    queryKey: ["notifications", user?.id, page],
+    queryKey: ["notifications", user?.id, filter, page],
     enabled: !!user,
     queryFn: async () => {
       const from = page * NOTIFS_PAGE_SIZE;
       const to = from + NOTIFS_PAGE_SIZE - 1;
-      const { data, error, count } = await supabase
+      let q = supabase
         .from("notifications")
         .select("*", { count: "exact" })
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .range(from, to);
+      if (filter === "unread") q = q.is("read_at", null);
+      const { data, error, count } = await q;
       if (error) throw error;
       return { items: (data ?? []) as AppNotification[], count: count ?? 0 };
     },
@@ -113,11 +135,6 @@ export const useNotifications = () => {
       return count ?? 0;
     },
   });
-
-  // Keep unread badge fresh when realtime fires.
-  useEffect(() => {
-    qc.invalidateQueries({ queryKey: ["notifications-unread", user?.id] });
-  }, [listQ.data, qc, user?.id]);
 
   const markAllRead = useMutation({
     mutationFn: async () => {
@@ -144,6 +161,16 @@ export const useNotifications = () => {
     },
   });
 
+  // Mark-read-on-open: fire once per mount when enabled and there are unread.
+  const openedRef = useRef(false);
+  useEffect(() => {
+    if (!markReadOnOpen || openedRef.current || !user) return;
+    if ((unreadQ.data ?? 0) > 0) {
+      openedRef.current = true;
+      markAllRead.mutate();
+    }
+  }, [markReadOnOpen, user, unreadQ.data, markAllRead]);
+
   const items = listQ.data?.items ?? [];
   const total = listQ.data?.count ?? 0;
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / NOTIFS_PAGE_SIZE)), [total]);
@@ -161,5 +188,7 @@ export const useNotifications = () => {
     setPage,
     hasPrev: page > 0,
     hasNext: (page + 1) * NOTIFS_PAGE_SIZE < total,
+    filter,
+    setFilter,
   };
 };

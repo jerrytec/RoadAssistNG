@@ -15,7 +15,11 @@ const KIND_ICON: Record<string, string> = {
 
 const NotificationsPanel = ({ open, onClose }: Props) => {
   const navigate = useNavigate();
-  const { items, unread, loading, markAllRead, markRead, page, totalPages, total, setPage, hasPrev, hasNext } = useNotifications();
+  const {
+    items, unread, loading, markAllRead, markRead,
+    page, totalPages, total, setPage, hasPrev, hasNext,
+    filter, setFilter,
+  } = useNotifications({ markReadOnOpen: open });
 
   if (!open) return null;
 
@@ -61,6 +65,22 @@ const NotificationsPanel = ({ open, onClose }: Props) => {
                 ✕
               </button>
             </div>
+          </div>
+
+          <div className="px-3 pt-3 flex items-center gap-1.5">
+            {(["all", "unread"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`text-[11px] px-2.5 py-1 rounded-full border ${
+                  filter === f
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border"
+                }`}
+              >
+                {f === "all" ? "All" : `Unread${unread > 0 ? ` (${unread})` : ""}`}
+              </button>
+            ))}
           </div>
 
           <div className="p-3">
