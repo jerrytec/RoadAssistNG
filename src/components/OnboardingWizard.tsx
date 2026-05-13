@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useUserRoles, useMyVendor } from "@/hooks/useUserRoles";
 import { useAvailability } from "@/hooks/useAvailability";
@@ -8,14 +9,14 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface Step { id: string; title: string; description: string; }
 
-const VENDOR_STEPS: Step[] = [
+const ALL_VENDOR_STEPS: Step[] = [
   { id: "business", title: "Business info", description: "Your shop or business name and contact" },
   { id: "payout", title: "Payout account", description: "Where we send your sales" },
   { id: "kyc", title: "Identity (KYC)", description: "NIN / BVN to keep the marketplace safe" },
   { id: "first-listing", title: "First listing", description: "Add your first part to start selling" },
 ];
 
-const TECH_STEPS: Step[] = [
+const ALL_TECH_STEPS: Step[] = [
   { id: "profile", title: "Profile", description: "Confirm your name and phone" },
   { id: "documents", title: "Documents", description: "NIN and driver's licence / trade ID" },
   { id: "service-area", title: "Service area", description: "Where you accept jobs" },
@@ -29,8 +30,34 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
   const { state, save } = useOnboarding();
   const { availability, update: updateAvail } = useAvailability();
 
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle();
+      return data;
+    },
+  });
+
   const isVendor = roles?.includes("vendor");
-  const steps = isVendor ? VENDOR_STEPS : TECH_STEPS;
+
+  // Skip steps already satisfied by signup data
+  const steps = useMemo<Step[]>(() => {
+    if (isVendor) {
+      return ALL_VENDOR_STEPS.filter((s) => {
+        if (s.id === "business") return !vendor?.business_name?.trim();
+        if (s.id === "payout") return !vendor?.payout_account?.trim();
+        if (s.id === "kyc") return !vendor?.bvn?.trim();
+        return true;
+      });
+    }
+    return ALL_TECH_STEPS.filter((s) => {
+      if (s.id === "profile") return !(profile?.full_name?.trim() && profile?.phone?.trim());
+      if (s.id === "service-area") return !availability?.base_location?.trim();
+      return true;
+    });
+  }, [isVendor, vendor, profile, availability]);
+
   const [idx, setIdx] = useState(0);
 
   useEffect(() => { if (state) setIdx(Math.min(state.step, steps.length - 1)); }, [state, steps.length]);
