@@ -29,6 +29,7 @@ const App = () => (
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<MyOrders />} />
             <Route path="/vendor" element={<VendorPortal />} />
+            <Route path="/requests/:id" element={<RequestTracking />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
