@@ -76,7 +76,7 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
   });
 
   useEffect(() => {
-    if (vendor) setForm((f) => ({ ...f, business_name: vendor.business_name ?? "", address: vendor.address ?? "", payout_account: vendor.payout_account ?? "" }));
+    if (vendor) setForm((f) => ({ ...f, business_name: vendor.business_name ?? "", address: vendor.address ?? "", payout_account: vendor.payout_account ?? "", bank_name: vendor.bank_name ?? "" }));
   }, [vendor]);
   useEffect(() => {
     if (profile) setForm((f) => ({ ...f, full_name: f.full_name || profile.full_name || "", phone: f.phone || profile.phone || "" }));
