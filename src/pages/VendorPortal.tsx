@@ -477,6 +477,7 @@ const SettingsTab = ({ vendor, onSaved }: { vendor: any; onSaved: () => void }) 
     business_name: vendor.business_name ?? "",
     phone: vendor.phone ?? "",
     address: vendor.address ?? "",
+    bank_name: vendor.bank_name ?? "",
     payout_account: vendor.payout_account ?? "",
   });
   const [busy, setBusy] = useState(false);
