@@ -482,8 +482,20 @@ const SettingsTab = ({ vendor, onSaved }: { vendor: any; onSaved: () => void }) 
   });
   const [busy, setBusy] = useState(false);
   const save = async () => {
+    if (!form.bank_name.trim()) return toast.error("Bank name is required");
+    if (form.bank_name.trim().length < 2) return toast.error("Bank name is too short");
+    if (!/^[A-Za-z\s]+$/.test(form.bank_name.trim())) return toast.error("Bank name should only contain letters");
+    if (!form.payout_account.trim()) return toast.error("Account number is required");
+    if (!/^\d{10}$/.test(form.payout_account.trim())) return toast.error("Account number must be exactly 10 digits");
     setBusy(true);
-    const { error } = await supabase.from("vendors").update(form).eq("id", vendor.id);
+    const payload = {
+      business_name: form.business_name.trim(),
+      phone: form.phone.trim() || null,
+      address: form.address.trim() || null,
+      bank_name: form.bank_name.trim(),
+      payout_account: form.payout_account.trim(),
+    };
+    const { error } = await supabase.from("vendors").update(payload).eq("id", vendor.id);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Profile updated");

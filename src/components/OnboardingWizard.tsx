@@ -11,7 +11,7 @@ interface Step { id: string; title: string; description: string; }
 
 const ALL_VENDOR_STEPS: Step[] = [
   { id: "business", title: "Business info", description: "Your shop or business name and contact" },
-  { id: "payout", title: "Payout account", description: "Where we send your sales" },
+  { id: "payout", title: "Bank details", description: "Where we send your sales" },
   { id: "kyc", title: "Identity (KYC)", description: "NIN / BVN to keep the marketplace safe" },
   { id: "first-listing", title: "First listing", description: "Add your first part to start selling" },
 ];
@@ -98,9 +98,12 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
           await supabase.from("vendors").update({ business_name: form.business_name, address: form.address || null, phone: form.phone || null }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "payout") {
-          if (!form.bank_name.trim()) return toast.error("Bank name required");
-          if (!form.payout_account.trim()) return toast.error("Account number required");
-          await supabase.from("vendors").update({ bank_name: form.bank_name, payout_account: form.payout_account }).eq("user_id", user!.id);
+          if (!form.bank_name.trim()) return toast.error("Bank name is required");
+          if (form.bank_name.trim().length < 2) return toast.error("Bank name is too short");
+          if (!/^[A-Za-z\s]+$/.test(form.bank_name.trim())) return toast.error("Bank name should only contain letters");
+          if (!form.payout_account.trim()) return toast.error("Account number is required");
+          if (!/^\d{10}$/.test(form.payout_account.trim())) return toast.error("Account number must be exactly 10 digits");
+          await supabase.from("vendors").update({ bank_name: form.bank_name.trim(), payout_account: form.payout_account.trim() }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "kyc") {
           if (!form.nin.trim()) return toast.error("NIN is required");
