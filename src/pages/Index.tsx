@@ -79,7 +79,7 @@ const Index = () => {
 
   return (
     <div className="max-w-[700px] mx-auto min-h-screen bg-background">
-      <AppHeader onOpenNotifications={() => setNotificationsOpen(true)} unreadCount={3} />
+      <AppHeader onOpenNotifications={() => setNotificationsOpen(true)} />
       <TabBar
         active={activeTab}
         onChange={(id) => {
