@@ -42,9 +42,9 @@ const AppHeader = ({ onOpenNotifications }: Props) => {
           aria-label="Notifications"
         >
           🔔
-          {unreadCount > 0 && (
+          {unread > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">
-              {unreadCount}
+              {unread}
             </span>
           )}
         </button>
