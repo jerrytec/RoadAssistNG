@@ -14,6 +14,7 @@ const AppHeader = ({ onOpenNotifications }: Props) => {
   const { user, signOut } = useAuth();
   const { totalCount } = useCart();
   const { data: roles } = useUserRoles();
+  const { unread } = useNotifications();
   const isProvider = roles?.some((r) => ["vendor", "tow_operator", "vulcanizer", "mechanic"].includes(r));
 
   return (
