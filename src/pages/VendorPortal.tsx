@@ -6,7 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMyVendor, useUserRoles } from "@/hooks/useUserRoles";
 import { formatNaira } from "@/lib/format";
 import { toast } from "sonner";
-import ProviderDashboard from "@/components/screens/ProviderDashboard";
+import ProviderJobsBoard from "@/components/screens/ProviderJobsBoard";
+import OnboardingWizard from "@/components/OnboardingWizard";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 type Tab = "overview" | "parts" | "orders" | "settings";
 
