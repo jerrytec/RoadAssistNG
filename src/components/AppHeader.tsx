@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface Props {
   onOpenNotifications: () => void;
-  unreadCount: number;
 }
 
-const AppHeader = ({ onOpenNotifications, unreadCount }: Props) => {
+const AppHeader = ({ onOpenNotifications }: Props) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { totalCount } = useCart();
