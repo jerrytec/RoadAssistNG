@@ -137,6 +137,7 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
   };
 
   const step = steps[idx];
+  if (!step) return <div className="p-6 text-center text-xs text-muted-foreground">Finishing setup…</div>;
 
   return (
     <div className="max-w-md mx-auto p-4">
