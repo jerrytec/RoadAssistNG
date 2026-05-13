@@ -23,6 +23,17 @@ const MyOrders = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const [chatOrderId, setChatOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel(`orders-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "parts_orders", filter: `buyer_id=eq.${user.id}` }, () => qc.invalidateQueries({ queryKey: ["my-orders"] }))
+      .on("postgres_changes", { event: "*", schema: "public", table: "parts_order_items" }, () => qc.invalidateQueries({ queryKey: ["my-orders"] }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, qc]);
 
   const ordersQ = useQuery({
     queryKey: ["my-orders", user?.id],
