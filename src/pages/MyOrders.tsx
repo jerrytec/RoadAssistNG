@@ -140,11 +140,21 @@ const MyOrders = () => {
                     </button>
                   </div>
                 )}
+                <button onClick={() => setChatOrderId(o.id)} className="mt-2 w-full py-2 rounded-lg border border-border text-xs font-semibold">
+                  💬 Chat with vendor
+                </button>
               </div>
             ))}
           </div>
         )}
       </div>
+      <ChatDrawer
+        open={!!chatOrderId}
+        onClose={() => setChatOrderId(null)}
+        threadType="order"
+        threadId={chatOrderId ?? ""}
+        title="Chat about this order"
+      />
     </div>
   );
 };
