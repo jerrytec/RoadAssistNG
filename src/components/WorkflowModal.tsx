@@ -102,6 +102,8 @@ const clearBooking = () => {
 };
 
 const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
+  const navigate = useNavigate();
+  const createRequest = useCreateRequest();
   const saved = loadBooking(provider.name);
 
   const [step, setStep] = useState(saved?.step ?? 0);
