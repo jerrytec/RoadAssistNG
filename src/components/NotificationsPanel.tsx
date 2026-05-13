@@ -15,7 +15,7 @@ const KIND_ICON: Record<string, string> = {
 
 const NotificationsPanel = ({ open, onClose }: Props) => {
   const navigate = useNavigate();
-  const { items, unread, loading, markAllRead, markRead } = useNotifications();
+  const { items, unread, loading, markAllRead, markRead, page, totalPages, total, setPage, hasPrev, hasNext } = useNotifications();
 
   if (!open) return null;
 
@@ -92,6 +92,28 @@ const NotificationsPanel = ({ open, onClose }: Props) => {
                 </div>
               </button>
             ))}
+
+            {!loading && total > 0 && (
+              <div className="flex items-center justify-between mt-3 px-1">
+                <button
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={!hasPrev}
+                  className="text-[11px] px-2.5 py-1 rounded-md border border-border bg-background disabled:opacity-40"
+                >
+                  ← Prev
+                </button>
+                <span className="text-[10px] text-muted-foreground">
+                  Page {page + 1} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={!hasNext}
+                  className="text-[11px] px-2.5 py-1 rounded-md border border-border bg-background disabled:opacity-40"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
