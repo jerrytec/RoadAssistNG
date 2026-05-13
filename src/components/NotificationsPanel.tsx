@@ -1,110 +1,47 @@
-import { useState } from "react";
-
-interface Notification {
-  id: string;
-  type: "booking" | "system" | "promo" | "alert";
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-  icon: string;
-}
-
-const initialNotifications: Notification[] = [
-  {
-    id: "n1",
-    type: "booking",
-    title: "Provider en route",
-    message: "Emeka Okafor Towing is 3 minutes away from your location.",
-    time: "Just now",
-    read: false,
-    icon: "🚐",
-  },
-  {
-    id: "n2",
-    type: "booking",
-    title: "Quote received",
-    message: "Emeka Okafor Towing sent you a quote of ₦12,128 for towing service.",
-    time: "5 min ago",
-    read: false,
-    icon: "💰",
-  },
-  {
-    id: "n3",
-    type: "alert",
-    title: "High demand area",
-    message: "Many requests in Ikeja right now. Wait times may be slightly longer.",
-    time: "15 min ago",
-    read: false,
-    icon: "⚠️",
-  },
-  {
-    id: "n4",
-    type: "booking",
-    title: "Service completed",
-    message: "Your booking #RA-2035 with Chidi AutoFix Mobile has been completed. Don't forget to leave a review!",
-    time: "3 days ago",
-    read: true,
-    icon: "✅",
-  },
-  {
-    id: "n5",
-    type: "promo",
-    title: "20% off your next tow",
-    message: "Use code ROADNG20 on your next booking. Valid until May 15.",
-    time: "5 days ago",
-    read: true,
-    icon: "🎁",
-  },
-  {
-    id: "n6",
-    type: "system",
-    title: "Profile verified",
-    message: "Your NIN and BVN have been successfully verified. You're all set!",
-    time: "1 week ago",
-    read: true,
-    icon: "🔐",
-  },
-  {
-    id: "n7",
-    type: "booking",
-    title: "Booking cancelled",
-    message: "Your booking #RA-2019 with Lagos Rescue Co. was cancelled.",
-    time: "2 weeks ago",
-    read: true,
-    icon: "❌",
-  },
-];
-
-const typeBorderColors = {
-  booking: "border-l-primary-mid",
-  alert: "border-l-accent",
-  promo: "border-l-secondary",
-  system: "border-l-info",
-};
+import { useNavigate } from "react-router-dom";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
+const KIND_ICON: Record<string, string> = {
+  "offer.new": "💰",
+  "request.status": "🛣️",
+  "chat.new": "💬",
+  "order.status": "📦",
+};
+
 const NotificationsPanel = ({ open, onClose }: Props) => {
-  const [notifications, setNotifications] = useState(initialNotifications);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAllRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const navigate = useNavigate();
+  const { items, unread, loading, markAllRead, markRead } = useNotifications();
 
   if (!open) return null;
+
+  const handleClick = (n: { id: string; link: string | null }) => {
+    markRead(n.id);
+    if (n.link) {
+      onClose();
+      navigate(n.link);
+    }
+  };
+
+  const formatTime = (iso: string) => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.round(diff / 60000);
+    if (m < 1) return "Just now";
+    if (m < 60) return `${m} min ago`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `${h} hr ago`;
+    const d = Math.round(h / 24);
+    return `${d} day${d > 1 ? "s" : ""} ago`;
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center" onClick={onClose}>
       <div className="w-full max-w-[700px] relative">
-        {/* Backdrop */}
         <div className="absolute inset-0 bg-foreground/30" />
-
-        {/* Panel */}
         <div
           className="absolute top-0 right-0 w-full max-w-[380px] h-full bg-card shadow-xl animate-slide-up overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
@@ -112,52 +49,48 @@ const NotificationsPanel = ({ open, onClose }: Props) => {
           <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between z-10">
             <div>
               <h2 className="text-[15px] font-semibold">Notifications</h2>
-              {unreadCount > 0 && (
-                <span className="text-[10px] text-muted-foreground">{unreadCount} unread</span>
-              )}
+              {unread > 0 && <span className="text-[10px] text-muted-foreground">{unread} unread</span>}
             </div>
             <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllRead}
-                  className="text-[11px] text-primary font-medium bg-transparent border-none cursor-pointer"
-                >
+              {unread > 0 && (
+                <button onClick={markAllRead} className="text-[11px] text-primary font-medium">
                   Mark all read
                 </button>
               )}
-              <button
-                onClick={onClose}
-                className="w-7 h-7 rounded-full bg-background border-none cursor-pointer flex items-center justify-center text-sm text-muted-foreground"
-              >
+              <button onClick={onClose} className="w-7 h-7 rounded-full bg-background flex items-center justify-center text-sm text-muted-foreground" aria-label="Close">
                 ✕
               </button>
             </div>
           </div>
 
           <div className="p-3">
-            {notifications.map((n) => (
-              <div
+            {loading && <p className="text-center text-xs text-muted-foreground py-10">Loading…</p>}
+            {!loading && items.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-3xl mb-2">🔕</div>
+                <p className="text-xs text-muted-foreground">No notifications yet.</p>
+              </div>
+            )}
+            {items.map((n) => (
+              <button
                 key={n.id}
-                className={`bg-card border border-border rounded-lg rounded-l-none border-l-[3px] ${typeBorderColors[n.type]} p-3 mb-2 transition-colors ${
-                  !n.read ? "bg-background" : ""
+                onClick={() => handleClick(n)}
+                className={`w-full text-left bg-card border border-border rounded-lg rounded-l-none border-l-[3px] border-l-primary p-3 mb-2 ${
+                  !n.read_at ? "bg-background" : ""
                 }`}
               >
                 <div className="flex items-start gap-2.5">
-                  <span className="text-lg shrink-0">{n.icon}</span>
+                  <span className="text-lg shrink-0">{KIND_ICON[n.kind] ?? "🔔"}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[13px] font-semibold">{n.title}</span>
-                      {!n.read && (
-                        <span className="w-2 h-2 rounded-full bg-primary-mid shrink-0" />
-                      )}
+                      {!n.read_at && <span className="w-2 h-2 rounded-full bg-primary shrink-0" />}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                      {n.message}
-                    </p>
-                    <span className="text-[10px] text-muted-foreground mt-1 block">{n.time}</span>
+                    {n.body && <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{n.body}</p>}
+                    <span className="text-[10px] text-muted-foreground mt-1 block">{formatTime(n.created_at)}</span>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
