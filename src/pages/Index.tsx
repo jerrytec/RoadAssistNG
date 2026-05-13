@@ -31,9 +31,8 @@ const Index = () => {
     if (!user || !roles) return;
     const providerRoles = ["vendor", "tow_operator", "vulcanizer", "mechanic"];
     const isProvider = roles.some((r) => providerRoles.includes(r));
-    const isOnlyProvider = isProvider && !roles.includes("buyer");
     const alreadyRedirected = sessionStorage.getItem("portal-redirected");
-    if (isOnlyProvider && !alreadyRedirected) {
+    if (isProvider && !alreadyRedirected) {
       sessionStorage.setItem("portal-redirected", "1");
       navigate("/vendor");
     }
