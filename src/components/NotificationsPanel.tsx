@@ -67,6 +67,22 @@ const NotificationsPanel = ({ open, onClose }: Props) => {
             </div>
           </div>
 
+          <div className="px-3 pt-3 flex items-center gap-1.5">
+            {(["all", "unread"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`text-[11px] px-2.5 py-1 rounded-full border ${
+                  filter === f
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border"
+                }`}
+              >
+                {f === "all" ? "All" : `Unread${unread > 0 ? ` (${unread})` : ""}`}
+              </button>
+            ))}
+          </div>
+
           <div className="p-3">
             {loading && <p className="text-center text-xs text-muted-foreground py-10">Loading…</p>}
             {!loading && items.length === 0 && (
