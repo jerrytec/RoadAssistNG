@@ -60,7 +60,13 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
 
   const [idx, setIdx] = useState(0);
 
-  useEffect(() => { if (state) setIdx(Math.min(state.step, steps.length - 1)); }, [state, steps.length]);
+  useEffect(() => {
+    if (steps.length === 0 && state && !state.completed) {
+      save({ step: 0, completed: true, payload: state.payload ?? {} }).then(onDone);
+    }
+  }, [steps.length, state, save, onDone]);
+
+  useEffect(() => { if (state) setIdx(Math.min(state.step, Math.max(steps.length - 1, 0))); }, [state, steps.length]);
 
   const [form, setForm] = useState({
     full_name: "", phone: "",
@@ -72,6 +78,9 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
   useEffect(() => {
     if (vendor) setForm((f) => ({ ...f, business_name: vendor.business_name ?? "", address: vendor.address ?? "", payout_account: vendor.payout_account ?? "" }));
   }, [vendor]);
+  useEffect(() => {
+    if (profile) setForm((f) => ({ ...f, full_name: f.full_name || profile.full_name || "", phone: f.phone || profile.phone || "" }));
+  }, [profile]);
   useEffect(() => {
     if (availability) setForm((f) => ({ ...f, base_location: availability.base_location ?? "" }));
   }, [availability]);
