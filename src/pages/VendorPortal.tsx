@@ -494,7 +494,8 @@ const SettingsTab = ({ vendor, onSaved }: { vendor: any; onSaved: () => void }) 
       <input placeholder="Business name" value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} className="w-full py-2.5 px-3 border border-border rounded-lg text-sm bg-background outline-none focus:border-primary" />
       <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full py-2.5 px-3 border border-border rounded-lg text-sm bg-background outline-none focus:border-primary" />
       <input placeholder="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full py-2.5 px-3 border border-border rounded-lg text-sm bg-background outline-none focus:border-primary" />
-      <input placeholder="Payout account (bank · acct no)" value={form.payout_account} onChange={(e) => setForm({ ...form, payout_account: e.target.value })} className="w-full py-2.5 px-3 border border-border rounded-lg text-sm bg-background outline-none focus:border-primary" />
+      <input placeholder="Bank name" value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} className="w-full py-2.5 px-3 border border-border rounded-lg text-sm bg-background outline-none focus:border-primary" />
+      <input placeholder="Account number" value={form.payout_account} onChange={(e) => setForm({ ...form, payout_account: e.target.value })} className="w-full py-2.5 px-3 border border-border rounded-lg text-sm bg-background outline-none focus:border-primary" />
       <button onClick={save} disabled={busy} className="py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-60">{busy ? "Saving…" : "Save changes"}</button>
     </div>
   );
