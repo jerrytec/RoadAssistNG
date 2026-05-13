@@ -98,8 +98,9 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
           await supabase.from("vendors").update({ business_name: form.business_name, address: form.address || null, phone: form.phone || null }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "payout") {
-          if (!form.payout_account.trim()) return toast.error("Add a payout account");
-          await supabase.from("vendors").update({ payout_account: form.payout_account }).eq("user_id", user!.id);
+          if (!form.bank_name.trim()) return toast.error("Bank name required");
+          if (!form.payout_account.trim()) return toast.error("Account number required");
+          await supabase.from("vendors").update({ bank_name: form.bank_name, payout_account: form.payout_account }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "kyc") {
           if (!form.nin.trim()) return toast.error("NIN is required");
