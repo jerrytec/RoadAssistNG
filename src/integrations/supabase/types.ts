@@ -524,6 +524,7 @@ export type Database = {
       vendors: {
         Row: {
           address: string | null
+          bank_name: string | null
           business_name: string
           bvn: string | null
           created_at: string
@@ -536,6 +537,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          bank_name?: string | null
           business_name: string
           bvn?: string | null
           created_at?: string
@@ -548,6 +550,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          bank_name?: string | null
           business_name?: string
           bvn?: string | null
           created_at?: string
