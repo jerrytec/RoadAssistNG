@@ -91,8 +91,18 @@ const VendorPortal = () => {
             {vendor.status === "verified" ? "✓ Verified vendor" : "⏳ Pending verification"}
           </span>
         </div>
-        <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
+        <div className="flex items-center gap-2">
+          {needsOnboarding && <button onClick={() => setShowOnboarding(true)} className="text-[11px] text-primary font-semibold">Finish setup</button>}
+          <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
+        </div>
       </header>
+
+      {needsOnboarding && (
+        <div className="mx-4 mt-3 p-2.5 bg-accent-light border border-accent/30 rounded-lg text-[11px] text-accent flex items-center justify-between">
+          <span>⚙️ Complete your onboarding to unlock payouts</span>
+          <button onClick={() => setShowOnboarding(true)} className="font-semibold underline">Resume</button>
+        </div>
+      )}
 
       <nav className="flex border-b border-border bg-background sticky top-[57px] z-10">
         {(["overview", "parts", "orders", "settings"] as Tab[]).map((t) => (
