@@ -46,7 +46,7 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
     if (isVendor) {
       return ALL_VENDOR_STEPS.filter((s) => {
         if (s.id === "business") return !vendor?.business_name?.trim();
-        if (s.id === "payout") return !vendor?.payout_account?.trim();
+        if (s.id === "payout") return !(vendor?.bank_name?.trim() && vendor?.payout_account?.trim());
         if (s.id === "kyc") return !vendor?.bvn?.trim();
         return true;
       });
