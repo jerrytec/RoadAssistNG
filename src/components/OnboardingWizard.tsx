@@ -71,7 +71,7 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
   const [form, setForm] = useState({
     full_name: "", phone: "",
     business_name: vendor?.business_name ?? "", address: vendor?.address ?? "",
-    payout_account: vendor?.payout_account ?? "",
+    payout_account: vendor?.payout_account ?? "", bank_name: vendor?.bank_name ?? "",
     nin: "", licence: "", base_location: availability?.base_location ?? "",
   });
 
