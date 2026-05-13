@@ -11,6 +11,7 @@ import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx";
 import MyOrders from "./pages/MyOrders.tsx";
 import VendorPortal from "./pages/VendorPortal.tsx";
+import RequestTracking from "./pages/RequestTracking.tsx";
 
 const queryClient = new QueryClient();
 
