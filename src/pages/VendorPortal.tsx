@@ -6,7 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMyVendor, useUserRoles } from "@/hooks/useUserRoles";
 import { formatNaira } from "@/lib/format";
 import { toast } from "sonner";
-import ProviderDashboard from "@/components/screens/ProviderDashboard";
+import ProviderJobsBoard from "@/components/screens/ProviderJobsBoard";
+import OnboardingWizard from "@/components/OnboardingWizard";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 type Tab = "overview" | "parts" | "orders" | "settings";
 
@@ -21,13 +23,28 @@ const VendorPortal = () => {
   const { user, loading, signOut } = useAuth();
   const { data: roles } = useUserRoles();
   const { data: vendor, isLoading: vLoading, refetch } = useMyVendor();
+  const { state: onboarding, loading: obLoading } = useOnboarding();
   const [tab, setTab] = useState<Tab>("overview");
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   if (loading) return <div className="p-10 text-center text-sm text-muted-foreground">Loading…</div>;
   if (!user) { navigate("/"); return null; }
 
   const isVendor = roles?.includes("vendor");
   const techRole = roles?.find((r) => ["tow_operator", "vulcanizer", "mechanic"].includes(r));
+  const needsOnboarding = !obLoading && onboarding && !onboarding.completed;
+
+  if (showOnboarding || (needsOnboarding && (techRole || isVendor) && (onboarding?.step ?? 0) === 0)) {
+    return (
+      <Wrap>
+        <header className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h1 className="text-sm font-bold">Welcome — let's get you set up</h1>
+          <button onClick={() => setShowOnboarding(false)} className="text-[11px] text-muted-foreground">Skip</button>
+        </header>
+        <OnboardingWizard onDone={() => { setShowOnboarding(false); refetch(); }} />
+      </Wrap>
+    );
+  }
 
   // Technician portal (tow / vulcanizer / mechanic)
   if (techRole && !isVendor) {
@@ -39,9 +56,12 @@ const VendorPortal = () => {
             <h1 className="text-sm font-bold">{TECH_ROLE_LABEL[techRole]} portal</h1>
             <span className="text-[10px] font-semibold text-primary">✓ Active</span>
           </div>
-          <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
+          <div className="flex items-center gap-2">
+            {needsOnboarding && <button onClick={() => setShowOnboarding(true)} className="text-[11px] text-primary font-semibold">Finish setup</button>}
+            <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
+          </div>
         </header>
-        <ProviderDashboard />
+        <ProviderJobsBoard />
       </Wrap>
     );
   }
@@ -71,8 +91,18 @@ const VendorPortal = () => {
             {vendor.status === "verified" ? "✓ Verified vendor" : "⏳ Pending verification"}
           </span>
         </div>
-        <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
+        <div className="flex items-center gap-2">
+          {needsOnboarding && <button onClick={() => setShowOnboarding(true)} className="text-[11px] text-primary font-semibold">Finish setup</button>}
+          <button onClick={() => signOut().then(() => { sessionStorage.removeItem("portal-redirected"); navigate("/"); })} className="text-[11px] text-muted-foreground">Log out</button>
+        </div>
       </header>
+
+      {needsOnboarding && (
+        <div className="mx-4 mt-3 p-2.5 bg-accent-light border border-accent/30 rounded-lg text-[11px] text-accent flex items-center justify-between">
+          <span>⚙️ Complete your onboarding to unlock payouts</span>
+          <button onClick={() => setShowOnboarding(true)} className="font-semibold underline">Resume</button>
+        </div>
+      )}
 
       <nav className="flex border-b border-border bg-background sticky top-[57px] z-10">
         {(["overview", "parts", "orders", "settings"] as Tab[]).map((t) => (

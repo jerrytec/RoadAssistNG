@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatNaira } from "@/lib/format";
 import { toast } from "sonner";
+import ChatDrawer from "@/components/ChatDrawer";
 
 const STATUS_LABEL: Record<string, string> = {
   pending_payment: "Pending payment",
@@ -21,6 +23,17 @@ const MyOrders = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const [chatOrderId, setChatOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel(`orders-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "parts_orders", filter: `buyer_id=eq.${user.id}` }, () => qc.invalidateQueries({ queryKey: ["my-orders"] }))
+      .on("postgres_changes", { event: "*", schema: "public", table: "parts_order_items" }, () => qc.invalidateQueries({ queryKey: ["my-orders"] }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, qc]);
 
   const ordersQ = useQuery({
     queryKey: ["my-orders", user?.id],
@@ -127,11 +140,21 @@ const MyOrders = () => {
                     </button>
                   </div>
                 )}
+                <button onClick={() => setChatOrderId(o.id)} className="mt-2 w-full py-2 rounded-lg border border-border text-xs font-semibold">
+                  💬 Chat with vendor
+                </button>
               </div>
             ))}
           </div>
         )}
       </div>
+      <ChatDrawer
+        open={!!chatOrderId}
+        onClose={() => setChatOrderId(null)}
+        threadType="order"
+        threadId={chatOrderId ?? ""}
+        title="Chat about this order"
+      />
     </div>
   );
 };

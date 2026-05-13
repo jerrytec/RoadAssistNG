@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       parts: {
         Row: {
           brand: string | null
@@ -288,6 +321,161 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_availability: {
+        Row: {
+          base_location: string | null
+          is_online: boolean
+          service_radius_km: number
+          updated_at: string
+          user_id: string
+          weekly_schedule: Json
+        }
+        Insert: {
+          base_location?: string | null
+          is_online?: boolean
+          service_radius_km?: number
+          updated_at?: string
+          user_id: string
+          weekly_schedule?: Json
+        }
+        Update: {
+          base_location?: string | null
+          is_online?: boolean
+          service_radius_km?: number
+          updated_at?: string
+          user_id?: string
+          weekly_schedule?: Json
+        }
+        Relationships: []
+      }
+      service_chat_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          sender_id: string
+          thread_id: string
+          thread_type: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          thread_id: string
+          thread_type: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          thread_id?: string
+          thread_type?: string
+        }
+        Relationships: []
+      }
+      service_offers: {
+        Row: {
+          created_at: string
+          eta_minutes: number | null
+          id: string
+          message: string | null
+          price_kobo: number
+          provider_id: string
+          request_id: string
+          status: Database["public"]["Enums"]["offer_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          eta_minutes?: number | null
+          id?: string
+          message?: string | null
+          price_kobo: number
+          provider_id: string
+          request_id: string
+          status?: Database["public"]["Enums"]["offer_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          eta_minutes?: number | null
+          id?: string
+          message?: string | null
+          price_kobo?: number
+          provider_id?: string
+          request_id?: string
+          status?: Database["public"]["Enums"]["offer_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_offers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          accepted_at: string | null
+          accepted_offer_id: string | null
+          assigned_provider_id: string | null
+          buyer_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          price_estimate_kobo: number | null
+          rating: number | null
+          review: string | null
+          service_type: Database["public"]["Enums"]["service_kind"]
+          status: Database["public"]["Enums"]["request_status"]
+          updated_at: string
+          vehicle: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_offer_id?: string | null
+          assigned_provider_id?: string | null
+          buyer_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          price_estimate_kobo?: number | null
+          rating?: number | null
+          review?: string | null
+          service_type: Database["public"]["Enums"]["service_kind"]
+          status?: Database["public"]["Enums"]["request_status"]
+          updated_at?: string
+          vehicle?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_offer_id?: string | null
+          assigned_provider_id?: string | null
+          buyer_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          price_estimate_kobo?: number | null
+          rating?: number | null
+          review?: string | null
+          service_type?: Database["public"]["Enums"]["service_kind"]
+          status?: Database["public"]["Enums"]["request_status"]
+          updated_at?: string
+          vehicle?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -305,6 +493,30 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendor_onboarding: {
+        Row: {
+          completed: boolean
+          payload: Json
+          step: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          payload?: Json
+          step?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          payload?: Json
+          step?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -353,12 +565,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_thread: {
+        Args: { _thread: string; _type: string; _uid: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      role_for_service: {
+        Args: { _k: Database["public"]["Enums"]["service_kind"] }
+        Returns: Database["public"]["Enums"]["app_role"]
       }
     }
     Enums: {
@@ -369,6 +589,7 @@ export type Database = {
         | "vulcanizer"
         | "mechanic"
         | "admin"
+      offer_status: "pending" | "accepted" | "declined" | "withdrawn"
       order_status:
         | "pending_payment"
         | "paid"
@@ -381,6 +602,16 @@ export type Database = {
         | "disputed"
       part_condition: "new" | "refurbished" | "used"
       part_status: "draft" | "active" | "out_of_stock" | "archived"
+      request_status:
+        | "pending"
+        | "offered"
+        | "accepted"
+        | "enroute"
+        | "arrived"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+      service_kind: "tow" | "vulcanizer" | "mechanic"
       vendor_status: "pending" | "verified" | "suspended"
     }
     CompositeTypes: {
@@ -517,6 +748,7 @@ export const Constants = {
         "mechanic",
         "admin",
       ],
+      offer_status: ["pending", "accepted", "declined", "withdrawn"],
       order_status: [
         "pending_payment",
         "paid",
@@ -530,6 +762,17 @@ export const Constants = {
       ],
       part_condition: ["new", "refurbished", "used"],
       part_status: ["draft", "active", "out_of_stock", "archived"],
+      request_status: [
+        "pending",
+        "offered",
+        "accepted",
+        "enroute",
+        "arrived",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
+      service_kind: ["tow", "vulcanizer", "mechanic"],
       vendor_status: ["pending", "verified", "suspended"],
     },
   },

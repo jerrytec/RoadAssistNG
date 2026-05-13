@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import type { Provider } from "@/components/ProviderCard";
+import { useCreateRequest, type ServiceKind } from "@/hooks/useServiceRequests";
 
 /**
  * Workflow Steps:
@@ -99,6 +102,8 @@ const clearBooking = () => {
 };
 
 const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
+  const navigate = useNavigate();
+  const createRequest = useCreateRequest();
   const saved = loadBooking(provider.name);
 
   const [step, setStep] = useState(saved?.step ?? 0);
@@ -385,11 +390,28 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                 />
               </div>
               <button
-                onClick={next}
-                disabled={!formData.name.trim() || !formData.phone.trim() || !formData.location.trim()}
+                onClick={async () => {
+                  const ptype = provider.type.toLowerCase();
+                  const kind: ServiceKind = ptype.includes("tow") ? "tow" : ptype.includes("vulcanizer") ? "vulcanizer" : "mechanic";
+                  try {
+                    const req = await createRequest.mutateAsync({
+                      service_type: kind,
+                      vehicle: prefill?.vehicle,
+                      description: formData.description || prefill?.description,
+                      location: formData.location,
+                      price_estimate_kobo: TOTAL_AMOUNT * 100,
+                    });
+                    toast.success("Request sent — providers can now respond");
+                    onClose();
+                    navigate(`/requests/${req.id}`);
+                  } catch (e: any) {
+                    toast.error(e.message ?? "Could not submit request");
+                  }
+                }}
+                disabled={!formData.name.trim() || !formData.phone.trim() || !formData.location.trim() || createRequest.isPending}
                 className="w-full py-3 rounded-lg border-none bg-primary text-primary-foreground text-sm font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Request service →
+                {createRequest.isPending ? "Sending…" : "Request service →"}
               </button>
             </div>
           )}

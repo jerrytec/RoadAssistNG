@@ -3,17 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface Props {
   onOpenNotifications: () => void;
-  unreadCount: number;
 }
 
-const AppHeader = ({ onOpenNotifications, unreadCount }: Props) => {
+const AppHeader = ({ onOpenNotifications }: Props) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { totalCount } = useCart();
   const { data: roles } = useUserRoles();
+  const { unread } = useNotifications();
   const isProvider = roles?.some((r) => ["vendor", "tow_operator", "vulcanizer", "mechanic"].includes(r));
 
   return (
@@ -41,9 +42,9 @@ const AppHeader = ({ onOpenNotifications, unreadCount }: Props) => {
           aria-label="Notifications"
         >
           🔔
-          {unreadCount > 0 && (
+          {unread > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">
-              {unreadCount}
+              {unread}
             </span>
           )}
         </button>
