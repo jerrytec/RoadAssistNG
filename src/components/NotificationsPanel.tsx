@@ -15,7 +15,11 @@ const KIND_ICON: Record<string, string> = {
 
 const NotificationsPanel = ({ open, onClose }: Props) => {
   const navigate = useNavigate();
-  const { items, unread, loading, markAllRead, markRead, page, totalPages, total, setPage, hasPrev, hasNext } = useNotifications();
+  const {
+    items, unread, loading, markAllRead, markRead,
+    page, totalPages, total, setPage, hasPrev, hasNext,
+    filter, setFilter,
+  } = useNotifications({ markReadOnOpen: open });
 
   if (!open) return null;
 
