@@ -160,7 +160,10 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
           </>
         )}
         {step.id === "payout" && (
-          <Field label="Bank · account number" v={form.payout_account} on={(v) => setForm({ ...form, payout_account: v })} placeholder="GTBank · 0123456789" />
+          <>
+            <Field label="Bank name" v={form.bank_name} on={(v) => setForm({ ...form, bank_name: v })} placeholder="GTBank" />
+            <Field label="Account number" v={form.payout_account} on={(v) => setForm({ ...form, payout_account: v })} placeholder="0123456789" />
+          </>
         )}
         {step.id === "kyc" && (
           <>
