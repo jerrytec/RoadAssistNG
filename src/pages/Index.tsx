@@ -106,6 +106,7 @@ const Index = () => {
         </>
       )}
 
+      </div>
       <NotificationsPanel open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
       <ContactSupportPanel open={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>
