@@ -20,21 +20,23 @@ interface TabBarProps {
 }
 
 const TabBar = ({ active, onChange }: TabBarProps) => (
-  <nav className="flex bg-card border-b border-border">
-    {tabs.map((t) => (
-      <button
-        key={t.id}
-        onClick={() => onChange(t.id)}
-        className={`flex-1 min-w-[62px] py-2 text-center text-[10px] font-medium cursor-pointer border-b-[2.5px] transition-all whitespace-nowrap ${
-          active === t.id
-            ? "text-primary border-primary-mid"
-            : "text-muted-foreground border-transparent"
-        }`}
-      >
-        <span className="text-sm block mb-0.5">{t.icon}</span>
-        {t.label}
-      </button>
-    ))}
+  <nav className="bg-card border-b border-border sticky top-14 z-20">
+    <div className="container max-w-[960px] flex overflow-x-auto px-2">
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          onClick={() => onChange(t.id)}
+          className={`flex-1 min-w-[72px] py-2.5 text-center text-[11px] font-medium cursor-pointer border-b-[2.5px] transition-all whitespace-nowrap ${
+            active === t.id
+              ? "text-primary border-primary"
+              : "text-muted-foreground border-transparent hover:text-foreground"
+          }`}
+        >
+          <span className="text-base block mb-0.5">{t.icon}</span>
+          {t.label}
+        </button>
+      ))}
+    </div>
   </nav>
 );
 

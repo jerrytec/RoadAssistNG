@@ -12,6 +12,10 @@ import Checkout from "./pages/Checkout.tsx";
 import MyOrders from "./pages/MyOrders.tsx";
 import VendorPortal from "./pages/VendorPortal.tsx";
 import RequestTracking from "./pages/RequestTracking.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
+import Profile from "./pages/Profile.tsx";
+import Notifications from "./pages/Notifications.tsx";
+import Support from "./pages/Support.tsx";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +34,10 @@ const App = () => (
             <Route path="/orders" element={<MyOrders />} />
             <Route path="/vendor" element={<VendorPortal />} />
             <Route path="/requests/:id" element={<RequestTracking />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/support" element={<Support />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
