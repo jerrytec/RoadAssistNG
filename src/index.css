@@ -107,10 +107,24 @@
   * {
     @apply border-border;
   }
+  html {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv02','cv03','cv04','cv11';
   }
+  h1, h2, h3, h4 { letter-spacing: -0.015em; }
+  :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; border-radius: 4px; }
+}
+
+@layer utilities {
+  .gradient-brand { background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-mid)) 60%, hsl(var(--secondary)) 130%); }
+  .gradient-soft { background: radial-gradient(1200px 600px at 0% 0%, hsl(var(--primary-light)) 0%, transparent 50%), radial-gradient(1000px 500px at 100% 100%, hsl(var(--secondary-light)) 0%, transparent 50%); }
+  .shadow-premium { box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04), 0 8px 24px -8px hsl(var(--foreground) / 0.10), 0 24px 48px -12px hsl(var(--primary) / 0.18); }
+  .shadow-card { box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04), 0 4px 12px -4px hsl(var(--foreground) / 0.08); }
 }
 
 @layer utilities {

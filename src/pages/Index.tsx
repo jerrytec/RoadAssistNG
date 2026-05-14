@@ -77,7 +77,7 @@ const Index = () => {
   };
 
   return (
-    <div className="max-w-[700px] mx-auto min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <AppHeader onOpenNotifications={() => setNotificationsOpen(true)} />
       <TabBar
         active={activeTab}
@@ -86,7 +86,7 @@ const Index = () => {
           else setActiveTab(id);
         }}
       />
-
+      <div className="container max-w-[960px] px-0 sm:px-4 py-4">
       {selectedProvider && (
         <WorkflowModal
           provider={selectedProvider}
@@ -106,6 +106,7 @@ const Index = () => {
         </>
       )}
 
+      </div>
       <NotificationsPanel open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
       <ContactSupportPanel open={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>

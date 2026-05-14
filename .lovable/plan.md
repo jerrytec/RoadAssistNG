@@ -1,69 +1,80 @@
-# Plan — Go-live milestone
+# RoadAssistNG — Premium Redesign & Workflow Completion
 
-## 1. Database (single migration)
-- `service_requests` (buyer creates job for tow/vulcanizer/mechanic; columns: buyer_id, service_type, vehicle, description, location, price_estimate_kobo, status [`pending`,`offered`,`accepted`,`enroute`,`arrived`,`in_progress`,`completed`,`cancelled`], assigned_provider_id, accepted_at, completed_at).
-- `service_offers` (request_id, provider_id, price_kobo, eta_minutes, message, status [`pending`,`accepted`,`declined`,`withdrawn`]).
-- `provider_availability` (user_id, is_online, weekly_schedule jsonb, service_radius_km, base_location, updated_at).
-- `chat_messages` (thread_type [`request`|`order`], thread_id, sender_id, body, created_at).
-- `notifications` (user_id, kind, title, body, link, read_at).
-- `vendor_onboarding` (user_id, step, payload jsonb, completed bool) — track wizard progress for all provider roles.
-- RLS: buyers see their requests + offers on them; providers see open requests matching their role + their offers + assigned jobs; chat visible to thread participants; notifications private; availability private to owner.
-- Realtime: enable for `service_requests`, `service_offers`, `chat_messages`, `notifications`, `parts_orders`, `parts_order_items`.
+This is a large, multi-area effort. I'll break it into focused phases so you can review and approve before I start building.
 
-## 2. Hooks & libs (`src/hooks`)
-- `useServiceRequests` — CRUD + realtime list.
-- `useProviderJobs(role)` — open requests + my offers + active jobs.
-- `useAvailability` — get/update online toggle + weekly schedule.
-- `useChat(threadType, threadId)` — load + send + subscribe.
-- `useNotifications` — list + markRead + realtime.
-- `useOnboarding` — read/update vendor_onboarding.
+## Phase 1 — Design system & typography
+- Switch global font to **Inter** (via Google Fonts in `index.html`, wired through Tailwind config and `body`).
+- Tighten typography scale (display / h1 / h2 / section / body / caption) and spacing tokens in `index.css` + `tailwind.config.ts`.
+- Introduce premium tokens: subtle gradients, elevated shadow tiers (`shadow-card`, `shadow-elevated`, `shadow-premium`), refined radii, and focus-ring tokens for accessibility.
+- Audit existing components to remove arbitrary colors and use semantic tokens only.
 
-## 3. Role routing
-- `src/lib/roleRoutes.ts` — `primaryRoleHome(roles)` returning `/vendor`, `/provider`, or `/`.
-- `RequireRole` wrapper for protected routes.
-- After login, route to onboarding if incomplete, else role home.
+## Phase 2 — Authentication redesign + real auth
+- Rebuild `AuthScreen` as a centered card (max-width ~460px) with:
+  - Vertical+horizontal centering, branded gradient background, compact roadside hero illustration on desktop split-pane (hidden on mobile).
+  - Animated Sign In ↔ Sign Up tab transition.
+  - Inter typography, modern inputs, premium "Continue with Google" button.
+  - Loading / success / error states + toasts, inline validation (zod).
+- Add **Forgot password** flow + new `/reset-password` page.
+- Wire **Google OAuth** via Lovable Cloud managed social login (`supabase--configure_social_auth` with `providers: ["google"]`), using `lovable.auth.signInWithOAuth("google", ...)`.
+- Session persistence already handled by `useAuth`; add explicit Logout entry in header menu.
 
-## 4. Buyer side
-- `NeedHelpScreen` / Service lists: "Request now" creates `service_requests` row instead of the local mock; opens `RequestTrackingScreen` showing live offers, accept offer → status flow → chat → complete + rate.
-- New page `/requests/:id` with status timeline, map placeholder, chat drawer.
+## Phase 3 — Responsive shell
+- Constrain main app shell so desktop feels compact (max-width container ~720–960 depending on screen), with sidebar/nav balance instead of stretched single column.
+- Mobile-first stacking; tablet breakpoints; touch-friendly tap targets (min 44px).
+- Polish `AppHeader`, `TabBar`, and panels for desktop (persistent side nav on ≥lg) while keeping bottom tab bar on mobile.
 
-## 5. Provider side
-- New `/provider` route with `ProviderDashboard` (already exists) wired to real data:
-  - Online toggle → updates `provider_availability.is_online`.
-  - Incoming requests list (filtered by role + radius) — Accept opens quote modal → creates offer; Decline hides.
-  - Active job card → status advance buttons (`enroute`→`arrived`→`in_progress`→`completed`) + Chat button.
-- `AvailabilityScreen` (weekly schedule editor).
+## Phase 4 — Booking workflow completion
+Audit current routes and fill gaps. Target route map:
 
-## 6. Vendor / technician onboarding wizard
-- `OnboardingWizard` component with role-specific steps:
-  - Vendor (parts): Business info → Payout account → KYC (NIN/BVN) → First listing → Done.
-  - Tow/Vulcanizer/Mechanic: Profile → Documents (NIN, licence) → Service area → Pricing baseline → Availability → Done.
-- Stored in `vendor_onboarding`; portal blocks core actions until completed (soft-block with banner).
+```
+/                    Home / dashboard
+/services            Service selection
+/services/:type      Service details
+/match               Provider matching (searching state)
+/providers           Nearby results
+/providers/:id       Provider profile
+/requests/:id        Active request hub
+  ├─ chat drawer     Live chat / call
+  ├─ negotiate       Price negotiation / accept offer
+  ├─ tracking        Live provider tracking
+  ├─ progress        Service in-progress
+  └─ complete        Service completion confirmation
+/requests/:id/review Review + summary
+/requests/:id/invoice Invoice / receipt
+/requests/:id/pay    Payment (AFTER completion)
+/pay/success         Payment success
+/pay/failure         Payment failure + retry
+/orders              Booking history (existing, refresh)
+/profile             User profile / settings
+/notifications       Full notifications page (panel exists)
+/support             Support page (panel exists)
+```
+- Wire every CTA; remove dead-ends.
+- Add loading skeletons + empty states throughout.
 
-## 7. Realtime order & chat updates
-- VendorPortal Orders inbox subscribes to `parts_order_items` changes.
-- Buyer `MyOrders` subscribes to status changes; toast on update.
-- Per order/request chat thread accessible from both sides.
+## Phase 5 — Payment-after-service flow
+- Update `service_requests` lifecycle so `payment` step only unlocks after `completed_at` is set and buyer confirms completion.
+- New columns (migration): `payment_status` (pending/paid/failed), `payment_reference`, `paid_at`, `amount_kobo`.
+- Generate payment reference client-side at checkout; store on row; show invoice/receipt page.
+- Retry handling on `/pay/failure`.
+- Use existing **Lovable built-in Stripe payments** (`payments--enable_stripe_payments`) for backend payment-intent creation. *(Confirm before enabling.)*
+- Parts checkout flow remains as-is for now unless you want it migrated too.
 
-## 8. Notifications
-- DB triggers insert notifications on: new offer, offer accepted, status change, new chat message, new order, order status change.
-- `NotificationsPanel` rewired to real data + realtime; bell unread count from query.
+## Phase 6 — UX polish & accessibility
+- Toasts on every async action (success/error).
+- Form validation with zod everywhere.
+- Focus-visible rings, ARIA labels on icon buttons, semantic landmarks (`<main>`, `<nav>`).
+- Keyboard navigation across modals and tabs.
+- Skeleton loaders for lists, empty states with CTAs.
 
-## 9. Wire dead buttons
-- Header sign-out, cart, notifications: ✓ exists.
-- TabBar Support → opens panel ✓.
-- WorkflowModal "Confirm" now creates a real `service_request`.
-- Booking history "Use again" prefills new request.
-- All "Track", "Chat", "Cancel", "Rate" buttons connected.
+## Technical notes
+- New files: `src/pages/ResetPassword.tsx`, `src/pages/Match.tsx`, `src/pages/Providers.tsx`, `src/pages/ProviderProfile.tsx`, `src/pages/Negotiate.tsx`, `src/pages/Tracking.tsx`, `src/pages/Progress.tsx`, `src/pages/Complete.tsx`, `src/pages/Review.tsx`, `src/pages/Invoice.tsx`, `src/pages/Pay.tsx`, `src/pages/PaySuccess.tsx`, `src/pays/PayFailure.tsx`, `src/pages/Profile.tsx`, `src/pages/Notifications.tsx`, `src/pages/Support.tsx`.
+- Edited: `App.tsx` routes, `index.html`, `index.css`, `tailwind.config.ts`, `AuthScreen.tsx`, `AppHeader.tsx`, `TabBar.tsx`, `Index.tsx`.
+- DB migration: add payment columns to `service_requests`.
+- Edge function (later phase): `create-payment-intent` after Stripe is enabled.
 
-## 10. Go-live polish
-- 404 page, loading skeletons, empty states.
-- Error boundary.
-- SEO: title/meta/H1 on Index + key pages.
-- Sign-out clears `portal-redirected`.
-- Toast feedback on every mutation.
-
-## Scope note
-This is large — I'll ship it in one pass focused on the spine (DB + hooks + buyer request flow + provider dashboard wired + onboarding gate + realtime notifications + chat). Cosmetic polish on every existing screen will be done where it intersects these flows.
-
-Ready to proceed?
+## Questions before I start
+1. **Google OAuth** — OK to enable Lovable's managed Google sign-in now? (No setup needed on your side.)
+2. **Payments** — should I enable Lovable's built-in Stripe payments (recommended, no Stripe account needed) or skip payment integration for now and just build the UI scaffolding?
+3. **Scope** — this is large. Do you want me to ship it in **one big pass**, or split into staged PRs (Phase 1+2 first, then 3, then 4–6)?
+4. **Hero illustration** — OK to generate a custom roadside-assistance illustration for the auth desktop split-pane, or prefer pure gradient/abstract?
