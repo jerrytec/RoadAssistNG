@@ -107,7 +107,13 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
           await refetchVendor();
         } else if (current === "kyc") {
           if (!form.nin.trim()) return toast.error("NIN is required");
-          await supabase.from("vendors").update({ bvn: form.nin }).eq("user_id", user!.id);
+          if (!/^\d{11}$/.test(form.nin.trim())) return toast.error("NIN must be 11 digits");
+          if (form.licence && !/^\d{11}$/.test(form.licence.trim())) return toast.error("BVN must be 11 digits");
+          await (supabase as any).from("vendors").update({
+            nin: form.nin.trim(),
+            bvn: form.licence?.trim() || null,
+            verification_status: "pending",
+          }).eq("user_id", user!.id);
           await refetchVendor();
         }
       } else {
