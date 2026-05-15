@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Clock } from "lucide-react";
 
@@ -40,6 +41,7 @@ const SOSPublicTrack = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageNav />
       <header className="bg-destructive text-destructive-foreground px-4 py-3">
         <p className="text-[10px] uppercase tracking-wider opacity-80 font-bold">🚨 Live SOS trip</p>
         <h1 className="text-base font-bold">A loved one needs help</h1>

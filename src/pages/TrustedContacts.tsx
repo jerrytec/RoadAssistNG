@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2, UserPlus } from "lucide-react";
 import { useTrustedContacts } from "@/hooks/useSOS";
@@ -23,6 +24,7 @@ const TrustedContacts = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageNav />
       <header className="gradient-brand px-4 py-3 flex items-center gap-2 sticky top-0 z-30">
         <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-full bg-white/15 text-primary-foreground flex items-center justify-center"><ArrowLeft className="w-4 h-4" /></button>
         <h1 className="text-base font-bold text-primary-foreground">Trusted contacts</h1>

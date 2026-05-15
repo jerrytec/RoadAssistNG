@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,6 +84,7 @@ const VendorPortal = () => {
 
   return (
     <Wrap>
+      <PageNav />
       <header className="px-4 py-3 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
         <div>
           <button onClick={() => navigate("/")} className="text-[11px] text-muted-foreground">← Back to app</button>

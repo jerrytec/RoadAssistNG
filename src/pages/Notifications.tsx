@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { ArrowLeft, Bell, CheckCheck } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -8,6 +9,7 @@ const Notifications = () => {
 
   return (
     <main className="min-h-screen bg-background">
+      <PageNav />
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="container max-w-[720px] flex items-center gap-3 h-14">
           <button onClick={() => navigate(-1)} aria-label="Back" className="w-9 h-9 rounded-lg hover:bg-muted flex items-center justify-center"><ArrowLeft className="w-4 h-4" /></button>

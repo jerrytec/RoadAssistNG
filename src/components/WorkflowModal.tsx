@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Home } from "lucide-react";
 import { toast } from "sonner";
 import type { Provider } from "@/components/ProviderCard";
 import { useCreateRequest, type ServiceKind } from "@/hooks/useServiceRequests";
@@ -310,9 +311,25 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
     <div className="bg-foreground/40 min-h-[500px] flex items-start justify-center p-5 rounded-lg mb-3">
       <div className="bg-card rounded-xl w-full max-w-[420px] overflow-hidden animate-slide-up">
         {/* Header */}
-        <div className="bg-primary px-4 py-3.5 flex items-center justify-between">
-          <span className="text-primary-foreground text-sm font-bold">Book {provider.name}</span>
-          <button onClick={handleClose} className="bg-white/20 border-none text-primary-foreground w-[26px] h-[26px] rounded-full cursor-pointer text-sm flex items-center justify-center">
+        <div className="bg-primary px-4 py-3.5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleClose}
+              aria-label="Back"
+              className="bg-white/20 hover:bg-white/30 active:scale-95 text-primary-foreground w-[26px] h-[26px] rounded-full flex items-center justify-center transition-all"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => { handleClose(); navigate("/"); }}
+              aria-label="Home"
+              className="bg-white/20 hover:bg-white/30 active:scale-95 text-primary-foreground w-[26px] h-[26px] rounded-full flex items-center justify-center transition-all"
+            >
+              <Home className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <span className="text-primary-foreground text-sm font-bold flex-1 text-center truncate">Book {provider.name}</span>
+          <button onClick={handleClose} aria-label="Close" className="bg-white/20 hover:bg-white/30 active:scale-95 text-primary-foreground w-[26px] h-[26px] rounded-full text-sm flex items-center justify-center transition-all">
             ✕
           </button>
         </div>

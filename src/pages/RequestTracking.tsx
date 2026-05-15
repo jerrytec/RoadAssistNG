@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { toast } from "sonner";
 import { useRequest, useAcceptOffer, useUpdateRequestStatus, useRateRequest, type RequestStatus } from "@/hooks/useServiceRequests";
 import { formatNaira } from "@/lib/format";
@@ -56,6 +57,7 @@ const RequestTracking = () => {
 
   return (
     <div className="max-w-[700px] mx-auto min-h-screen bg-background pb-10">
+      <PageNav />
       <header className="bg-primary px-4 py-3 flex items-center gap-2">
         <button onClick={() => navigate(-1)} className="text-primary-foreground text-sm">←</button>
         <h1 className="text-primary-foreground text-sm font-bold">Request #{request.id.slice(0, 8)}</h1>
