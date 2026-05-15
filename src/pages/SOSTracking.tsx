@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Phone, MessageCircle, Share2, AlertOctagon, X, MapPin, Clock, ShieldAlert, Users } from "lucide-react";
+import { ArrowLeft, Phone, MessageCircle, Share2, AlertOctagon, X, ShieldAlert, Users } from "lucide-react";
 import { useSOSRequest, useFlagDanger, useCancelSOS, useCreateShareToken, useTrustedContacts, useNotifyTrustedContacts, useSOSEta } from "@/hooks/useSOS";
 import { useAuth } from "@/hooks/useAuth";
 import { formatNaira } from "@/lib/format";
