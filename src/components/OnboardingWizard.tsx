@@ -176,8 +176,9 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
         )}
         {step.id === "kyc" && (
           <>
-            <Field label="NIN" v={form.nin} on={(v) => setForm({ ...form, nin: v })} placeholder="11-digit NIN" />
-            <p className="text-[10px] text-muted-foreground">Verification typically takes minutes. We never share this publicly.</p>
+            <Field label="NIN (National ID)" v={form.nin} on={(v) => setForm({ ...form, nin: v })} placeholder="11-digit NIN" />
+            <Field label="BVN (Bank Verification Number)" v={form.licence} on={(v) => setForm({ ...form, licence: v })} placeholder="11-digit BVN" />
+            <p className="text-[10px] text-muted-foreground">Submitted as <b>pending</b>. Our compliance team verifies BVN with NIBSS and NIN with NIMC, typically within 24–48 hours.</p>
           </>
         )}
         {step.id === "first-listing" && (
