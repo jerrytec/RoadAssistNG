@@ -160,6 +160,12 @@ const RequestTracking = () => {
           </div>
         )}
 
+        {isBuyer && request.status === "completed" && (request as any).payment_status !== "paid" && (
+          <button onClick={() => navigate(`/pay/service/${request.id}`)} className="w-full py-3 rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+            💳 Pay {formatNaira(request.price_estimate_kobo)}
+          </button>
+        )}
+
         {request.rating && (
           <div className="bg-primary-light border border-primary/20 rounded-xl p-4 text-center">
             <p className="text-xs text-primary font-semibold">You rated this {"⭐".repeat(request.rating)}</p>

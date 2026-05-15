@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["admin_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["admin_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["admin_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      disputes: {
+        Row: {
+          assigned_admin: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kind: Database["public"]["Enums"]["dispute_kind"]
+          opened_by: string
+          reason: string
+          reference_id: string
+          resolution: string | null
+          status: Database["public"]["Enums"]["dispute_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_admin?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["dispute_kind"]
+          opened_by: string
+          reason: string
+          reference_id: string
+          resolution?: string | null
+          status?: Database["public"]["Enums"]["dispute_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_admin?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["dispute_kind"]
+          opened_by?: string
+          reason?: string
+          reference_id?: string
+          resolution?: string | null
+          status?: Database["public"]["Enums"]["dispute_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -423,6 +486,7 @@ export type Database = {
         Row: {
           accepted_at: string | null
           accepted_offer_id: string | null
+          amount_kobo: number | null
           assigned_provider_id: string | null
           buyer_id: string
           completed_at: string | null
@@ -430,6 +494,9 @@ export type Database = {
           description: string | null
           id: string
           location: string | null
+          paid_at: string | null
+          payment_reference: string | null
+          payment_status: Database["public"]["Enums"]["svc_payment_status"]
           price_estimate_kobo: number | null
           rating: number | null
           review: string | null
@@ -441,6 +508,7 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           accepted_offer_id?: string | null
+          amount_kobo?: number | null
           assigned_provider_id?: string | null
           buyer_id: string
           completed_at?: string | null
@@ -448,6 +516,9 @@ export type Database = {
           description?: string | null
           id?: string
           location?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["svc_payment_status"]
           price_estimate_kobo?: number | null
           rating?: number | null
           review?: string | null
@@ -459,6 +530,7 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           accepted_offer_id?: string | null
+          amount_kobo?: number | null
           assigned_provider_id?: string | null
           buyer_id?: string
           completed_at?: string | null
@@ -466,6 +538,9 @@ export type Database = {
           description?: string | null
           id?: string
           location?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["svc_payment_status"]
           price_estimate_kobo?: number | null
           rating?: number | null
           review?: string | null
@@ -529,11 +604,16 @@ export type Database = {
           bvn: string | null
           created_at: string
           id: string
+          nin: string | null
           payout_account: string | null
           phone: string | null
           status: Database["public"]["Enums"]["vendor_status"]
           updated_at: string
           user_id: string
+          verification_notes: string | null
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           address?: string | null
@@ -542,11 +622,16 @@ export type Database = {
           bvn?: string | null
           created_at?: string
           id?: string
+          nin?: string | null
           payout_account?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["vendor_status"]
           updated_at?: string
           user_id: string
+          verification_notes?: string | null
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           address?: string | null
@@ -555,11 +640,16 @@ export type Database = {
           bvn?: string | null
           created_at?: string
           id?: string
+          nin?: string | null
           payout_account?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["vendor_status"]
           updated_at?: string
           user_id?: string
+          verification_notes?: string | null
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -572,6 +662,13 @@ export type Database = {
         Args: { _thread: string; _type: string; _uid: string }
         Returns: boolean
       }
+      has_admin_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["admin_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -579,12 +676,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_any_admin: { Args: { _user_id: string }; Returns: boolean }
       role_for_service: {
         Args: { _k: Database["public"]["Enums"]["service_kind"] }
         Returns: Database["public"]["Enums"]["app_role"]
       }
     }
     Enums: {
+      admin_role:
+        | "super_admin"
+        | "operations"
+        | "finance"
+        | "compliance"
+        | "fraud"
+        | "support"
+        | "analytics"
       app_role:
         | "buyer"
         | "vendor"
@@ -592,6 +698,8 @@ export type Database = {
         | "vulcanizer"
         | "mechanic"
         | "admin"
+      dispute_kind: "service" | "order"
+      dispute_status: "open" | "investigating" | "resolved" | "rejected"
       offer_status: "pending" | "accepted" | "declined" | "withdrawn"
       order_status:
         | "pending_payment"
@@ -615,7 +723,9 @@ export type Database = {
         | "completed"
         | "cancelled"
       service_kind: "tow" | "vulcanizer" | "mechanic"
+      svc_payment_status: "unpaid" | "pending" | "paid" | "refunded" | "failed"
       vendor_status: "pending" | "verified" | "suspended"
+      verification_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -743,6 +853,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: [
+        "super_admin",
+        "operations",
+        "finance",
+        "compliance",
+        "fraud",
+        "support",
+        "analytics",
+      ],
       app_role: [
         "buyer",
         "vendor",
@@ -751,6 +870,8 @@ export const Constants = {
         "mechanic",
         "admin",
       ],
+      dispute_kind: ["service", "order"],
+      dispute_status: ["open", "investigating", "resolved", "rejected"],
       offer_status: ["pending", "accepted", "declined", "withdrawn"],
       order_status: [
         "pending_payment",
@@ -776,7 +897,9 @@ export const Constants = {
         "cancelled",
       ],
       service_kind: ["tow", "vulcanizer", "mechanic"],
+      svc_payment_status: ["unpaid", "pending", "paid", "refunded", "failed"],
       vendor_status: ["pending", "verified", "suspended"],
+      verification_status: ["pending", "approved", "rejected"],
     },
   },
 } as const

@@ -16,6 +16,16 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import Profile from "./pages/Profile.tsx";
 import Notifications from "./pages/Notifications.tsx";
 import Support from "./pages/Support.tsx";
+import ServicePayment from "./pages/ServicePayment.tsx";
+import AdminLayout from "./pages/admin/AdminLayout.tsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
+import AdminUsers from "./pages/admin/AdminUsers.tsx";
+import AdminOperators from "./pages/admin/AdminOperators.tsx";
+import AdminRequests from "./pages/admin/AdminRequests.tsx";
+import AdminPayments from "./pages/admin/AdminPayments.tsx";
+import AdminDisputes from "./pages/admin/AdminDisputes.tsx";
+import AdminVerification from "./pages/admin/AdminVerification.tsx";
+import AdminRolesPage from "./pages/admin/AdminRolesPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +48,17 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/pay/service/:id" element={<ServicePayment />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="operators" element={<AdminOperators />} />
+              <Route path="requests" element={<AdminRequests />} />
+              <Route path="payments" element={<AdminPayments />} />
+              <Route path="disputes" element={<AdminDisputes />} />
+              <Route path="verification" element={<AdminVerification />} />
+              <Route path="roles" element={<AdminRolesPage />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
