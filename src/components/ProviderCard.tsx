@@ -11,6 +11,20 @@ export interface Provider {
   eta: string;
   rating: string;
   avatarBg: "info" | "accent" | "secondary";
+  // Optional rich metadata for tow / vulcanizer / mechanic detail flows
+  operator?: string;
+  plate?: string;
+  baseFeeKobo?: number;
+  perKmKobo?: number;
+  capacityTonnes?: number;
+  services?: string[];
+  priceMinKobo?: number;
+  priceMaxKobo?: number;
+  shopType?: string;
+  specializations?: string[];
+  calloutFeeKobo?: number;
+  hourlyRateKobo?: number;
+  yearsExp?: number;
 }
 
 interface ProviderCardProps {
