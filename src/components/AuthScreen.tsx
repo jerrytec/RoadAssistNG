@@ -24,7 +24,7 @@ const signupSchema = z.object({
   full_name: z.string().trim().min(2, "Enter your full name").max(100),
   email: z.string().trim().email("Enter a valid email").max(255),
   password: z.string().min(6, "Min 6 characters").max(72),
-  phone: z.string().trim().max(20).optional(),
+  phone: z.string().trim().min(7, "Phone number is required").max(20),
   business_name: z.string().trim().max(120).optional(),
 });
 const loginSchema = z.object({
