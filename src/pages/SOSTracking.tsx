@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Phone, MessageCircle, Share2, AlertOctagon, X, MapPin, Clock, ShieldAlert, Users } from "lucide-react";
-import { useSOSRequest, useFlagDanger, useCancelSOS, useCreateShareToken, useTrustedContacts } from "@/hooks/useSOS";
+import { ArrowLeft, Phone, MessageCircle, Share2, AlertOctagon, X, Clock, ShieldAlert, Users } from "lucide-react";
+import { useSOSRequest, useFlagDanger, useCancelSOS, useCreateShareToken, useTrustedContacts, useNotifyTrustedContacts, useSOSEta } from "@/hooks/useSOS";
 import { useAuth } from "@/hooks/useAuth";
 import { formatNaira } from "@/lib/format";
+import LiveSOSMap from "@/components/LiveSOSMap";
+import SOSTimeline from "@/components/SOSTimeline";
 
 const STATUS_COPY: Record<string, { title: string; sub: string; tone: "warn" | "info" | "ok" | "danger" }> = {
   dispatching: { title: "Finding nearest help…", sub: "We're alerting all available operators near you", tone: "warn" },
@@ -25,7 +27,10 @@ const SOSTracking = () => {
   const danger = useFlagDanger();
   const cancel = useCancelSOS();
   const share = useCreateShareToken();
+  const notify = useNotifyTrustedContacts();
   const { data: contacts } = useTrustedContacts();
+  const { data: etaMinutes } = useSOSEta(id);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
@@ -57,6 +62,17 @@ const SOSTracking = () => {
     } catch (e: any) { toast.error(e.message ?? "Could not share"); }
   };
 
+  const onAlertContacts = async () => {
+    try {
+      const token = await share.mutateAsync(req.id);
+      const res = await notify.mutateAsync({ request_id: req.id, share_token: token });
+      if (res.sent > 0) toast.success(`Alerted ${res.sent}/${res.total} trusted contact${res.total === 1 ? "" : "s"}`);
+      else if (res.mode === "preview") toast("Trusted contacts logged — connect Twilio to send live SMS");
+      else if (res.total === 0) toast("No trusted contacts to alert");
+      else toast.error("No SMS could be sent");
+    } catch (e: any) { toast.error(e.message ?? "Could not alert contacts"); }
+  };
+
   const onWhatsApp = () => {
     const msg = `🚨 SOS on RoadAssistNG. Location: ${req.sos_lat ?? "?"}, ${req.sos_lng ?? "?"}. Status: ${status}.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
@@ -67,9 +83,9 @@ const SOSTracking = () => {
     try { await danger.mutateAsync(req.id); toast.success("Operations team alerted"); } catch (e: any) { toast.error(e.message); }
   };
 
-  const onCancel = async () => {
-    if (!confirm("Cancel this SOS? Only do this if you no longer need help.")) return;
-    try { await cancel.mutateAsync(req.id); toast.success("SOS cancelled"); navigate("/"); } catch (e: any) { toast.error(e.message); }
+  const onCancelConfirm = async (reason: string) => {
+    try { await cancel.mutateAsync({ id: req.id, reason }); toast.success("SOS cancelled"); navigate("/"); }
+    catch (e: any) { toast.error(e.message); }
   };
 
   const toneClass = copy.tone === "danger" ? "bg-destructive text-destructive-foreground"
@@ -99,18 +115,11 @@ const SOSTracking = () => {
       <div className="container max-w-[720px] px-4 py-4 space-y-3">
         <p className="text-xs text-muted-foreground">{copy.sub}</p>
 
-        {/* Map placeholder */}
-        <div className="rounded-xl h-[200px] flex items-center justify-center relative overflow-hidden border border-border bg-primary-light">
-          <div className="absolute top-1/2 left-1/2 w-20 h-20 border-2 border-destructive/30 rounded-full animate-pulse-ring" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-destructive border-2 border-card z-10" />
-          {req.assigned_provider_id && (
-            <div className="absolute top-[35%] left-[30%] w-2.5 h-2.5 rounded-full bg-primary border border-card" />
-          )}
-          <div className="absolute bottom-2 left-2 bg-card/90 backdrop-blur px-2 py-1 rounded text-[10px] flex items-center gap-1">
-            <MapPin className="w-3 h-3" />
-            {req.sos_lat && req.sos_lng ? `${req.sos_lat.toFixed(4)}, ${req.sos_lng.toFixed(4)}` : "Location pending"}
-          </div>
-        </div>
+        {/* Live map */}
+        <LiveSOSMap lat={req.sos_lat} lng={req.sos_lng} />
+
+        {/* Timeline + ETA */}
+        <SOSTimeline requestId={req.id} currentStatus={status} triggeredAt={req.sos_triggered_at} etaMinutes={etaMinutes} />
 
         {/* Trip details */}
         <div className="bg-card border border-border rounded-xl p-3 space-y-2">
@@ -133,9 +142,9 @@ const SOSTracking = () => {
             <ActionBtn icon={<Phone className="w-4 h-4" />} label="Call operator" onClick={() => toast("Calling — connect your phone")} disabled={!req.assigned_provider_id} />
             <ActionBtn icon={<MessageCircle className="w-4 h-4" />} label="WhatsApp" onClick={onWhatsApp} />
             <ActionBtn icon={<Share2 className="w-4 h-4" />} label="Share live trip" onClick={onShare} />
-            <ActionBtn icon={<Users className="w-4 h-4" />} label="Trusted contacts" onClick={() => navigate("/profile/trusted-contacts")} />
+            <ActionBtn icon={<Users className="w-4 h-4" />} label="Alert contacts" onClick={onAlertContacts} />
             <ActionBtn icon={<AlertOctagon className="w-4 h-4" />} label="I'm in danger" onClick={onDanger} variant="danger" />
-            <ActionBtn icon={<X className="w-4 h-4" />} label="Cancel SOS" onClick={onCancel} variant="muted" />
+            <ActionBtn icon={<X className="w-4 h-4" />} label="Cancel SOS" onClick={() => setCancelOpen(true)} variant="muted" />
           </div>
         )}
 
@@ -157,6 +166,56 @@ const SOSTracking = () => {
             <p className="opacity-90 mt-0.5">A senior dispatcher is reviewing your case manually. Stay on this screen.</p>
           </div>
         )}
+      </div>
+
+      {cancelOpen && (
+        <CancelReasonModal
+          onClose={() => setCancelOpen(false)}
+          onConfirm={async (reason) => { setCancelOpen(false); await onCancelConfirm(reason); }}
+          loading={cancel.isPending}
+        />
+      )}
+    </div>
+  );
+};
+
+const CANCEL_REASONS = [
+  "I no longer need help",
+  "Triggered by mistake",
+  "Got help from someone else",
+  "Wait time too long",
+  "Other",
+];
+
+const CancelReasonModal = ({ onClose, onConfirm, loading }: { onClose: () => void; onConfirm: (r: string) => void; loading?: boolean }) => {
+  const [reason, setReason] = useState(CANCEL_REASONS[0]);
+  const [other, setOther] = useState("");
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center" onClick={onClose}>
+      <div className="bg-card w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-4" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-bold mb-1">Cancel SOS</h3>
+        <p className="text-[11px] text-muted-foreground mb-3">Help us improve — why are you cancelling?</p>
+        <div className="space-y-1.5 mb-3">
+          {CANCEL_REASONS.map((r) => (
+            <label key={r} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer text-xs ${reason === r ? "border-primary bg-primary-light" : "border-border"}`}>
+              <input type="radio" name="reason" checked={reason === r} onChange={() => setReason(r)} className="accent-primary" />
+              {r}
+            </label>
+          ))}
+          {reason === "Other" && (
+            <textarea value={other} onChange={(e) => setOther(e.target.value)} rows={2} placeholder="Tell us more…" className="w-full mt-1 py-2 px-3 border border-border rounded-lg text-xs bg-background outline-none focus:border-primary resize-none" />
+          )}
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-border text-xs font-semibold">Keep SOS active</button>
+          <button
+            disabled={loading}
+            onClick={() => onConfirm(reason === "Other" ? (other.trim() || "Other") : reason)}
+            className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold disabled:opacity-60"
+          >
+            {loading ? "Cancelling…" : "Cancel SOS"}
+          </button>
+        </div>
       </div>
     </div>
   );
