@@ -7,6 +7,7 @@ import { formatNaira } from "@/lib/format";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { seedParts } from "@/data/seedParts";
 
 const PartDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,9 +17,12 @@ const PartDetail = () => {
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
 
-  const { data: part, isLoading } = useQuery({
+  const isSeed = !!id?.startsWith("part-");
+  const seed = isSeed ? seedParts.find((p) => p.id === id) : null;
+
+  const { data: dbPart, isLoading } = useQuery({
     queryKey: ["part", id],
-    enabled: !!id,
+    enabled: !!id && !isSeed,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("parts")
@@ -30,7 +34,23 @@ const PartDetail = () => {
     },
   });
 
-  if (isLoading) return <div className="p-6 text-center text-sm text-muted-foreground">Loading…</div>;
+  const part: any = isSeed
+    ? seed && {
+        id: seed.id,
+        title: seed.title,
+        brand: seed.brand,
+        price_kobo: seed.price_kobo,
+        stock: seed.stock,
+        condition: seed.condition,
+        images: [],
+        compatibility: seed.compatibility,
+        description: `${seed.title} from ${seed.seller_name} (${seed.location}). Condition: ${seed.condition}. Demo listing — escrow checkout will be enabled when this seller completes onboarding.`,
+        vendor: { business_name: seed.seller_name, status: "verified" },
+        category: { name: seed.category, icon: seed.icon },
+      }
+    : dbPart;
+
+  if (!isSeed && isLoading) return <div className="p-6 text-center text-sm text-muted-foreground">Loading…</div>;
   if (!part) return (
     <div className="p-6 text-center">
       <p className="text-sm text-muted-foreground mb-3">Part not found.</p>
@@ -41,16 +61,19 @@ const PartDetail = () => {
   const images: string[] = part.images?.length ? part.images : [];
 
   const handleAdd = async () => {
+    if (isSeed) { toast.info("Demo listing — checkout opens once this seller is fully onboarded."); return; }
     if (!user) { toast.error("Please sign in to add to cart"); return; }
     if (part.stock < qty) { toast.error("Not enough stock"); return; }
     addItem.mutate({ partId: part.id, qty });
   };
 
   const handleBuyNow = async () => {
+    if (isSeed) { toast.info("Demo listing — checkout opens once this seller is fully onboarded."); return; }
     if (!user) { toast.error("Please sign in"); return; }
     if (part.stock < qty) { toast.error("Not enough stock"); return; }
     addItem.mutate({ partId: part.id, qty }, { onSuccess: () => navigate("/checkout") });
   };
+
 
   return (
     <div className="max-w-[700px] mx-auto min-h-screen bg-background">
