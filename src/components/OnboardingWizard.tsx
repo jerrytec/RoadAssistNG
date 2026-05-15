@@ -18,7 +18,8 @@ const ALL_VENDOR_STEPS: Step[] = [
 
 const ALL_TECH_STEPS: Step[] = [
   { id: "profile", title: "Profile", description: "Confirm your name and phone" },
-  { id: "documents", title: "Documents", description: "NIN and driver's licence / trade ID" },
+  { id: "kyc", title: "Identity (KYC)", description: "NIN, BVN and union ID — required for verification" },
+  { id: "documents", title: "Documents", description: "Driver's licence / trade ID" },
   { id: "service-area", title: "Service area", description: "Where you accept jobs" },
   { id: "availability", title: "Availability", description: "Your weekly hours" },
 ];
