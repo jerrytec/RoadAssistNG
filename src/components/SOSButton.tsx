@@ -27,7 +27,7 @@ const SOSButton = ({ variant = "hero" }: Props) => {
     cancel();
     if (!user) { toast.error("Please sign in to trigger SOS"); return; }
     try {
-      const res = await trigger.mutateAsync();
+      const res = await trigger.mutateAsync(undefined);
       if (res.existing) toast("You already have an active SOS — opening it");
       navigate(`/sos/${res.id}`);
     } catch (e: any) {
