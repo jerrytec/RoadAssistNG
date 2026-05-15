@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, LogOut } from "lucide-react";
+import { ArrowLeft, Loader2, LogOut, Users } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -72,6 +72,14 @@ const Profile = () => {
               </button>
             </div>
           )}
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-5 shadow-card">
+          <h2 className="text-sm font-semibold mb-3">Safety</h2>
+          <button onClick={() => navigate("/profile/trusted-contacts")} className="h-10 px-4 rounded-lg border border-border text-sm font-medium hover:bg-muted flex items-center gap-2">
+            <Users className="w-4 h-4" /> Manage trusted contacts
+          </button>
+          <p className="text-[11px] text-muted-foreground mt-2">Notified instantly when you trigger SOS.</p>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-5 shadow-card">

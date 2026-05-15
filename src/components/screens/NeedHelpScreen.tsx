@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ProviderCard from "@/components/ProviderCard";
+import SOSButton from "@/components/SOSButton";
 import { allProviders } from "@/data/providers";
 import type { Provider } from "@/components/ProviderCard";
 
@@ -23,17 +24,7 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
 
   return (
     <div className="p-3.5 animate-fade-in">
-      {/* SOS Button */}
-      <div className="text-center py-5">
-        <button
-          className="w-[115px] h-[115px] rounded-full bg-destructive border-none text-destructive-foreground text-[22px] font-extrabold cursor-pointer inline-flex items-center justify-center flex-col tracking-wider transition-transform hover:scale-[1.04] active:scale-[0.97]"
-          style={{ boxShadow: "var(--shadow-sos)" }}
-        >
-          SOS
-          <span className="text-[9px] opacity-90 mt-0.5 tracking-normal font-normal">Tap to alert</span>
-        </button>
-        <p className="text-[11px] text-muted-foreground mt-2">Broadcasts your location to all nearby providers</p>
-      </div>
+      <SOSButton variant="hero" />
 
       {/* Map */}
       <div className="rounded-lg h-[120px] flex items-center justify-center mb-3 relative overflow-hidden border border-border bg-primary-light">
