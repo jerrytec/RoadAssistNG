@@ -48,6 +48,7 @@ const ProviderJobsBoard = () => {
   const [tab, setTab] = useState<"open" | "active" | "schedule">("open");
   const [quoting, setQuoting] = useState<ServiceRequest | null>(null);
   const [chatJob, setChatJob] = useState<ServiceRequest | null>(null);
+  const [sosToAccept, setSosToAccept] = useState<any | null>(null);
 
   const myOfferIds = useMemo(() => new Set((jobs?.myOffers ?? []).map((o) => o.request_id)), [jobs]);
   const openWithoutOffer = (jobs?.open ?? []).filter((r) => !myOfferIds.has(r.id) && r.assigned_provider_id !== user?.id);
@@ -76,7 +77,7 @@ const ProviderJobsBoard = () => {
                     <p className="text-[10px] text-muted-foreground truncate">📍 {s.sos_lat ? `${s.sos_lat.toFixed(3)}, ${s.sos_lng?.toFixed(3)}` : s.location ?? "Unknown"}</p>
                   </div>
                   <button
-                    onClick={async () => { try { await claimSOS.mutateAsync(s.id); toast.success("SOS accepted"); navigate(`/sos/${s.id}`); } catch (e: any) { toast.error(e.message); } }}
+                    onClick={() => setSosToAccept(s)}
                     className="px-3 py-2 rounded-md bg-destructive text-destructive-foreground text-xs font-bold whitespace-nowrap"
                   >
                     Accept
@@ -218,6 +219,18 @@ const ProviderJobsBoard = () => {
         threadId={chatJob?.id ?? ""}
         title="Chat with customer"
       />
+
+      {sosToAccept && (
+        <SOSAcceptModal
+          sos={sosToAccept}
+          loading={claimSOS.isPending}
+          onClose={() => setSosToAccept(null)}
+          onConfirm={async () => {
+            try { await claimSOS.mutateAsync(sosToAccept.id); toast.success("SOS accepted — head out now"); setSosToAccept(null); navigate(`/sos/${sosToAccept.id}`); }
+            catch (e: any) { toast.error(e.message); }
+          }}
+        />
+      )}
     </div>
   );
 };
