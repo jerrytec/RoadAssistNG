@@ -132,6 +132,28 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [disputeReason, setDisputeReason] = useState<string | null>(null);
   const [disputeNotes, setDisputeNotes] = useState("");
+  const [holdSubmitted, setHoldSubmitted] = useState(false);
+  const [disputeRef, setDisputeRef] = useState<string>("");
+
+  const reasonLabel = (v: string | null) => {
+    switch (v) {
+      case "not_fixed": return "Issue not fixed";
+      case "no_show": return "Mechanic didn't show up";
+      case "overcharged": return "Charged more than quoted";
+      case "other": return "Other";
+      default: return "—";
+    }
+  };
+
+  const submitHold = () => {
+    const ref = `DIS-${Date.now().toString().slice(-5)}${Math.floor(Math.random() * 90 + 10)}`;
+    setDisputeRef(ref);
+    setHoldSubmitted(true);
+    setDisputeOpen(false);
+    toast.success("Payment held in escrow", {
+      description: `Dispute ${ref} opened. SMS & email confirmation sent.`,
+    });
+  };
 
   const [txnRef] = useState(() => saved?.txnRef ?? generateTxnRef());
   const amount = TOTAL_AMOUNT;
@@ -702,7 +724,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
           {/* Step 5: Confirm & Pay (Release Escrow) */}
           {step === 5 && (
             <div className="animate-fade-in">
-              {releaseStatus === "idle" && !disputeOpen && (
+              {releaseStatus === "idle" && !disputeOpen && !holdSubmitted && (
                 <>
                   <div className="text-center mb-4">
                     <div className="text-4xl mb-2">🔍</div>
@@ -806,10 +828,73 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                     </button>
                     <button
                       disabled={!disputeReason}
-                      onClick={() => { setDisputeOpen(false); }}
+                      onClick={submitHold}
                       className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Confirm hold payment
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {holdSubmitted && (
+                <div className="animate-fade-in py-2">
+                  <div className="text-center mb-3">
+                    <div className="w-14 h-14 mx-auto mb-2 rounded-full bg-destructive/10 flex items-center justify-center text-3xl">🔒</div>
+                    <h3 className="text-sm font-bold text-foreground mb-1">Payment Held Successfully</h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      <span className="font-semibold text-foreground">₦{amount.toLocaleString()}</span> is secured in escrow
+                    </p>
+                  </div>
+
+                  <div className="bg-muted/50 border border-border rounded-lg p-3 mb-3 space-y-1.5">
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-muted-foreground">Dispute ref</span>
+                      <span className="font-mono font-bold text-foreground">#{disputeRef}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-muted-foreground">Reason</span>
+                      <span className="font-medium text-foreground">{reasonLabel(disputeReason)}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-muted-foreground">Booking</span>
+                      <span className="font-mono text-foreground">{txnRef}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-muted-foreground">Opened</span>
+                      <span className="text-foreground">{new Date().toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-info-light border border-info/30 rounded-lg p-2.5 mb-3">
+                    <p className="text-[11px] text-foreground leading-relaxed">
+                      ✅ We've notified our team. An admin will reach out within <span className="font-bold">24 hours</span> via chat or phone.
+                      You'll also receive an SMS &amp; email confirmation with your dispute reference.
+                    </p>
+                  </div>
+
+                  <div className="bg-card border border-border rounded-lg p-2.5 mb-3">
+                    <p className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">What happens next</p>
+                    <ol className="space-y-1 text-[11px] text-foreground list-decimal list-inside">
+                      <li>Escrow frozen — provider cannot be paid</li>
+                      <li>Admin reviews booking timeline &amp; chat history</li>
+                      <li>Both parties contacted within 24 hours</li>
+                      <li>Resolution: refund, re-service, or partial split</li>
+                    </ol>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { onClose(); navigate("/support"); }}
+                      className="flex-1 py-3 rounded-lg bg-primary text-primary-foreground text-xs font-bold border-none cursor-pointer"
+                    >
+                      Track my dispute
+                    </button>
+                    <button
+                      onClick={() => { onClose(); navigate("/"); }}
+                      className="flex-1 py-3 rounded-lg border border-border bg-card text-foreground text-xs font-medium cursor-pointer"
+                    >
+                      Close
                     </button>
                   </div>
                 </div>
