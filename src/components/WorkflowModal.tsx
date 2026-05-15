@@ -174,8 +174,6 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const canHoldProceed = () => {
     if (payMethod === "card") return cardNumber.replace(/\s/g, "").length === 16 && expiry.length === 5 && cvv.length >= 3 && cardName.length > 1;
     if (payMethod === "bank") return selectedBank !== "";
-    if (payMethod === "ussd") return selectedUssd !== "";
-    if (payMethod === "cash") return true;
     return false;
   };
 
