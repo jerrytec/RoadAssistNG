@@ -24,7 +24,7 @@ const signupSchema = z.object({
   full_name: z.string().trim().min(2, "Enter your full name").max(100),
   email: z.string().trim().email("Enter a valid email").max(255),
   password: z.string().min(6, "Min 6 characters").max(72),
-  phone: z.string().trim().max(20).optional(),
+  phone: z.string().trim().min(7, "Phone number is required").max(20),
   business_name: z.string().trim().max(120).optional(),
 });
 const loginSchema = z.object({
@@ -207,7 +207,7 @@ const AuthScreen = ({ onComplete }: AuthScreenProps) => {
                   {mode === "signup" && (
                     <>
                       <input className={inputCls} type="text" placeholder="Full name" value={form.full_name} onChange={(e) => update("full_name", e.target.value)} />
-                      <input className={inputCls} type="tel" placeholder="Phone (optional)" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+                      <input className={inputCls} type="tel" placeholder="Phone number" value={form.phone} onChange={(e) => update("phone", e.target.value)} required />
                       {role === "vendor" && (
                         <input className={inputCls} type="text" placeholder="Business / shop name" value={form.business_name} onChange={(e) => update("business_name", e.target.value)} />
                       )}

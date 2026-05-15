@@ -18,7 +18,8 @@ const ALL_VENDOR_STEPS: Step[] = [
 
 const ALL_TECH_STEPS: Step[] = [
   { id: "profile", title: "Profile", description: "Confirm your name and phone" },
-  { id: "documents", title: "Documents", description: "NIN and driver's licence / trade ID" },
+  { id: "kyc", title: "Identity (KYC)", description: "NIN, BVN and union ID — required for verification" },
+  { id: "documents", title: "Documents", description: "Driver's licence / trade ID" },
   { id: "service-area", title: "Service area", description: "Where you accept jobs" },
   { id: "availability", title: "Availability", description: "Your weekly hours" },
 ];
@@ -47,7 +48,7 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
       return ALL_VENDOR_STEPS.filter((s) => {
         if (s.id === "business") return !vendor?.business_name?.trim();
         if (s.id === "payout") return !(vendor?.bank_name?.trim() && vendor?.payout_account?.trim());
-        if (s.id === "kyc") return !vendor?.bvn?.trim();
+        if (s.id === "kyc") return !(vendor?.bvn?.trim() && vendor?.nin?.trim() && (vendor as any)?.union_id?.trim());
         return true;
       });
     }
@@ -72,7 +73,8 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
     full_name: "", phone: "",
     business_name: vendor?.business_name ?? "", address: vendor?.address ?? "",
     payout_account: vendor?.payout_account ?? "", bank_name: vendor?.bank_name ?? "",
-    nin: "", licence: "", base_location: availability?.base_location ?? "",
+    nin: "", bvn: "", union_id: "", union_name: "", licence: "",
+    base_location: availability?.base_location ?? "",
   });
 
   useEffect(() => {
@@ -89,13 +91,34 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
     await save({ step: newIdx, completed, payload: { ...(state?.payload ?? {}), ...form } });
   };
 
+  const runIdentityVerification = async () => {
+    const { data, error } = await supabase.functions.invoke("verify-identity", {
+      body: {
+        nin: form.nin.trim(),
+        bvn: form.bvn.trim(),
+        union_id: form.union_id.trim(),
+        union_name: form.union_name.trim(),
+      },
+    });
+    if (error) throw new Error(error.message);
+    if ((data as any)?.error) throw new Error((data as any).error);
+    if ((data as any)?.mock) {
+      toast("KYC saved as pending — verification API not yet configured");
+    } else if ((data as any)?.status === "approved") {
+      toast.success("Identity verified");
+    } else {
+      toast("KYC submitted — pending review");
+    }
+  };
+
   const next = async () => {
     try {
       const current = steps[idx].id;
+      if (!form.phone.trim()) return toast.error("Phone number is required");
       if (isVendor) {
         if (current === "business") {
           if (!form.business_name.trim()) return toast.error("Business name required");
-          await supabase.from("vendors").update({ business_name: form.business_name, address: form.address || null, phone: form.phone || null }).eq("user_id", user!.id);
+          await supabase.from("vendors").update({ business_name: form.business_name, address: form.address || null, phone: form.phone }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "payout") {
           if (!form.bank_name.trim()) return toast.error("Bank name is required");
@@ -106,21 +129,23 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
           await supabase.from("vendors").update({ bank_name: form.bank_name.trim(), payout_account: form.payout_account.trim() }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "kyc") {
-          if (!form.nin.trim()) return toast.error("NIN is required");
           if (!/^\d{11}$/.test(form.nin.trim())) return toast.error("NIN must be 11 digits");
-          if (form.licence && !/^\d{11}$/.test(form.licence.trim())) return toast.error("BVN must be 11 digits");
-          await (supabase as any).from("vendors").update({
-            nin: form.nin.trim(),
-            bvn: form.licence?.trim() || null,
-            verification_status: "pending",
-          }).eq("user_id", user!.id);
+          if (!/^\d{11}$/.test(form.bvn.trim())) return toast.error("BVN must be 11 digits");
+          if (!form.union_id.trim()) return toast.error("Union / association ID is required");
+          await runIdentityVerification();
           await refetchVendor();
         }
       } else {
         if (current === "profile") {
-          await supabase.from("profiles").update({ full_name: form.full_name || undefined, phone: form.phone || undefined }).eq("id", user!.id);
+          if (!form.full_name.trim()) return toast.error("Full name required");
+          await supabase.from("profiles").update({ full_name: form.full_name, phone: form.phone }).eq("id", user!.id);
+        } else if (current === "kyc") {
+          if (!/^\d{11}$/.test(form.nin.trim())) return toast.error("NIN must be 11 digits");
+          if (!/^\d{11}$/.test(form.bvn.trim())) return toast.error("BVN must be 11 digits");
+          if (!form.union_id.trim()) return toast.error("Union / association ID is required");
+          await runIdentityVerification();
         } else if (current === "documents") {
-          if (!form.nin.trim()) return toast.error("NIN required");
+          if (!form.licence.trim()) return toast.error("Driver's licence / trade ID required");
         } else if (current === "service-area") {
           await updateAvail({ base_location: form.base_location || null });
         } else if (current === "availability") {
@@ -177,8 +202,10 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
         {step.id === "kyc" && (
           <>
             <Field label="NIN (National ID)" v={form.nin} on={(v) => setForm({ ...form, nin: v })} placeholder="11-digit NIN" />
-            <Field label="BVN (Bank Verification Number)" v={form.licence} on={(v) => setForm({ ...form, licence: v })} placeholder="11-digit BVN" />
-            <p className="text-[10px] text-muted-foreground">Submitted as <b>pending</b>. Our compliance team verifies BVN with NIBSS and NIN with NIMC, typically within 24–48 hours.</p>
+            <Field label="BVN (Bank Verification Number)" v={form.bvn} on={(v) => setForm({ ...form, bvn: v })} placeholder="11-digit BVN" />
+            <Field label="Union / association name" v={form.union_name} on={(v) => setForm({ ...form, union_name: v })} placeholder="e.g. NURTW, RTEAN, NATA" />
+            <Field label="Union / association registration ID" v={form.union_id} on={(v) => setForm({ ...form, union_id: v })} placeholder="Membership / registration number" />
+            <p className="text-[10px] text-muted-foreground">We verify your <b>BVN</b> with NIBSS and your <b>NIN</b> with NIMC instantly via our KYC partner. Union ID is logged for compliance.</p>
           </>
         )}
         {step.id === "first-listing" && (
@@ -187,13 +214,12 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
         {step.id === "profile" && (
           <>
             <Field label="Full name" v={form.full_name} on={(v) => setForm({ ...form, full_name: v })} />
-            <Field label="Phone" v={form.phone} on={(v) => setForm({ ...form, phone: v })} />
+            <Field label="Phone" v={form.phone} on={(v) => setForm({ ...form, phone: v })} placeholder="e.g. 0803 000 0000" />
           </>
         )}
         {step.id === "documents" && (
           <>
-            <Field label="NIN" v={form.nin} on={(v) => setForm({ ...form, nin: v })} />
-            <Field label="Trade / driver's licence #" v={form.licence} on={(v) => setForm({ ...form, licence: v })} />
+            <Field label="Driver's licence / trade ID #" v={form.licence} on={(v) => setForm({ ...form, licence: v })} placeholder="FRSC licence or trade certificate number" />
           </>
         )}
         {step.id === "service-area" && (
