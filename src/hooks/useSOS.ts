@@ -117,14 +117,43 @@ export const useFlagDanger = () =>
     },
   });
 
-export const useCancelSOS = () =>
-  useMutation({
-    mutationFn: async (id: string) => {
+export const useCancelSOS = () => {
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await (supabase as any)
         .from("service_requests")
         .update({ sos_status: "cancelled", status: "cancelled" })
         .eq("id", id);
       if (error) throw error;
+      await (supabase as any).from("sos_events").insert({ request_id: id, kind: "cancelled", payload: { reason }, actor_id: user?.id ?? null });
+    },
+  });
+};
+
+export const useNotifyTrustedContacts = () =>
+  useMutation({
+    mutationFn: async ({ request_id, share_token }: { request_id: string; share_token?: string }) => {
+      const { data, error } = await supabase.functions.invoke("sos-notify-contacts", { body: { request_id, share_token } });
+      if (error) throw error;
+      return data as { ok: boolean; sent: number; total: number; mode?: string; message?: string };
+    },
+  });
+
+export const useSOSEta = (requestId: string | undefined) =>
+  useQuery({
+    queryKey: ["sos-eta", requestId],
+    enabled: !!requestId,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("service_offers")
+        .select("eta_minutes, status, created_at")
+        .eq("request_id", requestId!)
+        .eq("status", "accepted")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return (data?.eta_minutes ?? null) as number | null;
     },
   });
 
