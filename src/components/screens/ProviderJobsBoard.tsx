@@ -5,9 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useAvailability } from "@/hooks/useAvailability";
 import { useProviderJobs, useSendOffer, useUpdateRequestStatus, type ServiceKind, type RequestStatus, type ServiceRequest } from "@/hooks/useServiceRequests";
+import { useOpenSOSForProvider, useClaimSOS } from "@/hooks/useSOS";
 import { formatNaira } from "@/lib/format";
 import ChatDrawer from "@/components/ChatDrawer";
 import AvailabilityEditor from "@/components/AvailabilityEditor";
+import { Siren } from "lucide-react";
 
 const ROLE_TO_KIND: Record<string, ServiceKind> = {
   tow_operator: "tow",
@@ -40,6 +42,8 @@ const ProviderJobsBoard = () => {
   const { data: jobs } = useProviderJobs(kind);
   const sendOffer = useSendOffer();
   const updateStatus = useUpdateRequestStatus();
+  const { data: sosOpen } = useOpenSOSForProvider(kind);
+  const claimSOS = useClaimSOS();
 
   const [tab, setTab] = useState<"open" | "active" | "schedule">("open");
   const [quoting, setQuoting] = useState<ServiceRequest | null>(null);
@@ -57,6 +61,33 @@ const ProviderJobsBoard = () => {
 
   return (
     <div className="p-3.5 animate-fade-in">
+      {(sosOpen?.length ?? 0) > 0 && (
+        <div className="border-2 border-destructive bg-destructive/5 rounded-xl p-3 mb-3 animate-pulse">
+          <div className="flex items-center gap-2 mb-2">
+            <Siren className="w-4 h-4 text-destructive" />
+            <span className="text-xs font-bold text-destructive uppercase tracking-wider">{sosOpen!.length} SOS alert{sosOpen!.length > 1 ? "s" : ""} nearby</span>
+          </div>
+          <div className="space-y-2">
+            {sosOpen!.map((s) => (
+              <div key={s.id} className="bg-card border border-destructive/30 rounded-lg p-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-bold capitalize truncate">🚨 {s.service_type} — {s.vehicle ?? "vehicle"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">📍 {s.sos_lat ? `${s.sos_lat.toFixed(3)}, ${s.sos_lng?.toFixed(3)}` : s.location ?? "Unknown"}</p>
+                  </div>
+                  <button
+                    onClick={async () => { try { await claimSOS.mutateAsync(s.id); toast.success("SOS accepted"); navigate(`/sos/${s.id}`); } catch (e: any) { toast.error(e.message); } }}
+                    className="px-3 py-2 rounded-md bg-destructive text-destructive-foreground text-xs font-bold whitespace-nowrap"
+                  >
+                    Accept
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!isOnline && (
         <div className="bg-accent-light border border-accent/30 rounded-lg p-2.5 text-[11px] text-accent flex items-center gap-2 mb-3">
           ⚠️ You're offline — turn on availability to receive new jobs
