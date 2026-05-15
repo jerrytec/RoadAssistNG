@@ -17,12 +17,12 @@ export const useAdminRoles = () => {
     queryKey: ["admin-roles", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("admin_roles" as any)
+      const { data, error } = await (supabase as any)
+        .from("admin_roles")
         .select("role")
         .eq("user_id", user!.id);
       if (error) throw error;
-      return ((data ?? []) as { role: AdminRole }[]).map((r) => r.role);
+      return ((data ?? []) as Array<{ role: AdminRole }>).map((r) => r.role);
     },
   });
 };
