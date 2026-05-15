@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRequest } from "@/hooks/useServiceRequests";
@@ -69,6 +70,7 @@ const ServicePayment = () => {
 
   return (
     <div className="max-w-[560px] mx-auto min-h-screen bg-background pb-10">
+      <PageNav />
       <header className="bg-primary px-4 py-3 flex items-center gap-2">
         <button onClick={() => navigate(-1)} className="text-primary-foreground"><ArrowLeft className="w-4 h-4" /></button>
         <h1 className="text-primary-foreground text-sm font-bold">Pay for service</h1>

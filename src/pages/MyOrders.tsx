@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,6 +83,7 @@ const MyOrders = () => {
 
   return (
     <div className="max-w-[700px] mx-auto min-h-screen bg-background">
+      <PageNav />
       <header className="bg-primary px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="text-primary-foreground text-lg">←</button>
         <h1 className="text-primary-foreground text-sm font-semibold flex-1">My Orders</h1>

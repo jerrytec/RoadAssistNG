@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { toast } from "sonner";
 import { ArrowLeft, Phone, MessageCircle, Share2, AlertOctagon, X, Clock, ShieldAlert, Users } from "lucide-react";
 import { useSOSRequest, useFlagDanger, useCancelSOS, useCreateShareToken, useTrustedContacts, useNotifyTrustedContacts, useSOSEta } from "@/hooks/useSOS";
@@ -98,6 +99,7 @@ const SOSTracking = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32">
+      <PageNav />
       <header className={`${toneClass} px-4 py-3 flex items-center gap-2`}>
         <button onClick={() => navigate("/")} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center" aria-label="Back">
           <ArrowLeft className="w-4 h-4" />
