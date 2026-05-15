@@ -744,28 +744,72 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                     onClick={() => setDisputeOpen(true)}
                     className="w-full py-2.5 rounded-lg border border-destructive bg-card text-destructive text-xs font-medium cursor-pointer"
                   >
-                    ⚠️ I have an issue — raise dispute
+                    🛑 Hold payment — service not completed
                   </button>
                 </>
               )}
 
               {disputeOpen && (
-                <div className="py-4">
+                <div className="py-2">
                   <div className="text-center mb-3">
-                    <div className="text-3xl mb-2">⚠️</div>
-                    <h3 className="text-sm font-bold text-destructive mb-1">Raise a Dispute</h3>
-                    <p className="text-[11px] text-muted-foreground">Your escrow funds are safe. Our support team will review and mediate.</p>
+                    <div className="text-3xl mb-2">🛑</div>
+                    <h3 className="text-sm font-bold text-destructive mb-1">Hold payment for review</h3>
                   </div>
+
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 mb-3">
+                    <p className="text-[11px] text-foreground leading-relaxed">
+                      Your <span className="font-bold">₦{amount.toLocaleString()}</span> payment will remain in escrow.
+                      An admin will review your case within <span className="font-bold">24 hours</span>.
+                      The provider will <span className="font-bold">not be paid</span> until this is resolved.
+                    </p>
+                  </div>
+
                   <div className="mb-3">
-                    <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Describe the issue</label>
-                    <textarea className="w-full py-2 px-3 border border-border rounded-md text-xs bg-card text-foreground outline-none focus:border-destructive resize-none h-20" placeholder="e.g., Service was incomplete, provider left early..." />
+                    <label className="text-[11px] font-semibold text-foreground mb-1.5 block">What's the issue?</label>
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {[
+                        { v: "not_fixed", l: "🔧 Issue not fixed" },
+                        { v: "no_show", l: "🚗 Mechanic didn't show up" },
+                        { v: "overcharged", l: "💰 Charged more than quoted" },
+                        { v: "other", l: "🕐 Other" },
+                      ].map((r) => (
+                        <button
+                          key={r.v}
+                          type="button"
+                          onClick={() => setDisputeReason(r.v)}
+                          className={`text-left px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${
+                            disputeReason === r.v
+                              ? "border-destructive bg-destructive/10 text-destructive"
+                              : "border-border bg-card text-foreground hover:border-destructive/50"
+                          }`}
+                        >
+                          {r.l}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+
+                  {disputeReason === "other" && (
+                    <div className="mb-3">
+                      <textarea
+                        value={disputeNotes}
+                        onChange={(e) => setDisputeNotes(e.target.value)}
+                        className="w-full py-2 px-3 border border-border rounded-md text-xs bg-card text-foreground outline-none focus:border-destructive resize-none h-16"
+                        placeholder="Briefly describe the issue..."
+                      />
+                    </div>
+                  )}
+
                   <div className="flex gap-2">
-                    <button onClick={() => setDisputeOpen(false)} className="flex-1 py-2.5 rounded-lg border border-border bg-card text-foreground text-xs font-medium cursor-pointer">
-                      ← Go back
+                    <button onClick={() => { setDisputeOpen(false); setDisputeReason(null); }} className="flex-1 py-2.5 rounded-lg border border-border bg-card text-foreground text-xs font-medium cursor-pointer">
+                      ← Cancel
                     </button>
-                    <button onClick={() => { setDisputeOpen(false); }} className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold border-none cursor-pointer">
-                      Submit dispute
+                    <button
+                      disabled={!disputeReason}
+                      onClick={() => { setDisputeOpen(false); }}
+                      className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Confirm hold payment
                     </button>
                   </div>
                 </div>
