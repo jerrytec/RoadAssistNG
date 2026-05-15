@@ -828,7 +828,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                     </button>
                     <button
                       disabled={!disputeReason}
-                      onClick={() => { setDisputeOpen(false); }}
+                      onClick={submitHold}
                       className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Confirm hold payment
