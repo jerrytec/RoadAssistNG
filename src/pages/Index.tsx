@@ -8,6 +8,7 @@ import ServiceListScreen from "@/components/screens/ServiceListScreen";
 import MechanicScreen from "@/components/screens/MechanicScreen";
 import BookingHistoryScreen, { type UseAgainData } from "@/components/screens/BookingHistoryScreen";
 import PartsBrowseScreen from "@/components/screens/PartsBrowseScreen";
+import SOSButton from "@/components/SOSButton";
 
 import WorkflowModal from "@/components/WorkflowModal";
 import type { PrefillData } from "@/components/WorkflowModal";
@@ -109,6 +110,7 @@ const Index = () => {
       </div>
       <NotificationsPanel open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
       <ContactSupportPanel open={supportOpen} onClose={() => setSupportOpen(false)} />
+      {activeTab !== "help" && <SOSButton variant="fab" />}
     </div>
   );
 };
