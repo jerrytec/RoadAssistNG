@@ -205,10 +205,6 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
 
   // Release escrow (confirm & pay)
   const handleConfirmRelease = () => {
-    if (payMethod === "cash") {
-      setReleaseStatus("released");
-      return;
-    }
     setReleaseStatus("releasing");
     setTimeout(() => {
       const success = Math.random() > 0.05;
