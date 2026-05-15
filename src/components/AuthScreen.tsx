@@ -207,7 +207,7 @@ const AuthScreen = ({ onComplete }: AuthScreenProps) => {
                   {mode === "signup" && (
                     <>
                       <input className={inputCls} type="text" placeholder="Full name" value={form.full_name} onChange={(e) => update("full_name", e.target.value)} />
-                      <input className={inputCls} type="tel" placeholder="Phone (optional)" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+                      <input className={inputCls} type="tel" placeholder="Phone number" value={form.phone} onChange={(e) => update("phone", e.target.value)} required />
                       {role === "vendor" && (
                         <input className={inputCls} type="text" placeholder="Business / shop name" value={form.business_name} onChange={(e) => update("business_name", e.target.value)} />
                       )}
