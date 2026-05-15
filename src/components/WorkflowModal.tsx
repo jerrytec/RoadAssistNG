@@ -117,7 +117,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
-  const [selectedBank, setSelectedBank] = useState("");
+  const [selectedBank, setSelectedBank] = useState(banks[0].code);
   const [selectedUssd, setSelectedUssd] = useState("");
 
   // Escrow hold state
