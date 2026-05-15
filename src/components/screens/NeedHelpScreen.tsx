@@ -13,14 +13,31 @@ interface Props {
 const NeedHelpScreen = ({ onSelectProvider }: Props) => {
   const [activeFilter, setActiveFilter] = useState("All nearby");
 
-  const filtered = allProviders.filter((p) => {
-    if (activeFilter === "All nearby") return true;
-    if (activeFilter === "🚐 Tow vans") return p.type.includes("Tow");
-    if (activeFilter === "🔧 Vulcanizers") return p.type.includes("Vulcanizer");
-    if (activeFilter === "🔩 Mechanics") return p.type.includes("mechanic");
-    if (activeFilter === "✅ Verified") return p.verified;
-    return true;
-  });
+  const mixed = (() => {
+    const tows = allProviders.filter((p) => p.type.includes("Tow"));
+    const vulcs = allProviders.filter((p) => p.type.includes("Vulcanizer"));
+    const mechs = allProviders.filter((p) => p.type.includes("mechanic"));
+    const out: Provider[] = [];
+    const max = Math.max(tows.length, vulcs.length, mechs.length);
+    for (let i = 0; i < max && out.length < 10; i++) {
+      if (tows[i] && out.length < 10) out.push(tows[i]);
+      if (vulcs[i] && out.length < 10) out.push(vulcs[i]);
+      if (mechs[i] && out.length < 10) out.push(mechs[i]);
+    }
+    return out;
+  })();
+
+  const filtered = (
+    activeFilter === "All nearby"
+      ? mixed
+      : allProviders.filter((p) => {
+          if (activeFilter === "🚐 Tow vans") return p.type.includes("Tow");
+          if (activeFilter === "🔧 Vulcanizers") return p.type.includes("Vulcanizer");
+          if (activeFilter === "🔩 Mechanics") return p.type.includes("mechanic");
+          if (activeFilter === "✅ Verified") return p.verified;
+          return true;
+        })
+  ).slice(0, 10);
 
   return (
     <div className="p-3.5 animate-fade-in">
