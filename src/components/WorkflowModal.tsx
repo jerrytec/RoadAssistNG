@@ -132,6 +132,28 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [disputeReason, setDisputeReason] = useState<string | null>(null);
   const [disputeNotes, setDisputeNotes] = useState("");
+  const [holdSubmitted, setHoldSubmitted] = useState(false);
+  const [disputeRef, setDisputeRef] = useState<string>("");
+
+  const reasonLabel = (v: string | null) => {
+    switch (v) {
+      case "not_fixed": return "Issue not fixed";
+      case "no_show": return "Mechanic didn't show up";
+      case "overcharged": return "Charged more than quoted";
+      case "other": return "Other";
+      default: return "—";
+    }
+  };
+
+  const submitHold = () => {
+    const ref = `DIS-${Date.now().toString().slice(-5)}${Math.floor(Math.random() * 90 + 10)}`;
+    setDisputeRef(ref);
+    setHoldSubmitted(true);
+    setDisputeOpen(false);
+    toast.success("Payment held in escrow", {
+      description: `Dispute ${ref} opened. SMS & email confirmation sent.`,
+    });
+  };
 
   const [txnRef] = useState(() => saved?.txnRef ?? generateTxnRef());
   const amount = TOTAL_AMOUNT;
