@@ -202,8 +202,10 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
         {step.id === "kyc" && (
           <>
             <Field label="NIN (National ID)" v={form.nin} on={(v) => setForm({ ...form, nin: v })} placeholder="11-digit NIN" />
-            <Field label="BVN (Bank Verification Number)" v={form.licence} on={(v) => setForm({ ...form, licence: v })} placeholder="11-digit BVN" />
-            <p className="text-[10px] text-muted-foreground">Submitted as <b>pending</b>. Our compliance team verifies BVN with NIBSS and NIN with NIMC, typically within 24–48 hours.</p>
+            <Field label="BVN (Bank Verification Number)" v={form.bvn} on={(v) => setForm({ ...form, bvn: v })} placeholder="11-digit BVN" />
+            <Field label="Union / association name" v={form.union_name} on={(v) => setForm({ ...form, union_name: v })} placeholder="e.g. NURTW, RTEAN, NATA" />
+            <Field label="Union / association registration ID" v={form.union_id} on={(v) => setForm({ ...form, union_id: v })} placeholder="Membership / registration number" />
+            <p className="text-[10px] text-muted-foreground">We verify your <b>BVN</b> with NIBSS and your <b>NIN</b> with NIMC instantly via our KYC partner. Union ID is logged for compliance.</p>
           </>
         )}
         {step.id === "first-listing" && (
@@ -212,13 +214,12 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
         {step.id === "profile" && (
           <>
             <Field label="Full name" v={form.full_name} on={(v) => setForm({ ...form, full_name: v })} />
-            <Field label="Phone" v={form.phone} on={(v) => setForm({ ...form, phone: v })} />
+            <Field label="Phone" v={form.phone} on={(v) => setForm({ ...form, phone: v })} placeholder="e.g. 0803 000 0000" />
           </>
         )}
         {step.id === "documents" && (
           <>
-            <Field label="NIN" v={form.nin} on={(v) => setForm({ ...form, nin: v })} />
-            <Field label="Trade / driver's licence #" v={form.licence} on={(v) => setForm({ ...form, licence: v })} />
+            <Field label="Driver's licence / trade ID #" v={form.licence} on={(v) => setForm({ ...form, licence: v })} placeholder="FRSC licence or trade certificate number" />
           </>
         )}
         {step.id === "service-area" && (
