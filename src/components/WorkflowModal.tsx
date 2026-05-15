@@ -258,7 +258,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
       </div>
       <div className="mt-3 space-y-1">
         {[
-          { l: "Method", v: payMethod === "ussd" ? "USSD" : payMethod === "bank" ? "Bank Transfer" : payMethod === "cash" ? "Cash" : "Debit Card" },
+          { l: "Method", v: payMethod === "bank" ? "Bank Transfer" : "Debit Card" },
           { l: "Date", v: new Date().toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) },
           { l: "Provider", v: provider.name },
           { l: "Status", v: "✅ Funds Released" },
