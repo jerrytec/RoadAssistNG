@@ -411,6 +411,60 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_kyc: {
+        Row: {
+          bvn: string | null
+          bvn_data: Json | null
+          bvn_verified: boolean
+          created_at: string
+          nin: string | null
+          nin_data: Json | null
+          nin_verified: boolean
+          notes: string | null
+          union_id: string | null
+          union_name: string | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          bvn?: string | null
+          bvn_data?: Json | null
+          bvn_verified?: boolean
+          created_at?: string
+          nin?: string | null
+          nin_data?: Json | null
+          nin_verified?: boolean
+          notes?: string | null
+          union_id?: string | null
+          union_name?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          bvn?: string | null
+          bvn_data?: Json | null
+          bvn_verified?: boolean
+          created_at?: string
+          nin?: string | null
+          nin_data?: Json | null
+          nin_verified?: boolean
+          notes?: string | null
+          union_id?: string | null
+          union_name?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       service_chat_messages: {
         Row: {
           body: string
@@ -743,6 +797,8 @@ export type Database = {
           payout_account: string | null
           phone: string | null
           status: Database["public"]["Enums"]["vendor_status"]
+          union_id: string | null
+          union_name: string | null
           updated_at: string
           user_id: string
           verification_notes: string | null
@@ -761,6 +817,8 @@ export type Database = {
           payout_account?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["vendor_status"]
+          union_id?: string | null
+          union_name?: string | null
           updated_at?: string
           user_id: string
           verification_notes?: string | null
@@ -779,6 +837,8 @@ export type Database = {
           payout_account?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["vendor_status"]
+          union_id?: string | null
+          union_name?: string | null
           updated_at?: string
           user_id?: string
           verification_notes?: string | null
