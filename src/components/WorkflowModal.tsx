@@ -179,11 +179,6 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
 
   // Simulate escrow authorization hold
   const handleAuthorizeHold = () => {
-    if (payMethod === "cash") {
-      setHoldStatus("held");
-      setTimeout(() => next(), 500);
-      return;
-    }
     setHoldStatus("authorizing");
     setTimeout(() => {
       const success = Math.random() > 0.1;
