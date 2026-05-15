@@ -91,13 +91,34 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
     await save({ step: newIdx, completed, payload: { ...(state?.payload ?? {}), ...form } });
   };
 
+  const runIdentityVerification = async () => {
+    const { data, error } = await supabase.functions.invoke("verify-identity", {
+      body: {
+        nin: form.nin.trim(),
+        bvn: form.bvn.trim(),
+        union_id: form.union_id.trim(),
+        union_name: form.union_name.trim(),
+      },
+    });
+    if (error) throw new Error(error.message);
+    if ((data as any)?.error) throw new Error((data as any).error);
+    if ((data as any)?.mock) {
+      toast("KYC saved as pending — verification API not yet configured");
+    } else if ((data as any)?.status === "approved") {
+      toast.success("Identity verified");
+    } else {
+      toast("KYC submitted — pending review");
+    }
+  };
+
   const next = async () => {
     try {
       const current = steps[idx].id;
+      if (!form.phone.trim()) return toast.error("Phone number is required");
       if (isVendor) {
         if (current === "business") {
           if (!form.business_name.trim()) return toast.error("Business name required");
-          await supabase.from("vendors").update({ business_name: form.business_name, address: form.address || null, phone: form.phone || null }).eq("user_id", user!.id);
+          await supabase.from("vendors").update({ business_name: form.business_name, address: form.address || null, phone: form.phone }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "payout") {
           if (!form.bank_name.trim()) return toast.error("Bank name is required");
@@ -108,21 +129,23 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
           await supabase.from("vendors").update({ bank_name: form.bank_name.trim(), payout_account: form.payout_account.trim() }).eq("user_id", user!.id);
           await refetchVendor();
         } else if (current === "kyc") {
-          if (!form.nin.trim()) return toast.error("NIN is required");
           if (!/^\d{11}$/.test(form.nin.trim())) return toast.error("NIN must be 11 digits");
-          if (form.licence && !/^\d{11}$/.test(form.licence.trim())) return toast.error("BVN must be 11 digits");
-          await (supabase as any).from("vendors").update({
-            nin: form.nin.trim(),
-            bvn: form.licence?.trim() || null,
-            verification_status: "pending",
-          }).eq("user_id", user!.id);
+          if (!/^\d{11}$/.test(form.bvn.trim())) return toast.error("BVN must be 11 digits");
+          if (!form.union_id.trim()) return toast.error("Union / association ID is required");
+          await runIdentityVerification();
           await refetchVendor();
         }
       } else {
         if (current === "profile") {
-          await supabase.from("profiles").update({ full_name: form.full_name || undefined, phone: form.phone || undefined }).eq("id", user!.id);
+          if (!form.full_name.trim()) return toast.error("Full name required");
+          await supabase.from("profiles").update({ full_name: form.full_name, phone: form.phone }).eq("id", user!.id);
+        } else if (current === "kyc") {
+          if (!/^\d{11}$/.test(form.nin.trim())) return toast.error("NIN must be 11 digits");
+          if (!/^\d{11}$/.test(form.bvn.trim())) return toast.error("BVN must be 11 digits");
+          if (!form.union_id.trim()) return toast.error("Union / association ID is required");
+          await runIdentityVerification();
         } else if (current === "documents") {
-          if (!form.nin.trim()) return toast.error("NIN required");
+          if (!form.licence.trim()) return toast.error("Driver's licence / trade ID required");
         } else if (current === "service-area") {
           await updateAvail({ base_location: form.base_location || null });
         } else if (current === "availability") {
