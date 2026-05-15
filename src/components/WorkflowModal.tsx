@@ -130,6 +130,8 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const [releaseStatus, setReleaseStatus] = useState<ReleaseStatus>("idle");
   const [showReceipt, setShowReceipt] = useState(false);
   const [disputeOpen, setDisputeOpen] = useState(false);
+  const [disputeReason, setDisputeReason] = useState<string | null>(null);
+  const [disputeNotes, setDisputeNotes] = useState("");
 
   const [txnRef] = useState(() => saved?.txnRef ?? generateTxnRef());
   const amount = TOTAL_AMOUNT;
