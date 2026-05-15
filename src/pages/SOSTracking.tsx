@@ -167,6 +167,56 @@ const SOSTracking = () => {
           </div>
         )}
       </div>
+
+      {cancelOpen && (
+        <CancelReasonModal
+          onClose={() => setCancelOpen(false)}
+          onConfirm={async (reason) => { setCancelOpen(false); await onCancelConfirm(reason); }}
+          loading={cancel.isPending}
+        />
+      )}
+    </div>
+  );
+};
+
+const CANCEL_REASONS = [
+  "I no longer need help",
+  "Triggered by mistake",
+  "Got help from someone else",
+  "Wait time too long",
+  "Other",
+];
+
+const CancelReasonModal = ({ onClose, onConfirm, loading }: { onClose: () => void; onConfirm: (r: string) => void; loading?: boolean }) => {
+  const [reason, setReason] = useState(CANCEL_REASONS[0]);
+  const [other, setOther] = useState("");
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center" onClick={onClose}>
+      <div className="bg-card w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-4" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-bold mb-1">Cancel SOS</h3>
+        <p className="text-[11px] text-muted-foreground mb-3">Help us improve — why are you cancelling?</p>
+        <div className="space-y-1.5 mb-3">
+          {CANCEL_REASONS.map((r) => (
+            <label key={r} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer text-xs ${reason === r ? "border-primary bg-primary-light" : "border-border"}`}>
+              <input type="radio" name="reason" checked={reason === r} onChange={() => setReason(r)} className="accent-primary" />
+              {r}
+            </label>
+          ))}
+          {reason === "Other" && (
+            <textarea value={other} onChange={(e) => setOther(e.target.value)} rows={2} placeholder="Tell us more…" className="w-full mt-1 py-2 px-3 border border-border rounded-lg text-xs bg-background outline-none focus:border-primary resize-none" />
+          )}
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-border text-xs font-semibold">Keep SOS active</button>
+          <button
+            disabled={loading}
+            onClick={() => onConfirm(reason === "Other" ? (other.trim() || "Other") : reason)}
+            className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold disabled:opacity-60"
+          >
+            {loading ? "Cancelling…" : "Cancel SOS"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
