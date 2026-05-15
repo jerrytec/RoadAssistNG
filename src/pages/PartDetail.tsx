@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
+import PageNav from "@/components/PageNav";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +54,7 @@ const PartDetail = () => {
 
   return (
     <div className="max-w-[700px] mx-auto min-h-screen bg-background">
+      <PageNav />
       <header className="bg-primary px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="text-primary-foreground text-lg">←</button>
         <h1 className="text-primary-foreground text-sm font-semibold flex-1 truncate">{part.title}</h1>
