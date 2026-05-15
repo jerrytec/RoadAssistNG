@@ -17,27 +17,15 @@ import { useCreateRequest, type ServiceKind } from "@/hooks/useServiceRequests";
 
 const steps = ["Book", "Quote", "Chat", "Hold", "Service", "Confirm", "Review"];
 
-type PayMethod = "card" | "bank" | "ussd" | "cash";
+type PayMethod = "card" | "bank";
 type HoldStatus = "idle" | "authorizing" | "held" | "failed";
 type ServicePhase = "en_route" | "arrived" | "in_progress" | "completed";
 type ReleaseStatus = "idle" | "releasing" | "released" | "failed";
 
 const banks = [
-  { name: "GTBank", code: "058", icon: "🏦" },
-  { name: "First Bank", code: "011", icon: "🏦" },
-  { name: "Zenith Bank", code: "057", icon: "🏦" },
-  { name: "Access Bank", code: "044", icon: "🏦" },
-  { name: "UBA", code: "033", icon: "🏦" },
-  { name: "Kuda Bank", code: "090267", icon: "🏦" },
-];
-
-const ussdCodes = [
-  { bank: "GTBank", code: "*737*Amount*MerchantCode#" },
-  { bank: "First Bank", code: "*894*Amount#" },
-  { bank: "Zenith Bank", code: "*966*Amount*MerchantCode#" },
-  { bank: "Access Bank", code: "*901*Amount#" },
-  { bank: "UBA", code: "*919*Amount#" },
-  { bank: "Stanbic IBTC", code: "*909*Amount#" },
+  { code: "gtb", name: "GTBank", accountNumber: "0489123456", accountName: "RoadAssistNG Limited", icon: "🏦" },
+  { code: "zenith", name: "Zenith Bank", accountNumber: "1019876543", accountName: "RoadAssistNG Limited", icon: "🏦" },
+  { code: "access", name: "Access Bank", accountNumber: "0712345678", accountName: "RoadAssistNG Limited", icon: "🏦" },
 ];
 
 export interface PrefillData {
