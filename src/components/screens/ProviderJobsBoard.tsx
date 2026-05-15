@@ -286,4 +286,33 @@ const QuoteModal = ({ request, onClose, onSubmit }: { request: ServiceRequest; o
   );
 };
 
+const SOSAcceptModal = ({ sos, onClose, onConfirm, loading }: { sos: any; onClose: () => void; onConfirm: () => void; loading?: boolean }) => {
+  const mapsUrl = sos.sos_lat && sos.sos_lng ? `https://maps.google.com/?q=${sos.sos_lat},${sos.sos_lng}` : null;
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center" onClick={onClose}>
+      <div className="bg-card w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-4 border-t-4 border-destructive" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 mb-2">
+          <Siren className="w-5 h-5 text-destructive animate-pulse" />
+          <h3 className="text-sm font-bold text-destructive uppercase tracking-wider">Accept SOS emergency?</h3>
+        </div>
+        <p className="text-[11px] text-muted-foreground mb-3">
+          Confirm only if you can respond <strong>immediately</strong>. Once accepted, the customer is notified and counting on you.
+        </p>
+        <div className="bg-muted rounded-lg p-2.5 text-xs space-y-1 mb-3">
+          <div className="flex justify-between"><span className="text-muted-foreground">Service</span><span className="font-semibold capitalize">{sos.service_type}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Vehicle</span><span className="font-semibold">{sos.vehicle ?? "—"}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Location</span><span className="font-mono text-[10px]">{sos.sos_lat ? `${sos.sos_lat.toFixed(4)}, ${sos.sos_lng?.toFixed(4)}` : sos.location ?? "Unknown"}</span></div>
+          {mapsUrl && <a href={mapsUrl} target="_blank" rel="noreferrer" className="text-primary text-[11px] underline">Open in Google Maps ↗</a>}
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-border text-xs font-semibold">Not now</button>
+          <button disabled={loading} onClick={onConfirm} className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold disabled:opacity-60">
+            {loading ? "Accepting…" : "Yes, I'm responding"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default ProviderJobsBoard;
