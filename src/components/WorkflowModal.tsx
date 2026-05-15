@@ -528,10 +528,8 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                   {/* Payment method tabs */}
                   <div className="flex gap-1.5 mb-3">
                     {([
-                      { id: "card" as PayMethod, icon: "💳", label: "Card" },
-                      { id: "bank" as PayMethod, icon: "🏦", label: "Bank" },
-                      { id: "ussd" as PayMethod, icon: "📱", label: "USSD" },
-                      { id: "cash" as PayMethod, icon: "💵", label: "Cash" },
+                      { id: "bank" as PayMethod, icon: "🏦", label: "Bank Transfer" },
+                      { id: "card" as PayMethod, icon: "💳", label: "Debit Card" },
                     ]).map((m) => (
                       <button
                         key={m.id}
@@ -579,22 +577,25 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                   {/* Bank transfer */}
                   {payMethod === "bank" && (
                     <div className="mb-3">
-                      <p className="text-[11px] text-muted-foreground mb-2">Select your bank for escrow authorization</p>
-                      <div className="grid grid-cols-2 gap-1.5 mb-2.5">
+                      <p className="text-[11px] text-muted-foreground mb-2">Choose a RoadAssistNG escrow account to transfer to</p>
+                      <div className="space-y-1.5 mb-2.5">
                         {banks.map((b) => (
-                          <button key={b.code} onClick={() => setSelectedBank(b.code)} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-left transition-all ${selectedBank === b.code ? "border-primary bg-primary-light" : "border-border bg-background hover:border-primary/40"}`}>
+                          <button key={b.code} onClick={() => setSelectedBank(b.code)} className={`w-full flex items-center justify-between p-2.5 rounded-lg border cursor-pointer text-left transition-all ${selectedBank === b.code ? "border-primary bg-primary-light" : "border-border bg-background hover:border-primary/40"}`}>
+                            <div>
+                              <p className="text-[11px] font-semibold text-foreground">{b.name}</p>
+                              <p className="text-[10px] font-mono text-muted-foreground">{b.accountNumber}</p>
+                            </div>
                             <span>{b.icon}</span>
-                            <span className="text-[11px] font-medium text-foreground">{b.name}</span>
                           </button>
                         ))}
                       </div>
                       {selectedBank && (
                         <div className="bg-background rounded-lg p-3 border border-border">
-                          <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mb-1.5">Escrow hold account</p>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mb-1.5">Transfer to this account</p>
                           {[
                             { l: "Bank", v: banks.find((b) => b.code === selectedBank)?.name },
-                            { l: "Account", v: "8012345678" },
-                            { l: "Name", v: "RoadAssist NG Escrow" },
+                            { l: "Account", v: banks.find((b) => b.code === selectedBank)?.accountNumber },
+                            { l: "Name", v: banks.find((b) => b.code === selectedBank)?.accountName },
                             { l: "Hold Amount", v: `₦${amount.toLocaleString()}` },
                           ].map((r) => (
                             <div key={r.l} className="flex justify-between text-xs py-1">
@@ -611,35 +612,6 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                     </div>
                   )}
 
-                  {/* USSD */}
-                  {payMethod === "ussd" && (
-                    <div className="mb-3">
-                      <p className="text-[11px] text-muted-foreground mb-2">Authorize escrow hold via USSD</p>
-                      <div className="space-y-1.5 mb-2.5">
-                        {ussdCodes.map((u) => (
-                          <button key={u.bank} onClick={() => setSelectedUssd(u.bank)} className={`w-full flex items-center justify-between p-2.5 rounded-lg border cursor-pointer text-left transition-all ${selectedUssd === u.bank ? "border-primary bg-primary-light" : "border-border bg-background hover:border-primary/40"}`}>
-                            <div>
-                              <span className="text-[11px] font-semibold text-foreground">{u.bank}</span>
-                              <p className="text-[10px] font-mono text-muted-foreground">{u.code}</p>
-                            </div>
-                            <span>📱</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cash */}
-                  {payMethod === "cash" && (
-                    <div className="mb-3 bg-accent-light rounded-lg p-3 text-center">
-                      <span className="text-2xl block mb-2">💵</span>
-                      <p className="text-xs font-semibold text-foreground mb-1">Cash Payment</p>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        You'll pay ₦{amount.toLocaleString()} directly to the provider after service is confirmed complete. No escrow hold needed.
-                      </p>
-                    </div>
-                  )}
-
                   <div className="flex items-center justify-center gap-2 mb-2.5">
                     <span className="text-[9px] text-muted-foreground">🔒 SSL</span>
                     <span className="text-[9px] text-muted-foreground">🛡️ Escrow Protected</span>
@@ -651,7 +623,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                     disabled={!canHoldProceed()}
                     className="w-full py-3 rounded-lg border-none bg-primary text-primary-foreground text-sm font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                   >
-                    {payMethod === "cash" ? "Proceed without hold →" : `Authorize ₦${amount.toLocaleString()} hold →`}
+                    {`Authorize ₦${amount.toLocaleString()} hold →`}
                   </button>
                 </>
               )}
