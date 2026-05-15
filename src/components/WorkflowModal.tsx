@@ -724,7 +724,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
           {/* Step 5: Confirm & Pay (Release Escrow) */}
           {step === 5 && (
             <div className="animate-fade-in">
-              {releaseStatus === "idle" && !disputeOpen && (
+              {releaseStatus === "idle" && !disputeOpen && !holdSubmitted && (
                 <>
                   <div className="text-center mb-4">
                     <div className="text-4xl mb-2">🔍</div>
