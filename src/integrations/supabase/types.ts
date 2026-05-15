@@ -491,16 +491,26 @@ export type Database = {
           buyer_id: string
           completed_at: string | null
           created_at: string
+          danger_flag: boolean
           description: string | null
+          device_info: Json | null
           id: string
+          is_sos: boolean
           location: string | null
           paid_at: string | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["svc_payment_status"]
           price_estimate_kobo: number | null
+          priority: number
           rating: number | null
           review: string | null
           service_type: Database["public"]["Enums"]["service_kind"]
+          sos_accuracy_m: number | null
+          sos_escalated_at: string | null
+          sos_lat: number | null
+          sos_lng: number | null
+          sos_status: Database["public"]["Enums"]["sos_status"] | null
+          sos_triggered_at: string | null
           status: Database["public"]["Enums"]["request_status"]
           updated_at: string
           vehicle: string | null
@@ -513,16 +523,26 @@ export type Database = {
           buyer_id: string
           completed_at?: string | null
           created_at?: string
+          danger_flag?: boolean
           description?: string | null
+          device_info?: Json | null
           id?: string
+          is_sos?: boolean
           location?: string | null
           paid_at?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["svc_payment_status"]
           price_estimate_kobo?: number | null
+          priority?: number
           rating?: number | null
           review?: string | null
           service_type: Database["public"]["Enums"]["service_kind"]
+          sos_accuracy_m?: number | null
+          sos_escalated_at?: string | null
+          sos_lat?: number | null
+          sos_lng?: number | null
+          sos_status?: Database["public"]["Enums"]["sos_status"] | null
+          sos_triggered_at?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
           vehicle?: string | null
@@ -535,19 +555,134 @@ export type Database = {
           buyer_id?: string
           completed_at?: string | null
           created_at?: string
+          danger_flag?: boolean
           description?: string | null
+          device_info?: Json | null
           id?: string
+          is_sos?: boolean
           location?: string | null
           paid_at?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["svc_payment_status"]
           price_estimate_kobo?: number | null
+          priority?: number
           rating?: number | null
           review?: string | null
           service_type?: Database["public"]["Enums"]["service_kind"]
+          sos_accuracy_m?: number | null
+          sos_escalated_at?: string | null
+          sos_lat?: number | null
+          sos_lng?: number | null
+          sos_status?: Database["public"]["Enums"]["sos_status"] | null
+          sos_triggered_at?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
           vehicle?: string | null
+        }
+        Relationships: []
+      }
+      sos_abuse_log: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          request_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          request_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          request_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sos_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          payload: Json
+          request_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          payload?: Json
+          request_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          request_id?: string
+        }
+        Relationships: []
+      }
+      sos_share_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          request_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at: string
+          request_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          request_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
+      trusted_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notify_on_sos: boolean
+          phone: string
+          relation: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notify_on_sos?: boolean
+          phone: string
+          relation?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notify_on_sos?: boolean
+          phone?: string
+          relation?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -662,6 +797,20 @@ export type Database = {
         Args: { _thread: string; _type: string; _uid: string }
         Returns: boolean
       }
+      get_sos_by_token: {
+        Args: { _token: string }
+        Returns: {
+          assigned_provider_id: string
+          created_at: string
+          id: string
+          location: string
+          sos_lat: number
+          sos_lng: number
+          sos_status: Database["public"]["Enums"]["sos_status"]
+          updated_at: string
+          vehicle: string
+        }[]
+      }
       has_admin_role: {
         Args: {
           _role: Database["public"]["Enums"]["admin_role"]
@@ -723,6 +872,15 @@ export type Database = {
         | "completed"
         | "cancelled"
       service_kind: "tow" | "vulcanizer" | "mechanic"
+      sos_status:
+        | "dispatching"
+        | "assigned"
+        | "enroute"
+        | "on_scene"
+        | "resolved"
+        | "escalated"
+        | "cancelled"
+        | "false_alarm"
       svc_payment_status: "unpaid" | "pending" | "paid" | "refunded" | "failed"
       vendor_status: "pending" | "verified" | "suspended"
       verification_status: "pending" | "approved" | "rejected"
@@ -897,6 +1055,16 @@ export const Constants = {
         "cancelled",
       ],
       service_kind: ["tow", "vulcanizer", "mechanic"],
+      sos_status: [
+        "dispatching",
+        "assigned",
+        "enroute",
+        "on_scene",
+        "resolved",
+        "escalated",
+        "cancelled",
+        "false_alarm",
+      ],
       svc_payment_status: ["unpaid", "pending", "paid", "refunded", "failed"],
       vendor_status: ["pending", "verified", "suspended"],
       verification_status: ["pending", "approved", "rejected"],
