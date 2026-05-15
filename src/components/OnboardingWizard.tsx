@@ -48,7 +48,7 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
       return ALL_VENDOR_STEPS.filter((s) => {
         if (s.id === "business") return !vendor?.business_name?.trim();
         if (s.id === "payout") return !(vendor?.bank_name?.trim() && vendor?.payout_account?.trim());
-        if (s.id === "kyc") return !vendor?.bvn?.trim();
+        if (s.id === "kyc") return !(vendor?.bvn?.trim() && vendor?.nin?.trim() && (vendor as any)?.union_id?.trim());
         return true;
       });
     }
@@ -73,7 +73,8 @@ const OnboardingWizard = ({ onDone }: { onDone: () => void }) => {
     full_name: "", phone: "",
     business_name: vendor?.business_name ?? "", address: vendor?.address ?? "",
     payout_account: vendor?.payout_account ?? "", bank_name: vendor?.bank_name ?? "",
-    nin: "", licence: "", base_location: availability?.base_location ?? "",
+    nin: "", bvn: "", union_id: "", union_name: "", licence: "",
+    base_location: availability?.base_location ?? "",
   });
 
   useEffect(() => {
