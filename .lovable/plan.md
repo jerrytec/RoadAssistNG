@@ -1,98 +1,91 @@
-## SOS Emergency System — Implementation Plan
+# Compliance Levy & Deduction System
 
-Transform the placeholder SOS button into a real emergency dispatch flow with priority routing, live tracking, safety escalation, trusted contacts, and an admin command center.
+Add a backend-enforced fee deduction that runs on every completed service payment, routes funds into a compliance ledger + wallet, surfaces the breakdown to providers, and gives admins reporting and remittance controls.
 
-### 1. Database (migration)
+## 1. Database (single migration)
 
-Extend `service_requests` and add supporting tables:
+**`compliance_config`** (singleton row, admin-editable)
+- `fee_percentage` numeric (0.01–0.05, default 0.03)
+- `fee_label` text (default `"State Digital Service Levy"`)
+- `platform_service_fee_percentage` numeric (default 0.05 services / parts handled separately)
+- `min_fee`, `max_fee` numeric
+- `updated_by`, `updated_at`
 
-- `service_requests`:
-  - `is_sos boolean default false`
-  - `sos_status` enum (`dispatching`, `assigned`, `enroute`, `on_scene`, `resolved`, `escalated`, `cancelled`, `false_alarm`)
-  - `priority smallint default 0` (SOS = 100)
-  - `sos_lat numeric, sos_lng numeric, sos_accuracy_m int`
-  - `sos_triggered_at timestamptz`
-  - `sos_escalated_at timestamptz`
-  - `device_info jsonb`
-  - `danger_flag boolean default false`
-- New table `sos_events` — audit log (request_id, kind: created/dispatch_attempt/accepted/escalated/danger/resolved, payload jsonb, created_at)
-- New table `trusted_contacts` (user_id, name, phone, relation, notify_on_sos boolean)
-- New table `sos_share_tokens` (request_id, token, expires_at) for public live-trip share links
-- New table `sos_abuse_log` (user_id, reason, created_at) + computed `trust_score` view; block users with >3 false alarms in 24h via trigger
-- RLS:
-  - SOS requests visible to: buyer, assigned provider, any admin, holders of valid share token (via security definer function)
-  - All providers in matching service area can see unassigned SOS requests (broader than normal)
-  - `trusted_contacts` — owner only
-  - `sos_events` — admin + buyer + assigned provider
-- Trigger `notify_sos_created` — fans out notifications to all eligible providers + ops admins; logs `sos_events`
-- Trigger `auto_escalate_sos` — runs on update; if `dispatching` for >3 min, sets `sos_status='escalated'`, notifies ops admins (handled via cron edge function actually; trigger only flags timer)
+**`compliance_ledger`** — one row per completed transaction
+- `transaction_id` (FK request/order), `transaction_kind` ('service' | 'parts')
+- `provider_id`, `buyer_id`
+- `gross_amount_kobo`, `platform_fee_kobo`, `compliance_fee_kobo`, `net_payout_kobo`
+- `fee_percentage_applied`, `fee_label`
+- `remittance_status` ('pending' | 'processing' | 'completed')
+- `remittance_batch_id` (nullable)
+- `created_at`
 
-### 2. Edge function `sos-dispatch`
+**`compliance_remittance_batches`**
+- `id`, `total_amount_kobo`, `entry_count`, `status`, `notes`, `processed_at`, `created_at`
 
-`POST /sos-dispatch` — JWT verified. Body: `{ lat, lng, accuracy, vehicle?, description?, device_info? }`.
-- Validates trust score (reject if abuse-flagged)
-- Inserts SOS request (`is_sos=true`, priority=100, `sos_status='dispatching'`)
-- Logs `sos_events` (created)
-- Returns request id immediately (fire-and-forget for matching)
-- Background: matches nearest providers (haversine on `provider_availability.base_location` parsed lat/lng + `is_online=true` + role match), starts at 5km, expands to 10/20/50km every 60s until accepted or 5min elapsed → mark `escalated`
+**`compliance_wallet`** — singleton view/row
+- Derived: `total_collected`, `pending_remittance`, `processing`, `completed_to_date`
 
-`POST /sos-share` — creates share token; returns public URL `/sos/track/:token`.
-`POST /sos-resolve` — buyer or provider marks resolved; opens payment.
-`POST /sos-danger` — buyer flags danger → instant escalate + ops notified.
+All tables: GRANTs, RLS. Ledger/wallet/config readable only by admins (`has_role` super_admin/finance/compliance). Service role writes.
 
-### 3. Frontend — User flow
+## 2. Edge function: `apply-compliance-fee`
 
-- **`SOSButton` component** (replaces current static button in `NeedHelpScreen`):
-  - Long-press 800ms OR tap-confirm 3-2-1 countdown to prevent accidental triggers
-  - Captures `navigator.geolocation` + `userAgent` immediately
-  - Calls `sos-dispatch`, navigates to `/sos/:id`
-- **`/sos/:id` SOSTracking page**:
-  - Full-screen, red-alert theme
-  - Status banner: "Finding nearest help…" → "Operator assigned" → "Enroute (ETA 4 min)" → "On scene" → "Resolved"
-  - Operator card with name, vehicle, rating, phone (tel:) + WhatsApp
-  - Live map placeholder with pulsing user marker + provider marker
-  - Action row: Call, WhatsApp, Share live trip, **I'm in danger** (red), Cancel
-  - Trusted contacts quick-share
-  - Auto-shows payment CTA after `resolved`
-- **`/sos/track/:token` public share page** — read-only live status for family/friends, no auth
-- **`/profile/trusted-contacts`** — manage contacts
-- **Floating SOS FAB** on `/`, `/requests/:id`, `/sos/:id` (always-visible bottom-right red button)
+Triggered on payment confirmation (called from `ServicePayment` after mark-paid, and reusable for parts orders / future webhook routes from Paystack/Flutterwave/Monnify).
 
-### 4. Provider portal
+Logic (server-side only — no client can bypass):
+1. Load transaction; reject if already in `compliance_ledger`.
+2. Load `compliance_config`.
+3. Compute: `compliance_fee = clamp(gross * fee_percentage, gross*min, gross*max)`, `platform_fee = gross * platform_pct`, `net_payout = gross - platform_fee - compliance_fee`.
+4. Insert ledger row (`remittance_status='pending'`), update request/order with payout breakdown columns.
+5. Return breakdown.
 
-- New "🚨 SOS Alerts" tab at top of `ProviderJobsBoard` — pinned, red-bordered, with sound/vibrate on new
-- Single-tap **Accept** (no negotiation, fixed emergency rate from settings)
-- Auto-decline after 30s if no response (pass to next provider)
+A second function `compliance-remittance` handles admin actions: create batch (move pending → processing), mark batch completed, export CSV.
 
-### 5. Admin dashboard
+## 3. Wire deduction into payment flow
 
-- New `/admin/sos` route in `AdminLayout` sidebar (visible to `super_admin` + `operations`)
-- Live SOS table: blinking row for `dispatching`/`escalated`, columns: user, location, status, age, assigned provider, escalation timer
-- Manual dispatch: assign any online operator
-- Mark false alarm (increments abuse log)
-- Stats card on AdminDashboard: "Active SOS" + "Escalated"
+- `ServicePayment.tsx`: after the existing `update({ payment_status: 'paid' })`, invoke `apply-compliance-fee`. Show breakdown in success toast.
+- `Checkout.tsx` (parts): same hook after order paid.
+- Add `payout_breakdown` columns (`platform_fee_kobo`, `compliance_fee_kobo`, `net_payout_kobo`, `fee_label`) on `service_requests` and `parts_orders` so they render without joins.
 
-### 6. Payment
+## 4. Provider transparency
 
-Reuse existing `/pay/service/:id` flow — payment page already gated by completed status. SOS uses same `payment_status` columns; no changes needed beyond surfacing the Pay CTA on `SOSTracking` after `sos_status='resolved'`.
+- `ProviderDashboard.tsx` / `ProviderJobsBoard.tsx`: for each completed job show Gross / Platform fee / `{fee_label}` / Net payout pulled from the request row.
+- `RequestTracking.tsx`: once paid, render the same 4-line breakdown to the customer.
 
-### 7. Fraud / abuse protection
+## 5. Admin
 
-- Cooldown: max 1 active SOS per user
-- Edge function rejects new SOS if user has unresolved one
-- After provider/admin marks `false_alarm` 3x in 24h → user blocked from SOS for 24h (UI shows reason + support link)
+New page **`/admin/compliance`** (linked from `AdminLayout`, gated by `finance` or `super_admin`):
+- KPI cards: total collected, pending remittance, processing, completed.
+- Config editor (percentage slider 1–5%, label dropdown with 3 presets + custom).
+- Ledger table with filters: date range, service type, state/region.
+- Charts/totals: daily / weekly / monthly aggregates, by service type, by region.
+- Buttons: **Create remittance batch** (moves all pending → processing), **Mark batch completed**, **Export CSV**, **Export PDF**.
 
-### Technical notes
+## 6. Files
 
-- Geolocation: `navigator.geolocation.getCurrentPosition` with `enableHighAccuracy:true, timeout:8000`
-- Realtime: subscribe to `service_requests` + `sos_events` filtered by id for tracking page; admin subscribes to all `is_sos=true`
-- Sound alert: small `.mp3` in `public/` played on new SOS (provider + admin)
-- Web Share API for trusted contacts share, `tel:` and `https://wa.me/` fallbacks
-- Map: keep current pulse-ring placeholder for now; structure for Mapbox later
+**New**
+- `supabase/migrations/<ts>_compliance_levy.sql`
+- `supabase/functions/apply-compliance-fee/index.ts`
+- `supabase/functions/compliance-remittance/index.ts`
+- `src/pages/admin/AdminCompliance.tsx`
+- `src/hooks/useComplianceConfig.ts`
+- `src/lib/compliance.ts` (client helper to call edge fn + format breakdown)
+- `src/components/PayoutBreakdown.tsx` (shared 4-line breakdown component)
 
-### Out of scope for this iteration
+**Edited**
+- `src/App.tsx` (route)
+- `src/pages/admin/AdminLayout.tsx` (nav link)
+- `src/pages/ServicePayment.tsx`, `src/pages/Checkout.tsx` (invoke edge fn)
+- `src/pages/RequestTracking.tsx` (breakdown for customer)
+- `src/components/screens/ProviderDashboard.tsx`, `src/components/screens/ProviderJobsBoard.tsx` (provider view)
 
-- Real Mapbox/Google Maps integration (stub with pulse animation + lat/lng readout)
-- Real SMS to trusted contacts (UI + share link only; SMS later via edge function + Twilio)
-- Government agency integration
-- Lock-screen shortcuts (native app, post-Capacitor)
+## Technical notes
+
+- All amounts stored in **kobo** (integer) — matches existing convention.
+- Fee label is never `"tax"`; UI uses `config.fee_label` everywhere.
+- Min/max clamp uses **percentage of gross**, not flat values, matching `min_fee`/`max_fee` semantics (0.01–0.05).
+- Idempotency: unique index on `(transaction_id, transaction_kind)` in ledger.
+- Config changes log via `updated_by` for audit; runtime change only requires a row update — no redeploy.
+- CSV export generated client-side from filtered ledger; PDF via `window.print()` of a print-styled report view (keeps deps small).
+
+Ready to implement on approval.
