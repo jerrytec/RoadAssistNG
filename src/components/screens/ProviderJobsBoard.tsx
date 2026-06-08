@@ -8,6 +8,7 @@ import { useProviderJobs, useSendOffer, useUpdateRequestStatus, type ServiceKind
 import { useOpenSOSForProvider, useClaimSOS } from "@/hooks/useSOS";
 import { formatNaira } from "@/lib/format";
 import ChatDrawer from "@/components/ChatDrawer";
+import PayoutBreakdown from "@/components/PayoutBreakdown";
 import AvailabilityEditor from "@/components/AvailabilityEditor";
 import { Siren } from "lucide-react";
 
