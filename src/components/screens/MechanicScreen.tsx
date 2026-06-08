@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import ProviderCard from "@/components/ProviderCard";
+import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
+import { syntheticCoord } from "@/lib/googleMaps";
 import { mechanics } from "@/data/providers";
 import type { Provider } from "@/components/ProviderCard";
 
@@ -22,6 +24,22 @@ interface Props {
 const MechanicScreen = ({ onSelectProvider }: Props) => {
   const [selectedFault, setSelectedFault] = useState<string | null>(null);
 
+  const mapMarkers: MapMarker[] = useMemo(
+    () =>
+      mechanics.map((m) => {
+        const { lat, lng } = syntheticCoord(m.id);
+        return {
+          id: m.id,
+          lat,
+          lng,
+          title: m.name,
+          variant: "accent",
+          onClick: () => onSelectProvider(m),
+        };
+      }),
+    [onSelectProvider]
+  );
+
   return (
     <div className="p-3.5 animate-fade-in">
       <h2 className="text-[15px] font-semibold mb-1">Find a roadside mechanic</h2>
@@ -29,12 +47,9 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
         Stranded with a fault? Pick your issue and we'll connect you to a verified mobile mechanic nearby.
       </p>
 
-      {/* Map */}
-      <div className="rounded-lg h-[120px] flex items-center justify-center mb-3 relative overflow-hidden border border-border bg-secondary-light">
-        <span className="text-3xl">🔩</span>
-        <div className="absolute w-[7px] h-[7px] rounded-full bg-secondary" style={{ top: "30%", left: "35%" }} />
-        <div className="absolute w-[7px] h-[7px] rounded-full bg-secondary" style={{ top: "55%", left: "70%" }} />
-        <div className="absolute w-[7px] h-[7px] rounded-full bg-secondary" style={{ top: "65%", left: "45%" }} />
+      {/* Live map */}
+      <div className="mb-3">
+        <GoogleMap markers={mapMarkers} cluster trackUser fitBounds height={180} />
       </div>
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
