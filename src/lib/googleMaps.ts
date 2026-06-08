@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 // Singleton loader for the Google Maps JavaScript API.
 // Loads asynchronously with a callback so google.maps is ready when the promise resolves.
 
