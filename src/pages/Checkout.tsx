@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { formatNaira } from "@/lib/format";
+import { applyComplianceFee } from "@/lib/compliance";
 
 const schema = z.object({
   delivery_address: z.string().trim().min(8, "Enter a delivery address").max(300),
