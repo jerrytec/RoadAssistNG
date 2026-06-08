@@ -3,7 +3,7 @@ import { useAdminRoles } from "@/hooks/useAdminRoles";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, Users, Wrench, ListTodo, CreditCard,
-  AlertTriangle, ShieldCheck, Settings, Siren,
+  AlertTriangle, ShieldCheck, Settings, Siren, Receipt,
 } from "lucide-react";
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin/operators", label: "Operators", icon: Wrench },
   { to: "/admin/requests", label: "Requests", icon: ListTodo },
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
+  { to: "/admin/compliance", label: "Compliance", icon: Receipt },
   { to: "/admin/disputes", label: "Disputes", icon: AlertTriangle },
   { to: "/admin/verification", label: "Verification", icon: ShieldCheck },
   { to: "/admin/roles", label: "Admin Roles", icon: Settings },

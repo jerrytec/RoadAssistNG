@@ -8,6 +8,7 @@ import { useProviderJobs, useSendOffer, useUpdateRequestStatus, type ServiceKind
 import { useOpenSOSForProvider, useClaimSOS } from "@/hooks/useSOS";
 import { formatNaira } from "@/lib/format";
 import ChatDrawer from "@/components/ChatDrawer";
+import PayoutBreakdown from "@/components/PayoutBreakdown";
 import AvailabilityEditor from "@/components/AvailabilityEditor";
 import { Siren } from "lucide-react";
 
@@ -190,6 +191,18 @@ const ProviderJobsBoard = () => {
                     </button>
                   )}
                 </div>
+                {(r as any).compliance_fee_kobo != null && (
+                  <div className="mt-2">
+                    <PayoutBreakdown
+                      gross_kobo={(r as any).amount_kobo ?? r.price_estimate_kobo ?? 0}
+                      platform_fee_kobo={(r as any).platform_fee_kobo}
+                      compliance_fee_kobo={(r as any).compliance_fee_kobo}
+                      net_payout_kobo={(r as any).net_payout_kobo}
+                      fee_label={(r as any).fee_label}
+                      variant="provider"
+                    />
+                  </div>
+                )}
               </div>
             );
           })}

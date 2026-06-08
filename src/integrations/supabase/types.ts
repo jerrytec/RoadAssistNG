@@ -35,6 +35,137 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_config: {
+        Row: {
+          fee_label: string
+          fee_percentage: number
+          id: boolean
+          max_fee: number
+          min_fee: number
+          platform_parts_fee_percentage: number
+          platform_service_fee_percentage: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          fee_label?: string
+          fee_percentage?: number
+          id?: boolean
+          max_fee?: number
+          min_fee?: number
+          platform_parts_fee_percentage?: number
+          platform_service_fee_percentage?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          fee_label?: string
+          fee_percentage?: number
+          id?: boolean
+          max_fee?: number
+          min_fee?: number
+          platform_parts_fee_percentage?: number
+          platform_service_fee_percentage?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      compliance_ledger: {
+        Row: {
+          buyer_id: string | null
+          compliance_fee_kobo: number
+          created_at: string
+          fee_label: string
+          fee_percentage_applied: number
+          gross_amount_kobo: number
+          id: string
+          net_payout_kobo: number
+          platform_fee_kobo: number
+          provider_id: string | null
+          region: string | null
+          remittance_batch_id: string | null
+          remittance_status: string
+          service_type: string | null
+          transaction_id: string
+          transaction_kind: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          compliance_fee_kobo: number
+          created_at?: string
+          fee_label: string
+          fee_percentage_applied: number
+          gross_amount_kobo: number
+          id?: string
+          net_payout_kobo: number
+          platform_fee_kobo?: number
+          provider_id?: string | null
+          region?: string | null
+          remittance_batch_id?: string | null
+          remittance_status?: string
+          service_type?: string | null
+          transaction_id: string
+          transaction_kind: string
+        }
+        Update: {
+          buyer_id?: string | null
+          compliance_fee_kobo?: number
+          created_at?: string
+          fee_label?: string
+          fee_percentage_applied?: number
+          gross_amount_kobo?: number
+          id?: string
+          net_payout_kobo?: number
+          platform_fee_kobo?: number
+          provider_id?: string | null
+          region?: string | null
+          remittance_batch_id?: string | null
+          remittance_status?: string
+          service_type?: string | null
+          transaction_id?: string
+          transaction_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_ledger_remittance_batch_id_fkey"
+            columns: ["remittance_batch_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_remittance_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_remittance_batches: {
+        Row: {
+          created_at: string
+          entry_count: number
+          id: string
+          notes: string | null
+          processed_at: string | null
+          status: string
+          total_amount_kobo: number
+        }
+        Insert: {
+          created_at?: string
+          entry_count?: number
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          status?: string
+          total_amount_kobo?: number
+        }
+        Update: {
+          created_at?: string
+          entry_count?: number
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          status?: string
+          total_amount_kobo?: number
+        }
+        Relationships: []
+      }
       disputes: {
         Row: {
           assigned_admin: string | null
@@ -315,13 +446,17 @@ export type Database = {
       parts_orders: {
         Row: {
           buyer_id: string
+          compliance_fee_kobo: number | null
           created_at: string
           delivery_address: string | null
           delivery_fee_kobo: number
           delivery_phone: string | null
           escrow_ref: string | null
+          fee_label: string | null
           id: string
+          net_payout_kobo: number | null
           notes: string | null
+          platform_fee_kobo: number | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal_kobo: number
           total_kobo: number
@@ -329,13 +464,17 @@ export type Database = {
         }
         Insert: {
           buyer_id: string
+          compliance_fee_kobo?: number | null
           created_at?: string
           delivery_address?: string | null
           delivery_fee_kobo?: number
           delivery_phone?: string | null
           escrow_ref?: string | null
+          fee_label?: string | null
           id?: string
+          net_payout_kobo?: number | null
           notes?: string | null
+          platform_fee_kobo?: number | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal_kobo?: number
           total_kobo?: number
@@ -343,13 +482,17 @@ export type Database = {
         }
         Update: {
           buyer_id?: string
+          compliance_fee_kobo?: number | null
           created_at?: string
           delivery_address?: string | null
           delivery_fee_kobo?: number
           delivery_phone?: string | null
           escrow_ref?: string | null
+          fee_label?: string | null
           id?: string
+          net_payout_kobo?: number | null
           notes?: string | null
+          platform_fee_kobo?: number | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal_kobo?: number
           total_kobo?: number
@@ -544,16 +687,20 @@ export type Database = {
           assigned_provider_id: string | null
           buyer_id: string
           completed_at: string | null
+          compliance_fee_kobo: number | null
           created_at: string
           danger_flag: boolean
           description: string | null
           device_info: Json | null
+          fee_label: string | null
           id: string
           is_sos: boolean
           location: string | null
+          net_payout_kobo: number | null
           paid_at: string | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["svc_payment_status"]
+          platform_fee_kobo: number | null
           price_estimate_kobo: number | null
           priority: number
           rating: number | null
@@ -576,16 +723,20 @@ export type Database = {
           assigned_provider_id?: string | null
           buyer_id: string
           completed_at?: string | null
+          compliance_fee_kobo?: number | null
           created_at?: string
           danger_flag?: boolean
           description?: string | null
           device_info?: Json | null
+          fee_label?: string | null
           id?: string
           is_sos?: boolean
           location?: string | null
+          net_payout_kobo?: number | null
           paid_at?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["svc_payment_status"]
+          platform_fee_kobo?: number | null
           price_estimate_kobo?: number | null
           priority?: number
           rating?: number | null
@@ -608,16 +759,20 @@ export type Database = {
           assigned_provider_id?: string | null
           buyer_id?: string
           completed_at?: string | null
+          compliance_fee_kobo?: number | null
           created_at?: string
           danger_flag?: boolean
           description?: string | null
           device_info?: Json | null
+          fee_label?: string | null
           id?: string
           is_sos?: boolean
           location?: string | null
+          net_payout_kobo?: number | null
           paid_at?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["svc_payment_status"]
+          platform_fee_kobo?: number | null
           price_estimate_kobo?: number | null
           priority?: number
           rating?: number | null
@@ -886,6 +1041,7 @@ export type Database = {
         Returns: boolean
       }
       is_any_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_compliance_admin: { Args: { _uid: string }; Returns: boolean }
       role_for_service: {
         Args: { _k: Database["public"]["Enums"]["service_kind"] }
         Returns: Database["public"]["Enums"]["app_role"]
