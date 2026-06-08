@@ -93,6 +93,14 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
           targetName={dir.target.name}
           directions={dir.directions}
           loading={dir.loading}
+          travelMode={dir.travelMode}
+          swapped={dir.swapped}
+          locationError={dir.locationError}
+          origin={dir.originCoords}
+          destination={dir.destCoords}
+          onChangeMode={dir.changeMode}
+          onSwap={dir.swap}
+          onRetryLocation={dir.retryLocation}
           onClose={dir.clear}
           onPrimaryAction={bookSelected}
           primaryActionLabel={`Book ${dir.target.name}`}
