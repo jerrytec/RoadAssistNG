@@ -66,6 +66,7 @@ const App = () => (
               <Route path="disputes" element={<AdminDisputes />} />
               <Route path="verification" element={<AdminVerification />} />
               <Route path="roles" element={<AdminRolesPage />} />
+              <Route path="compliance" element={<AdminCompliance />} />
               <Route path="sos" element={<AdminSOS />} />
             </Route>
             <Route path="*" element={<NotFound />} />
