@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import ProviderCard from "@/components/ProviderCard";
 import SOSButton from "@/components/SOSButton";
+import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
+import { syntheticCoord } from "@/lib/googleMaps";
 import { allProviders } from "@/data/providers";
 import type { Provider } from "@/components/ProviderCard";
 
@@ -39,30 +41,38 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
         })
   ).slice(0, 10);
 
+  const mapMarkers: MapMarker[] = useMemo(
+    () =>
+      filtered.map((p) => {
+        const { lat, lng } = syntheticCoord(p.id);
+        const variant: MapMarker["variant"] = p.type.toLowerCase().includes("mechanic")
+          ? "accent"
+          : "primary";
+        return {
+          id: p.id,
+          lat,
+          lng,
+          title: p.name,
+          variant,
+          onClick: () => onSelectProvider(p),
+        };
+      }),
+    [filtered, onSelectProvider]
+  );
+
   return (
     <div className="p-3.5 animate-fade-in">
       <SOSButton variant="hero" />
 
-      {/* Map */}
-      <div className="rounded-lg h-[120px] flex items-center justify-center mb-3 relative overflow-hidden border border-border bg-primary-light">
-        <div className="absolute top-1/2 left-1/2 w-9 h-9 border-2 border-destructive/35 rounded-full animate-pulse-ring" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-destructive border-2 border-card z-10" />
-        {/* Nearby dots */}
-        <div className="absolute w-[7px] h-[7px] rounded-full bg-primary-mid" style={{ top: "30%", left: "40%" }} />
-        <div className="absolute w-[7px] h-[7px] rounded-full bg-primary-mid" style={{ top: "60%", left: "65%" }} />
-        <div className="absolute w-[7px] h-[7px] rounded-full bg-secondary" style={{ top: "35%", left: "70%" }} />
-        {/* Legend */}
-        <div className="absolute bottom-2 right-2 flex flex-col gap-0.5">
-          <div className="flex items-center gap-1 text-[10px] text-primary">
-            <span className="w-[7px] h-[7px] rounded-full bg-primary-mid shrink-0" /> Tow/Vulc
-          </div>
-          <div className="flex items-center gap-1 text-[10px] text-secondary">
-            <span className="w-[7px] h-[7px] rounded-full bg-secondary shrink-0" /> Mechanic
-          </div>
-          <div className="flex items-center gap-1 text-[10px] text-destructive">
-            <span className="w-[7px] h-[7px] rounded-full bg-destructive shrink-0" /> You
-          </div>
-        </div>
+      {/* Live map */}
+      <div className="mb-3">
+        <GoogleMap
+          markers={mapMarkers}
+          cluster
+          trackUser
+          fitBounds
+          height={180}
+        />
       </div>
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">📍 Ikeja, Lagos</p>
