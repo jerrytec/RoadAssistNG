@@ -26,6 +26,7 @@ import AdminPayments from "./pages/admin/AdminPayments.tsx";
 import AdminDisputes from "./pages/admin/AdminDisputes.tsx";
 import AdminVerification from "./pages/admin/AdminVerification.tsx";
 import AdminRolesPage from "./pages/admin/AdminRolesPage.tsx";
+import AdminCompliance from "./pages/admin/AdminCompliance.tsx";
 import AdminSOS from "./pages/admin/AdminSOS.tsx";
 import SOSTracking from "./pages/SOSTracking.tsx";
 import SOSPublicTrack from "./pages/SOSPublicTrack.tsx";
