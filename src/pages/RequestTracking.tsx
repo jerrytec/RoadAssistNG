@@ -169,6 +169,20 @@ const RequestTracking = () => {
           </button>
         )}
 
+        {(request as any).payment_status === "paid" && (request as any).compliance_fee_kobo != null && (
+          <div className="space-y-2">
+            <h3 className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Payment breakdown</h3>
+            <PayoutBreakdown
+              gross_kobo={(request as any).amount_kobo ?? request.price_estimate_kobo ?? 0}
+              platform_fee_kobo={(request as any).platform_fee_kobo}
+              compliance_fee_kobo={(request as any).compliance_fee_kobo}
+              net_payout_kobo={(request as any).net_payout_kobo}
+              fee_label={(request as any).fee_label}
+              variant={isBuyer ? "customer" : "provider"}
+            />
+          </div>
+        )}
+
         {request.rating && (
           <div className="bg-primary-light border border-primary/20 rounded-xl p-4 text-center">
             <p className="text-xs text-primary font-semibold">You rated this {"⭐".repeat(request.rating)}</p>
