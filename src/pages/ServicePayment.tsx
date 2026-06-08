@@ -62,6 +62,8 @@ const ServicePayment = () => {
         amount_kobo: amount,
       }).eq("id", request.id);
       if (error) throw error;
+      // Backend-enforced compliance/levy deduction (idempotent)
+      await applyComplianceFee({ transaction_id: request.id, transaction_kind: "service" });
       toast.success(method === "bank" ? "Payment confirmed — funds held in escrow" : "Card authorized — funds held in escrow");
       navigate(`/requests/${request.id}`);
     } catch (e: any) {
