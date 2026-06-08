@@ -6,6 +6,7 @@ import { useRequest, useAcceptOffer, useUpdateRequestStatus, useRateRequest, typ
 import { formatNaira } from "@/lib/format";
 import { useAuth } from "@/hooks/useAuth";
 import ChatDrawer from "@/components/ChatDrawer";
+import PayoutBreakdown from "@/components/PayoutBreakdown";
 
 const STATUS_FLOW: RequestStatus[] = ["pending", "offered", "accepted", "enroute", "arrived", "in_progress", "completed"];
 const STATUS_LABEL: Record<RequestStatus, string> = {
