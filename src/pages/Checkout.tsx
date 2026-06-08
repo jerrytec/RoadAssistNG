@@ -74,6 +74,9 @@ const Checkout = () => {
       const { error: itemsErr } = await supabase.from("parts_order_items").insert(orderItems);
       if (itemsErr) throw itemsErr;
 
+      // Backend-enforced compliance/levy deduction (idempotent)
+      await applyComplianceFee({ transaction_id: order.id, transaction_kind: "parts" });
+
       await clear.mutateAsync();
       toast.success("Order placed — funds held in escrow until delivery");
       navigate(`/orders`);
