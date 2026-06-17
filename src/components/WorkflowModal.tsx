@@ -100,6 +100,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const [rating, setRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [chatInput, setChatInput] = useState("");
+  const [callOpen, setCallOpen] = useState(false);
   const [messages, setMessages] = useState([
     { me: false, text: "Hi! I've seen your request. I'm about 7 minutes away. What exactly happened to your vehicle?", time: "2:14 PM" },
     { me: true, text: "My tyre blew out on the expressway. White Toyota Camry at the bus stop junction.", time: "2:15 PM" },
