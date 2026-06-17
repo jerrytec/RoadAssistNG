@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/logo.ico.asset.json";
+import logoAsset from "@/assets/logo.png.asset.json";
 
 interface BrandLogoProps {
   className?: string;
