@@ -1,4 +1,5 @@
 import ThemeToggle from "./ThemeToggle";
+import BrandLogo from "./BrandLogo";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,8 +35,9 @@ const AppHeader = ({ onOpenNotifications }: Props) => {
   return (
     <header className="gradient-brand sticky top-0 z-30 shadow-card">
       <div className="container max-w-[960px] flex items-center justify-between h-14 px-4">
-        <button onClick={() => navigate("/")} className="text-base sm:text-lg font-extrabold tracking-tight text-primary-foreground">
-          RoadAssist<span className="opacity-80">NG</span>
+        <button onClick={() => navigate("/")} className="flex items-center gap-2 text-base sm:text-lg font-extrabold tracking-tight text-primary-foreground">
+          <BrandLogo className="w-6 h-6 rounded-sm" />
+          <span>RoadAssist<span className="opacity-80">NG</span></span>
         </button>
         <div className="flex items-center gap-2">
           <ThemeToggle />
