@@ -23,8 +23,8 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
       className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${fadeOut ? "opacity-0" : "opacity-100"}`}
       style={{ backgroundColor: "#E7EFE6" }}
     >
-      <div className="flex flex-col items-center gap-4">
-        <BrandLogo className="w-20 h-20 rounded-2xl shadow-lg" />
+      <div className="flex items-center gap-3">
+        <BrandLogo className="w-14 h-14" />
         <h1 className="text-4xl font-bold tracking-tight" style={{ color: "#1a1a18" }}>
           RoadAssist<span style={{ color: "#0F6E56" }}>NG</span>
         </h1>
