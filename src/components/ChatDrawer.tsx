@@ -15,6 +15,7 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
   const { user } = useAuth();
   const { messages, send, sending } = useChat(open ? threadType : null, open ? threadId : undefined);
   const [text, setText] = useState("");
+  const [callOpen, setCallOpen] = useState(false);
 
   if (!open) return null;
 
