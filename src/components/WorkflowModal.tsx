@@ -1031,6 +1031,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
           )}
         </div>
       </div>
+      <CallDialog open={callOpen} onClose={() => setCallOpen(false)} peerName={provider.name} peerRole={provider.type} />
     </div>
   );
 };
