@@ -1,4 +1,5 @@
 import { NavLink, Outlet, Navigate, useLocation } from "react-router-dom";
+import BrandLogo from "@/components/BrandLogo";
 import { useAdminRoles } from "@/hooks/useAdminRoles";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -45,7 +46,10 @@ const AdminLayout = () => {
       <aside className="w-56 shrink-0 border-r border-border bg-card hidden md:flex flex-col">
         <div className="px-4 py-4 border-b border-border">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin</p>
-          <p className="text-sm font-bold">RoadAssist<span className="opacity-70">NG</span></p>
+          <div className="flex items-center gap-2">
+            <BrandLogo className="w-6 h-6 rounded-sm" />
+            <p className="text-sm font-bold">RoadAssist<span className="opacity-70">NG</span></p>
+          </div>
         </div>
         <nav className="flex-1 p-2 space-y-1">
           {NAV.map((n) => (

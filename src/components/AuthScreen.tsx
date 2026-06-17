@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Zap, MapPin } from "lucide-react";
+import BrandLogo from "./BrandLogo";
 
 interface AuthScreenProps {
   onComplete: () => void;
@@ -125,8 +126,9 @@ const AuthScreen = ({ onComplete }: AuthScreenProps) => {
             backgroundImage: "radial-gradient(circle at 20% 20%, rgba(255,255,255,.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,.18), transparent 45%)",
           }} />
           <div className="relative">
-            <h1 className="text-2xl font-extrabold tracking-tight">
-              RoadAssist<span className="opacity-80">NG</span>
+            <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight">
+              <BrandLogo className="w-8 h-8 rounded-md" />
+              <span>RoadAssist<span className="opacity-80">NG</span></span>
             </h1>
             <p className="text-sm opacity-80 mt-1">Premium roadside assistance, on demand.</p>
           </div>
@@ -149,8 +151,9 @@ const AuthScreen = ({ onComplete }: AuthScreenProps) => {
         <main className="flex items-center justify-center p-5 sm:p-8 gradient-soft">
           <div className="w-full max-w-[460px]">
             <div className="lg:hidden text-center mb-5">
-              <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-                RoadAssist<span className="text-primary">NG</span>
+              <h1 className="flex items-center justify-center gap-2 text-2xl font-extrabold tracking-tight text-foreground">
+                <BrandLogo className="w-7 h-7 rounded-md" />
+                <span>RoadAssist<span className="text-primary">NG</span></span>
               </h1>
               <p className="text-xs text-muted-foreground mt-1">Premium roadside assistance</p>
             </div>
