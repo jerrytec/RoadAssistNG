@@ -501,6 +501,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                   className="flex-1 py-2 px-3 border border-border rounded-md text-xs outline-none bg-card text-foreground"
                   placeholder="Type a message..."
                 />
+                <CallButton onClick={() => setCallOpen(true)} label="" />
                 <button onClick={sendMessage} className="px-3.5 py-2 rounded-md border-none bg-primary-mid text-primary-foreground text-xs font-semibold cursor-pointer">
                   Send
                 </button>
