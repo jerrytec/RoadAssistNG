@@ -90,6 +90,9 @@
     --info: 210 70% 50%;
     --info-light: 210 30% 18%;
 
+    --success: 150 70% 38%;
+    --success-foreground: 0 0% 100%;
+
     --muted: 220 15% 20%;
     --muted-foreground: 45 5% 60%;
 
