@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useChat } from "@/hooks/useChat";
+import CallDialog, { CallButton } from "@/components/CallDialog";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
@@ -14,6 +15,7 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
   const { user } = useAuth();
   const { messages, send, sending } = useChat(open ? threadType : null, open ? threadId : undefined);
   const [text, setText] = useState("");
+  const [callOpen, setCallOpen] = useState(false);
 
   if (!open) return null;
 
@@ -29,10 +31,14 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
       <div className="w-full max-w-[700px] relative">
         <div className="absolute inset-0 bg-foreground/30" />
         <div className="absolute right-0 top-0 h-full w-full max-w-[420px] bg-card flex flex-col" onClick={(e) => e.stopPropagation()}>
-          <header className="px-4 py-3 border-b border-border flex items-center justify-between">
-            <h3 className="text-sm font-bold">{title ?? "Chat"}</h3>
-            <button onClick={onClose} className="text-muted-foreground text-lg" aria-label="Close">✕</button>
+          <header className="px-4 py-3 border-b border-border flex items-center justify-between gap-2">
+            <h3 className="text-sm font-bold truncate">{title ?? "Chat"}</h3>
+            <div className="flex items-center gap-2">
+              <CallButton onClick={() => setCallOpen(true)} />
+              <button onClick={onClose} className="text-muted-foreground text-lg" aria-label="Close">✕</button>
+            </div>
           </header>
+          <CallDialog open={callOpen} onClose={() => setCallOpen(false)} peerName={title ?? "Contact"} />
           <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
             {messages.length === 0 && (
               <p className="text-center text-[11px] text-muted-foreground py-10">No messages yet. Say hi 👋</p>

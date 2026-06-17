@@ -4,6 +4,7 @@ import { ArrowLeft, Home } from "lucide-react";
 import { toast } from "sonner";
 import type { Provider } from "@/components/ProviderCard";
 import { useCreateRequest, type ServiceKind } from "@/hooks/useServiceRequests";
+import CallDialog, { CallButton } from "@/components/CallDialog";
 
 /**
  * Workflow Steps:
@@ -99,6 +100,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const [rating, setRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [chatInput, setChatInput] = useState("");
+  const [callOpen, setCallOpen] = useState(false);
   const [messages, setMessages] = useState([
     { me: false, text: "Hi! I've seen your request. I'm about 7 minutes away. What exactly happened to your vehicle?", time: "2:14 PM" },
     { me: true, text: "My tyre blew out on the expressway. White Toyota Camry at the bus stop junction.", time: "2:15 PM" },
@@ -464,6 +466,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                 <button onClick={next} className="flex-1 py-2 rounded-md border border-border bg-card text-muted-foreground text-xs font-medium cursor-pointer">
                   💬 Chat & negotiate
                 </button>
+                <CallButton onClick={() => setCallOpen(true)} label="Call" />
                 <button onClick={() => setStep(2)} className="flex-1 py-2 rounded-md border-none bg-primary-mid text-primary-foreground text-xs font-semibold cursor-pointer">
                   Accept quote →
                 </button>
@@ -498,6 +501,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                   className="flex-1 py-2 px-3 border border-border rounded-md text-xs outline-none bg-card text-foreground"
                   placeholder="Type a message..."
                 />
+                <CallButton onClick={() => setCallOpen(true)} label="" />
                 <button onClick={sendMessage} className="px-3.5 py-2 rounded-md border-none bg-primary-mid text-primary-foreground text-xs font-semibold cursor-pointer">
                   Send
                 </button>
@@ -1027,6 +1031,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
           )}
         </div>
       </div>
+      <CallDialog open={callOpen} onClose={() => setCallOpen(false)} peerName={provider.name} peerRole={provider.type} />
     </div>
   );
 };
