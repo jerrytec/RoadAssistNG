@@ -466,6 +466,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                 <button onClick={next} className="flex-1 py-2 rounded-md border border-border bg-card text-muted-foreground text-xs font-medium cursor-pointer">
                   💬 Chat & negotiate
                 </button>
+                <CallButton onClick={() => setCallOpen(true)} label="Call" />
                 <button onClick={() => setStep(2)} className="flex-1 py-2 rounded-md border-none bg-primary-mid text-primary-foreground text-xs font-semibold cursor-pointer">
                   Accept quote →
                 </button>
