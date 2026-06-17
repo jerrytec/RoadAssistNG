@@ -177,3 +177,15 @@
 .animate-slide-up-card {
   animation: slide-up-card 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+@layer components {
+  .container-main { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+  .card-hover { @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1; }
+  .badge-verified { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-primary text-primary-foreground; }
+  .badge-new { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-info text-white; }
+  .badge-insured { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-success text-success-foreground; }
+  .section-title { @apply text-2xl font-bold text-foreground mb-6; }
+  .nav-link { @apply text-muted-foreground hover:text-foreground transition-colors; }
+  .hero-gradient { background: var(--gradient-hero); }
+  .cta-gradient { background: var(--gradient-cta); }
+}
