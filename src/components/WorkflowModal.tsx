@@ -1031,7 +1031,17 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
           )}
         </div>
       </div>
-      <CallDialog open={callOpen} onClose={() => setCallOpen(false)} peerName={provider.name} peerRole={provider.type} />
+      <CallDialog
+        open={callOpen}
+        onClose={() => setCallOpen(false)}
+        peerName={provider.name}
+        peerRole={provider.type}
+        onEnded={({ status, durationSec }) => {
+          if (status === "completed") toast.success(`Call ended · ${Math.floor(durationSec / 60)}m ${(durationSec % 60).toString().padStart(2, "0")}s`);
+          else if (status === "missed") toast("Call not answered");
+          else if (status === "failed") toast.error("Call couldn't start — check microphone permission");
+        }}
+      />
     </div>
   );
 };
