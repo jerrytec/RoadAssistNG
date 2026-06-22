@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Phone, History } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import CallDialog, { CallButton } from "@/components/CallDialog";
+import CallDetailsDrawer from "@/components/CallDetailsDrawer";
 import { useAuth } from "@/hooks/useAuth";
-import { getCallHistory, formatDuration, type CallStatus } from "@/lib/callHistory";
+import { getCallHistory, formatDuration, type CallRecord, type CallStatus } from "@/lib/callHistory";
 
 interface Props {
   open: boolean;
