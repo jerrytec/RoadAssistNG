@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Home, X, Building2, CreditCard, Car, MapPin, Wrench, CheckCircle2, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Home, X, Building2, CreditCard, Car, MapPin, Wrench, CheckCircle2, MessageCircle, ShieldCheck, Wallet, Clock, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { Provider } from "@/components/ProviderCard";
 import { useCreateRequest, type ServiceKind } from "@/hooks/useServiceRequests";
@@ -110,7 +110,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
   const [formData, setFormData] = useState(saved?.formData ?? {
     name: "",
     phone: "",
-    location: prefill ? "📍 Using current GPS location" : "",
+    location: prefill ? "Using current GPS location" : "",
     description: prefill?.description ?? "",
   });
 
@@ -457,14 +457,14 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                 <p className="text-[10px] text-muted-foreground">Ref: <span className="font-mono font-semibold text-foreground">{txnRef}</span></p>
               </div>
               <div className="bg-accent-light rounded-lg p-2.5 mb-3 flex items-start gap-2">
-                <span className="text-sm">🛡️</span>
+                <ShieldCheck className="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
                 <p className="text-[10px] text-accent leading-relaxed font-medium">
                   Your payment will be held in escrow and only released after you confirm the service is complete. You won't be charged until you're satisfied.
                 </p>
               </div>
               <div className="flex gap-2">
-                <button onClick={next} className="flex-1 py-2 rounded-md border border-border bg-card text-muted-foreground text-xs font-medium cursor-pointer">
-                  💬 Chat & negotiate
+                <button onClick={next} className="flex-1 py-2 rounded-md border border-border bg-card text-muted-foreground text-xs font-medium cursor-pointer inline-flex items-center justify-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> Chat & negotiate
                 </button>
                 <CallButton onClick={() => setCallOpen(true)} label="Call" />
                 <button onClick={() => setStep(2)} className="flex-1 py-2 rounded-md border-none bg-primary-mid text-primary-foreground text-xs font-semibold cursor-pointer">
@@ -478,7 +478,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
           {step === 2 && (
             <div className="animate-fade-in">
               <div className="bg-accent-light rounded-lg p-2 mb-2.5 flex items-center gap-2">
-                <span className="text-[10px]">💬</span>
+                <MessageCircle className="w-3 h-3 text-accent" aria-hidden="true" />
                 <p className="text-[10px] text-accent font-medium">Discuss pricing and details with your provider before authorizing payment hold.</p>
               </div>
               <div className="bg-background rounded-lg p-2.5 mb-2.5 min-h-[140px] flex flex-col gap-2">
@@ -818,10 +818,10 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                     <label className="text-[11px] font-semibold text-foreground mb-1.5 block">What's the issue?</label>
                     <div className="grid grid-cols-1 gap-1.5">
                       {[
-                        { v: "not_fixed", l: "🔧 Issue not fixed" },
-                        { v: "no_show", l: "🚗 Mechanic didn't show up" },
-                        { v: "overcharged", l: "💰 Charged more than quoted" },
-                        { v: "other", l: "🕐 Other" },
+                        { v: "not_fixed",   Icon: Wrench,        l: "Issue not fixed" },
+                        { v: "no_show",     Icon: Car,           l: "Mechanic didn't show up" },
+                        { v: "overcharged", Icon: Wallet,        l: "Charged more than quoted" },
+                        { v: "other",       Icon: Clock,         l: "Other" },
                       ].map((r) => (
                         <button
                           key={r.v}
