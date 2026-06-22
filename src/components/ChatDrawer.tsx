@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Phone, History } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import CallDialog, { CallButton } from "@/components/CallDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { getCallHistory, formatDuration, type CallStatus } from "@/lib/callHistory";
 
 interface Props {
   open: boolean;
@@ -11,19 +13,35 @@ interface Props {
   title?: string;
 }
 
+const statusLabel = (s: CallStatus, dur: number) => {
+  if (s === "completed") return `📞 Call · ${formatDuration(dur)}`;
+  if (s === "missed") return "📞 Missed call";
+  if (s === "declined") return "📞 Call declined";
+  return "📞 Call failed";
+};
+
 const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
   const { user } = useAuth();
   const { messages, send, sending } = useChat(open ? threadType : null, open ? threadId : undefined);
   const [text, setText] = useState("");
   const [callOpen, setCallOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyTick, setHistoryTick] = useState(0);
 
   if (!open) return null;
+
+  const history = getCallHistory(threadId);
 
   const handleSend = async () => {
     if (!text.trim()) return;
     const body = text.trim();
     setText("");
     try { await send(body); } catch { setText(body); }
+  };
+
+  const handleCallEnded = async (info: { status: CallStatus; durationSec: number }) => {
+    setHistoryTick((t) => t + 1);
+    try { await send(statusLabel(info.status, info.durationSec)); } catch { /* ignore */ }
   };
 
   return (
@@ -34,21 +52,63 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
           <header className="px-4 py-3 border-b border-border flex items-center justify-between gap-2">
             <h3 className="text-sm font-bold truncate">{title ?? "Chat"}</h3>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowHistory((v) => !v)}
+                className={`p-2 rounded-md text-xs ${showHistory ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}
+                aria-label="Call history"
+                title="Call history"
+              >
+                <History className="w-3.5 h-3.5" />
+              </button>
               <CallButton onClick={() => setCallOpen(true)} />
               <button onClick={onClose} className="text-muted-foreground text-lg" aria-label="Close">✕</button>
             </div>
           </header>
-          <CallDialog open={callOpen} onClose={() => setCallOpen(false)} peerName={title ?? "Contact"} />
+          <CallDialog
+            open={callOpen}
+            onClose={() => setCallOpen(false)}
+            peerName={title ?? "Contact"}
+            threadId={threadId}
+            onEnded={handleCallEnded}
+          />
+
+          {showHistory && (
+            <div className="border-b border-border bg-muted/40 px-3 py-2 max-h-40 overflow-y-auto" key={historyTick}>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Call history</p>
+              {history.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground py-2">No calls yet for this thread.</p>
+              ) : history.map((c) => (
+                <div key={c.id} className="flex items-center justify-between text-[11px] py-1">
+                  <span className="flex items-center gap-1.5">
+                    <Phone className={`w-3 h-3 ${c.status === "completed" ? "text-success" : c.status === "missed" ? "text-warning" : "text-destructive"}`} />
+                    <span className="font-semibold">{statusLabel(c.status, c.durationSec).replace("📞 ", "")}</span>
+                  </span>
+                  <span className="text-muted-foreground">{new Date(c.startedAt).toLocaleString([], { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
             {messages.length === 0 && (
               <p className="text-center text-[11px] text-muted-foreground py-10">No messages yet. Say hi 👋</p>
             )}
             {messages.map((m) => {
               const me = m.sender_id === user?.id;
+              const isCall = m.body.startsWith("📞");
               return (
-                <div key={m.id} className={`max-w-[78%] px-3 py-2 rounded-2xl text-[12px] ${me ? "self-end bg-primary text-primary-foreground rounded-br-md" : "self-start bg-muted text-foreground rounded-bl-md"}`}>
+                <div
+                  key={m.id}
+                  className={`max-w-[78%] px-3 py-2 rounded-2xl text-[12px] ${
+                    isCall
+                      ? "self-center bg-success/15 text-foreground text-center italic"
+                      : me
+                        ? "self-end bg-primary text-primary-foreground rounded-br-md"
+                        : "self-start bg-muted text-foreground rounded-bl-md"
+                  }`}
+                >
                   {m.body}
-                  <div className={`text-[9px] mt-0.5 ${me ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  <div className={`text-[9px] mt-0.5 ${isCall ? "text-muted-foreground" : me ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                     {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
