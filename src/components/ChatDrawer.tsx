@@ -14,9 +14,13 @@ interface Props {
   title?: string;
 }
 
+// U+1F4DE = legacy "telephone receiver" emoji once used as a chat-call marker.
+const LEGACY_CALL_GLYPH = String.fromCodePoint(0x1f4de);
 const CALL_PREFIXES = ["Call · ", "Missed call", "Call declined", "Call failed"];
 const isCallMessage = (body: string) =>
-  body.startsWith("📞") || CALL_PREFIXES.some((p) => body.startsWith(p));
+  body.startsWith(LEGACY_CALL_GLYPH) || CALL_PREFIXES.some((p) => body.startsWith(p));
+const stripLegacyCallGlyph = (body: string) =>
+  body.startsWith(LEGACY_CALL_GLYPH) ? body.slice(LEGACY_CALL_GLYPH.length).trimStart() : body;
 
 const statusLabel = (s: CallStatus, dur: number) => {
   if (s === "completed") return `Call · ${formatDuration(dur)}`;
