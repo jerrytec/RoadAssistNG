@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { MapPin, MessageCircle, CheckCircle2, Star, CreditCard } from "lucide-react";
 import PageNav from "@/components/PageNav";
 import { toast } from "sonner";
 import { useRequest, useAcceptOffer, useUpdateRequestStatus, useRateRequest, type RequestStatus } from "@/hooks/useServiceRequests";
@@ -79,7 +80,7 @@ const RequestTracking = () => {
           <div className="grid grid-cols-2 gap-2 mt-3 text-[11px]">
             <div><span className="text-muted-foreground">Service:</span> <span className="font-semibold capitalize">{request.service_type}</span></div>
             {request.vehicle && <div><span className="text-muted-foreground">Vehicle:</span> <span className="font-semibold">{request.vehicle}</span></div>}
-            {request.location && <div className="col-span-2"><span className="text-muted-foreground">📍</span> <span className="font-semibold">{request.location}</span></div>}
+            {request.location && <div className="col-span-2 inline-flex items-center gap-1"><MapPin className="w-3 h-3 text-muted-foreground" aria-hidden="true" /> <span className="font-semibold">{request.location}</span></div>}
             {request.description && <div className="col-span-2"><span className="text-muted-foreground">Notes:</span> {request.description}</div>}
             {request.price_estimate_kobo > 0 && <div className="col-span-2"><span className="text-muted-foreground">Agreed price:</span> <span className="font-semibold text-primary">{formatNaira(request.price_estimate_kobo)}</span></div>}
           </div>
@@ -122,16 +123,16 @@ const RequestTracking = () => {
           <div className="bg-card border border-border rounded-xl p-4 space-y-2">
             <button
               onClick={() => setChatOpen(true)}
-              className="w-full py-2.5 rounded-lg border border-primary text-primary text-xs font-bold"
+              className="w-full py-2.5 rounded-lg border border-primary text-primary text-xs font-bold inline-flex items-center justify-center gap-1.5"
             >
-              💬 Chat with provider
+              <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> Chat with provider
             </button>
             {isBuyer && request.status === "in_progress" && (
               <button
                 onClick={async () => { try { await updateStatus.mutateAsync({ id: request.id, status: "completed" }); toast.success("Marked complete"); } catch (e: any) { toast.error(e.message); } }}
-                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold"
+                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold inline-flex items-center justify-center gap-1.5"
               >
-                ✅ Confirm completion
+                <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Confirm completion
               </button>
             )}
           </div>
@@ -150,7 +151,9 @@ const RequestTracking = () => {
             <p className="text-sm font-bold mb-2">Rate your experience</p>
             <div className="flex gap-1 mb-2">
               {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} onClick={() => setStars(n)} className={`text-2xl ${n <= stars ? "" : "opacity-30"}`}>⭐</button>
+                <button key={n} onClick={() => setStars(n)} aria-label={`${n} star${n > 1 ? "s" : ""}`}>
+                  <Star className={`w-6 h-6 ${n <= stars ? "fill-accent text-accent" : "text-muted-foreground opacity-40"}`} aria-hidden="true" />
+                </button>
               ))}
             </div>
             <textarea
@@ -164,8 +167,8 @@ const RequestTracking = () => {
         )}
 
         {isBuyer && request.status === "completed" && (request as any).payment_status !== "paid" && (
-          <button onClick={() => navigate(`/pay/service/${request.id}`)} className="w-full py-3 rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-            💳 Pay {formatNaira(request.price_estimate_kobo)}
+          <button onClick={() => navigate(`/pay/service/${request.id}`)} className="w-full py-3 rounded-lg bg-primary text-primary-foreground text-sm font-bold inline-flex items-center justify-center gap-2">
+            <CreditCard className="w-4 h-4" aria-hidden="true" /> Pay {formatNaira(request.price_estimate_kobo)}
           </button>
         )}
 
@@ -185,7 +188,12 @@ const RequestTracking = () => {
 
         {request.rating && (
           <div className="bg-primary-light border border-primary/20 rounded-xl p-4 text-center">
-            <p className="text-xs text-primary font-semibold">You rated this {"⭐".repeat(request.rating)}</p>
+            <p className="text-xs text-primary font-semibold inline-flex items-center justify-center gap-1">
+              You rated this
+              {Array.from({ length: request.rating }).map((_, i) => (
+                <Star key={i} className="w-3.5 h-3.5 fill-accent text-accent" aria-hidden="true" />
+              ))}
+            </p>
             {request.review && <p className="text-[11px] text-muted-foreground mt-1">{request.review}</p>}
           </div>
         )}

@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Receipt, Calendar, MapPin, Car, Wallet, Star } from "lucide-react";
+import { Receipt, Calendar, MapPin, Car, Wallet, Star, AlertTriangle, CheckCircle2, RefreshCw, Search } from "lucide-react";
 import { getProviderIcon } from "@/lib/providerIcons";
 
 
 interface Booking {
   id: string;
   provider: string;
-  providerIcon: string;
   type: string;
   date: string;
   time: string;
@@ -23,7 +22,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2041",
     provider: "Emeka Okafor Towing",
-    providerIcon: "🚐",
     type: "Tow van",
     date: "28 Apr 2026",
     time: "2:14 PM",
@@ -37,7 +35,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2035",
     provider: "Chidi AutoFix Mobile",
-    providerIcon: "🔩",
     type: "Mobile mechanic",
     date: "25 Apr 2026",
     time: "10:30 AM",
@@ -52,7 +49,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2028",
     provider: "Femi Tyres & Vulcanizer",
-    providerIcon: "🔧",
     type: "Vulcanizer",
     date: "20 Apr 2026",
     time: "4:45 PM",
@@ -67,7 +63,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2019",
     provider: "Lagos Rescue Co.",
-    providerIcon: "🚐",
     type: "Tow van",
     date: "14 Apr 2026",
     time: "8:12 AM",
@@ -81,7 +76,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2011",
     provider: "Tunde Fix-It Mobile",
-    providerIcon: "🔧",
     type: "Vulcanizer",
     date: "8 Apr 2026",
     time: "1:20 PM",
@@ -312,8 +306,8 @@ const UseAgainSheet = ({
         {/* Previous service summary */}
         <div className="p-3 rounded-lg bg-background mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-[36px] h-[36px] rounded-lg bg-card flex items-center justify-center text-base shrink-0">
-              {booking.providerIcon}
+            <div className="w-[36px] h-[36px] rounded-lg bg-card flex items-center justify-center text-primary shrink-0">
+              {(() => { const I = getProviderIcon(booking.type); return <I className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />; })()}
             </div>
             <div className="flex-1">
               <div className="text-[12px] font-semibold">{booking.provider}</div>
@@ -322,8 +316,10 @@ const UseAgainSheet = ({
               </div>
             </div>
             {booking.rating && (
-              <div className="text-[11px]" style={{ color: "#EF9F27" }}>
-                {"★".repeat(booking.rating)}
+              <div className="flex items-center gap-0.5 text-accent">
+                {Array.from({ length: booking.rating }).map((_, i) => (
+                  <Star key={i} className="w-3 h-3 fill-accent" aria-hidden="true" />
+                ))}
               </div>
             )}
           </div>
@@ -341,7 +337,7 @@ const UseAgainSheet = ({
                   : "bg-card text-muted-foreground border-border"
               }`}
             >
-              🔄 Request same provider
+              <span className="inline-flex items-center justify-center gap-1.5"><RefreshCw className="w-3 h-3" aria-hidden="true" /> Request same provider</span>
             </button>
             <button
               onClick={() => setPreferSame(false)}
@@ -351,14 +347,14 @@ const UseAgainSheet = ({
                   : "bg-card text-muted-foreground border-border"
               }`}
             >
-              🔍 Find nearest available
+              <span className="inline-flex items-center justify-center gap-1.5"><Search className="w-3 h-3" aria-hidden="true" /> Find nearest available</span>
             </button>
           </div>
           {/* Provider unavailability notice */}
           {preferSame && !isProviderAvailable && (
             <div className="mt-2 p-2.5 rounded-lg bg-destructive-light border border-destructive/20">
               <div className="text-[11px] font-semibold text-destructive flex items-center gap-1.5">
-                ⚠️ {booking.provider} is currently offline
+                <AlertTriangle className="w-3 h-3" aria-hidden="true" /> {booking.provider} is currently offline
               </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">
                 We'll automatically match you with the next best <span className="font-medium text-foreground">{booking.type}</span> provider nearby.
@@ -366,8 +362,8 @@ const UseAgainSheet = ({
             </div>
           )}
           {preferSame && isProviderAvailable && (
-            <p className="text-[10px] text-muted-foreground mt-1.5">
-              ✅ {booking.provider} is currently available.
+            <p className="text-[10px] text-muted-foreground mt-1.5 inline-flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3 text-success" aria-hidden="true" /> {booking.provider} is currently available.
             </p>
           )}
         </div>
@@ -383,7 +379,7 @@ const UseAgainSheet = ({
                 : "bg-card border-border"
             }`}
           >
-            <span className="text-base">🚗</span>
+            <Car className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <div className="flex-1 text-left">
               <div className="text-[12px] font-medium">{booking.vehicle}</div>
               <div className="text-[10px] text-muted-foreground">
@@ -393,7 +389,7 @@ const UseAgainSheet = ({
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
               reuseVehicle ? "border-primary bg-primary" : "border-border"
             }`}>
-              {reuseVehicle && <span className="text-primary-foreground text-[10px]">✓</span>}
+              {reuseVehicle && <CheckCircle2 className="w-3 h-3 text-primary-foreground" aria-hidden="true" />}
             </div>
           </button>
           {booking.serviceNotes && (
@@ -406,7 +402,7 @@ const UseAgainSheet = ({
 
         {/* Price estimate changes */}
         <div className="mb-4 p-3 rounded-lg bg-background">
-          <div className="text-[11px] font-semibold mb-2">💰 Estimated price</div>
+          <div className="text-[11px] font-semibold mb-2 inline-flex items-center gap-1.5"><Wallet className="w-3 h-3" aria-hidden="true" /> Estimated price</div>
           <div className="flex items-center justify-between">
             <div>
               <div className="text-[10px] text-muted-foreground line-through">{booking.amount} (previous)</div>
@@ -431,13 +427,13 @@ const UseAgainSheet = ({
         <div className="p-3 rounded-lg bg-background mb-4 space-y-1.5">
           <div className="text-[11px] font-semibold">What's different this time</div>
           <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-            <span className="text-primary">📍</span> Location: Your <span className="font-medium text-foreground">current GPS location</span> (not the previous one)
+            <MapPin className="w-3 h-3 text-primary" aria-hidden="true" /> Location: Your <span className="font-medium text-foreground">current GPS location</span> (not the previous one)
           </div>
           <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-            <span className="text-primary">💰</span> Pricing: May vary based on <span className="font-medium text-foreground">distance & availability</span>
+            <Wallet className="w-3 h-3 text-primary" aria-hidden="true" /> Pricing: May vary based on <span className="font-medium text-foreground">distance & availability</span>
           </div>
           <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-            <span className="text-primary">🚗</span> Vehicle: <span className="font-medium text-foreground">{reuseVehicle ? booking.vehicle : "You'll enter new details"}</span>
+            <Car className="w-3 h-3 text-primary" aria-hidden="true" /> Vehicle: <span className="font-medium text-foreground">{reuseVehicle ? booking.vehicle : "You'll enter new details"}</span>
           </div>
         </div>
 

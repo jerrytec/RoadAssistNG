@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { Layers, Truck, Disc3, Wrench, ShieldCheck, MapPin, Navigation, type LucideIcon } from "lucide-react";
-import ProviderCard from "@/components/ProviderCard";
+import { Layers, Truck, Disc3, Wrench, ShieldCheck, MapPin, type LucideIcon } from "lucide-react";
+import NearestProvidersList from "@/components/NearestProvidersList";
 import SOSButton from "@/components/SOSButton";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
@@ -139,24 +139,11 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
         })}
       </div>
 
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Nearest providers</p>
-
-      {filtered.map((p) => (
-        <div key={p.id} className="relative">
-          <ProviderCard provider={p} onClick={() => onSelectProvider(p)} />
-          <button
-            onClick={(e) => { e.stopPropagation(); startFor(p); }}
-            className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"
-            aria-label={`Directions to ${p.name}`}
-          >
-            <Navigation className="w-3 h-3" aria-hidden="true" /> Directions
-          </button>
-        </div>
-      ))}
-
-      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2 inline-flex items-center justify-center gap-1 w-full">
-        Tap any provider to book · Tap <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
-      </p>
+      <NearestProvidersList
+        providers={filtered}
+        onSelect={onSelectProvider}
+        onDirections={startFor}
+      />
     </div>
   );
 };
