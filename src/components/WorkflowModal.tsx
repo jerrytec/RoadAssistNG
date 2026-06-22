@@ -833,7 +833,7 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                               : "border-border bg-card text-foreground hover:border-destructive/50"
                           }`}
                         >
-                          {r.l}
+                          <span className="inline-flex items-center gap-2"><r.Icon className="w-3.5 h-3.5" aria-hidden="true" /> {r.l}</span>
                         </button>
                       ))}
                     </div>
