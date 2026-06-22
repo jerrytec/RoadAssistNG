@@ -6,7 +6,6 @@ import { getProviderIcon } from "@/lib/providerIcons";
 interface Booking {
   id: string;
   provider: string;
-  providerIcon: string;
   type: string;
   date: string;
   time: string;

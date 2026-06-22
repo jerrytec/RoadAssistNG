@@ -116,7 +116,7 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
             {messages.map((m) => {
               const me = m.sender_id === user?.id;
               const isCall = isCallMessage(m.body);
-              const body = isCall ? m.body.replace(/^📞\s*/, "") : m.body;
+              const body = isCall ? stripLegacyCallGlyph(m.body) : m.body;
               return (
                 <div
                   key={m.id}
