@@ -437,7 +437,7 @@ const OrdersInbox = ({ vendorId }: { vendorId: string }) => {
   if (ordersQ.isLoading) return <p className="text-center text-xs text-muted-foreground py-10">Loading…</p>;
   if (!ordersQ.data?.length) return (
     <div className="text-center py-10 border border-dashed border-border rounded-xl">
-      <div className="text-3xl mb-2">📭</div>
+      <Inbox className="w-8 h-8 mx-auto mb-2 text-muted-foreground" aria-hidden="true" />
       <p className="text-xs text-muted-foreground">No orders yet</p>
     </div>
   );
@@ -453,8 +453,8 @@ const OrdersInbox = ({ vendorId }: { vendorId: string }) => {
                 <div className="text-[12px] font-semibold truncate">{it.title_snapshot}</div>
                 <div className="text-[10px] text-muted-foreground">Qty {it.qty} · {formatNaira(it.unit_price_kobo * it.qty)}</div>
                 <div className="text-[10px] text-muted-foreground mt-1">Order #{it.order?.id?.slice(0, 8)} · {it.order?.created_at && new Date(it.order.created_at).toLocaleDateString()}</div>
-                {it.order?.delivery_address && <div className="text-[10px] text-muted-foreground mt-0.5">📍 {it.order.delivery_address}</div>}
-                {it.order?.delivery_phone && <div className="text-[10px] text-muted-foreground">📞 {it.order.delivery_phone}</div>}
+                {it.order?.delivery_address && <div className="text-[10px] text-muted-foreground mt-0.5 inline-flex items-center gap-1"><MapPin className="w-2.5 h-2.5" aria-hidden="true" /> {it.order.delivery_address}</div>}
+                {it.order?.delivery_phone && <div className="text-[10px] text-muted-foreground inline-flex items-center gap-1"><Phone className="w-2.5 h-2.5" aria-hidden="true" /> {it.order.delivery_phone}</div>}
               </div>
               <span className="text-[9px] font-semibold bg-muted px-1.5 py-0.5 rounded uppercase">{it.vendor_status}</span>
             </div>

@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatNaira } from "@/lib/format";
 import { toast } from "sonner";
 import ChatDrawer from "@/components/ChatDrawer";
+import { MessageCircle } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = {
   pending_payment: "Pending payment",
