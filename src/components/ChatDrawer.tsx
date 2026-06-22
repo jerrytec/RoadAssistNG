@@ -28,6 +28,7 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
   const [callOpen, setCallOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyTick, setHistoryTick] = useState(0);
+  const [detailsCall, setDetailsCall] = useState<CallRecord | null>(null);
 
   if (!open) return null;
 
@@ -72,6 +73,11 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
             threadId={threadId}
             onEnded={handleCallEnded}
           />
+          <CallDetailsDrawer
+            call={detailsCall}
+            onClose={() => setDetailsCall(null)}
+            onCallBack={() => { setDetailsCall(null); setCallOpen(true); }}
+          />
 
           {showHistory && (
             <div className="border-b border-border bg-muted/40 px-3 py-2 max-h-40 overflow-y-auto" key={historyTick}>
@@ -79,13 +85,18 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
               {history.length === 0 ? (
                 <p className="text-[11px] text-muted-foreground py-2">No calls yet for this thread.</p>
               ) : history.map((c) => (
-                <div key={c.id} className="flex items-center justify-between text-[11px] py-1">
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setDetailsCall(c)}
+                  className="w-full flex items-center justify-between text-[11px] py-1 hover:bg-card/60 rounded px-1 text-left"
+                >
                   <span className="flex items-center gap-1.5">
                     <Phone className={`w-3 h-3 ${c.status === "completed" ? "text-success" : c.status === "missed" ? "text-warning" : "text-destructive"}`} />
                     <span className="font-semibold">{statusLabel(c.status, c.durationSec).replace("📞 ", "")}</span>
                   </span>
                   <span className="text-muted-foreground">{new Date(c.startedAt).toLocaleString([], { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })}</span>
-                </div>
+                </button>
               ))}
             </div>
           )}
