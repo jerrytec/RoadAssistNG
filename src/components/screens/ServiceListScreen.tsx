@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { Truck, Disc3, MapPin, Navigation, type LucideIcon } from "lucide-react";
-import ProviderCard, { type Provider } from "@/components/ProviderCard";
+import { Truck, Disc3, MapPin, type LucideIcon } from "lucide-react";
+import { type Provider } from "@/components/ProviderCard";
+import NearestProvidersList from "@/components/NearestProvidersList";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
 import { useDirections } from "@/hooks/useDirections";
@@ -107,28 +108,11 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
         <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {list.length} available
       </p>
 
-      {list.length === 0 ? (
-        <div className="text-center text-[12px] text-muted-foreground border border-dashed border-border rounded-lg py-8">
-          No providers available right now. Try again shortly.
-        </div>
-      ) : (
-        list.map((p) => (
-          <div key={p.id} className="relative">
-            <ProviderCard provider={p} onClick={() => onSelectProvider(p)} />
-            <button
-              onClick={(e) => { e.stopPropagation(); startFor(p); }}
-              className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"
-              aria-label={`Directions to ${p.name}`}
-            >
-              <Navigation className="w-3 h-3" aria-hidden="true" /> Directions
-            </button>
-          </div>
-        ))
-      )}
-
-      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2 inline-flex items-center justify-center gap-1 w-full">
-        Tap any provider to book · Tap <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
-      </p>
+      <NearestProvidersList
+        providers={list}
+        onSelect={onSelectProvider}
+        onDirections={startFor}
+      />
     </div>
   );
 };

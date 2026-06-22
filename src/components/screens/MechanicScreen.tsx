@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { Zap, BatteryWarning, Thermometer, Wind, Disc3, Lightbulb, Car, Droplets, HelpCircle, MapPin, Navigation, type LucideIcon } from "lucide-react";
-import ProviderCard from "@/components/ProviderCard";
+import { Zap, BatteryWarning, Thermometer, Wind, Disc3, Lightbulb, Car, Droplets, HelpCircle, MapPin, type LucideIcon } from "lucide-react";
+import NearestProvidersList from "@/components/NearestProvidersList";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
 import { useDirections } from "@/hooks/useDirections";
@@ -123,24 +123,12 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
         })}
       </div>
 
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Nearest verified mechanics</p>
-
-      {mechanics.map((m) => (
-        <div key={m.id} className="relative">
-          <ProviderCard provider={m} onClick={() => onSelectProvider(m)} />
-          <button
-            onClick={(e) => { e.stopPropagation(); startFor(m); }}
-            className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"
-            aria-label={`Directions to ${m.name}`}
-          >
-            <Navigation className="w-3 h-3" aria-hidden="true" /> Directions
-          </button>
-        </div>
-      ))}
-
-      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2 inline-flex items-center justify-center gap-1 w-full">
-        Tap any mechanic to book · Tap <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
-      </p>
+      <NearestProvidersList
+        providers={mechanics}
+        heading="Nearest verified mechanics"
+        onSelect={onSelectProvider}
+        onDirections={startFor}
+      />
     </div>
   );
 };
