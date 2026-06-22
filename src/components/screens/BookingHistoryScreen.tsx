@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Receipt, Calendar, MapPin, Car, Wallet, Star, RefreshCw, Search, AlertTriangle, CheckCircle2, Check, Lock, X } from "lucide-react";
+import { Receipt, Calendar, MapPin, Car, Wallet, Star } from "lucide-react";
 import { getProviderIcon } from "@/lib/providerIcons";
 
 
