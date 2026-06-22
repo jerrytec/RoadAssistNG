@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Phone, History } from "lucide-react";
+import { Phone, History, X } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import CallDialog, { CallButton } from "@/components/CallDialog";
 import CallDetailsDrawer from "@/components/CallDetailsDrawer";
@@ -63,7 +63,7 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
                 <History className="w-3.5 h-3.5" />
               </button>
               <CallButton onClick={() => setCallOpen(true)} />
-              <button onClick={onClose} className="text-muted-foreground text-lg" aria-label="Close">✕</button>
+              <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Close"><X className="w-4 h-4" /></button>
             </div>
           </header>
           <CallDialog
