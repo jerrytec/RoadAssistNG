@@ -142,8 +142,8 @@ const MyOrders = () => {
                     </button>
                   </div>
                 )}
-                <button onClick={() => setChatOrderId(o.id)} className="mt-2 w-full py-2 rounded-lg border border-border text-xs font-semibold">
-                  💬 Chat with vendor
+                <button onClick={() => setChatOrderId(o.id)} className="mt-2 w-full py-2 rounded-lg border border-border text-xs font-semibold inline-flex items-center justify-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> Chat with vendor
                 </button>
               </div>
             ))}

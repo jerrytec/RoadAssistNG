@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { MapPin, MessageCircle, CheckCircle2, Star, CreditCard } from "lucide-react";
 import PageNav from "@/components/PageNav";
 import { toast } from "sonner";
 import { useRequest, useAcceptOffer, useUpdateRequestStatus, useRateRequest, type RequestStatus } from "@/hooks/useServiceRequests";
