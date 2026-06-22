@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MapPin, AlertTriangle } from "lucide-react";
 
 const ProviderDashboard = () => {
   const [isOnline, setIsOnline] = useState(false);
@@ -6,7 +7,7 @@ const ProviderDashboard = () => {
   return (
     <div className="p-3.5 animate-fade-in">
       <div className="bg-accent-light border border-accent/30 rounded-lg p-2.5 text-[11px] text-accent flex items-center gap-2 mb-3">
-        ⚠️ Keep your location ON to receive job requests near you
+        <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" /> Keep your location ON to receive job requests near you
       </div>
 
       {/* Profile card */}

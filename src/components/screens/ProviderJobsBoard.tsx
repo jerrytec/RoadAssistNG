@@ -255,9 +255,9 @@ const Stat = ({ n, l }: { n: number; l: string }) => (
   </div>
 );
 
-const Empty = ({ Icon, text }: { Icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>; text: string }) => (
+const Empty = ({ Icon, text }: { Icon: typeof Inbox; text: string }) => (
   <div className="text-center py-10 border border-dashed border-border rounded-xl">
-    <Icon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" aria-hidden={true} />
+    <Icon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" aria-hidden="true" />
     <p className="text-xs text-muted-foreground">{text}</p>
   </div>
 );
