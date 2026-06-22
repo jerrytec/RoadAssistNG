@@ -46,8 +46,8 @@ const ProviderDashboard = () => {
       ].map((r) => (
         <div key={r.id} className="bg-card border border-border rounded-lg rounded-l-none border-l-[3px] border-l-primary-mid p-3 mb-2">
           <div className="text-[13px] font-semibold">{r.title}</div>
-          <div className="text-[11px] text-muted-foreground mt-0.5">
-            📍 {r.loc} · {r.dist} · Driver: {r.driver} · Booking #{r.id}
+          <div className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+            <MapPin className="w-2.5 h-2.5" aria-hidden="true" /> {r.loc} · {r.dist} · Driver: {r.driver} · Booking #{r.id}
           </div>
           <div className="flex gap-2 mt-2">
             <button className="flex-1 py-2 rounded-md border-none bg-primary-mid text-primary-foreground text-xs font-semibold cursor-pointer">

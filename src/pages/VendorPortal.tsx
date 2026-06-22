@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import ProviderJobsBoard from "@/components/screens/ProviderJobsBoard";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { Inbox, MapPin, Phone } from "lucide-react";
 
 type Tab = "overview" | "parts" | "orders" | "settings";
 

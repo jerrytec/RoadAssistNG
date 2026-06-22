@@ -10,7 +10,7 @@ import { formatNaira } from "@/lib/format";
 import ChatDrawer from "@/components/ChatDrawer";
 import PayoutBreakdown from "@/components/PayoutBreakdown";
 import AvailabilityEditor from "@/components/AvailabilityEditor";
-import { Siren } from "lucide-react";
+import { Siren, MapPin, MessageCircle, AlertTriangle, Inbox, Wrench } from "lucide-react";
 
 const ROLE_TO_KIND: Record<string, ServiceKind> = {
   tow_operator: "tow",
@@ -74,8 +74,8 @@ const ProviderJobsBoard = () => {
               <div key={s.id} className="bg-card border border-destructive/30 rounded-lg p-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-[12px] font-bold capitalize truncate">🚨 {s.service_type} — {s.vehicle ?? "vehicle"}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">📍 {s.sos_lat ? `${s.sos_lat.toFixed(3)}, ${s.sos_lng?.toFixed(3)}` : s.location ?? "Unknown"}</p>
+                    <p className="text-[12px] font-bold capitalize truncate inline-flex items-center gap-1"><Siren className="w-3 h-3 text-destructive" aria-hidden="true" /> {s.service_type} — {s.vehicle ?? "vehicle"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate inline-flex items-center gap-1"><MapPin className="w-2.5 h-2.5" aria-hidden="true" /> {s.sos_lat ? `${s.sos_lat.toFixed(3)}, ${s.sos_lng?.toFixed(3)}` : s.location ?? "Unknown"}</p>
                   </div>
                   <button
                     onClick={() => setSosToAccept(s)}
@@ -92,7 +92,7 @@ const ProviderJobsBoard = () => {
 
       {!isOnline && (
         <div className="bg-accent-light border border-accent/30 rounded-lg p-2.5 text-[11px] text-accent flex items-center gap-2 mb-3">
-          ⚠️ You're offline — turn on availability to receive new jobs
+          <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" /> You're offline — turn on availability to receive new jobs
         </div>
       )}
 
@@ -133,11 +133,11 @@ const ProviderJobsBoard = () => {
       {tab === "open" && (
         <>
           {openWithoutOffer.length === 0 ? (
-            <Empty icon="📭" text={isOnline ? "No open requests right now. We'll notify you." : "Go online to see open requests."} />
+            <Empty Icon={Inbox} text={isOnline ? "No open requests right now. We'll notify you." : "Go online to see open requests."} />
           ) : openWithoutOffer.map((r) => (
             <div key={r.id} className="bg-card border border-border border-l-[3px] border-l-primary rounded-lg p-3 mb-2">
               <div className="text-[13px] font-semibold capitalize">{r.service_type} — {r.vehicle ?? "vehicle"}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">📍 {r.location ?? "Location not specified"}</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1"><MapPin className="w-2.5 h-2.5" aria-hidden="true" /> {r.location ?? "Location not specified"}</div>
               {r.description && <div className="text-[11px] mt-1">{r.description}</div>}
               <div className="flex gap-2 mt-2">
                 <button onClick={() => setQuoting(r)} className="flex-1 py-2 rounded-md bg-primary text-primary-foreground text-xs font-semibold">
@@ -255,9 +255,9 @@ const Stat = ({ n, l }: { n: number; l: string }) => (
   </div>
 );
 
-const Empty = ({ icon, text }: { icon: string; text: string }) => (
+const Empty = ({ Icon, text }: { Icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>; text: string }) => (
   <div className="text-center py-10 border border-dashed border-border rounded-xl">
-    <div className="text-3xl mb-2">{icon}</div>
+    <Icon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" aria-hidden={true} />
     <p className="text-xs text-muted-foreground">{text}</p>
   </div>
 );
