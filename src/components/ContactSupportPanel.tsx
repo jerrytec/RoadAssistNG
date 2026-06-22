@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Phone, MessageCircle, Mail, Smartphone, ArrowLeft, ArrowRight, X, CheckCircle2, type LucideIcon } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -7,11 +8,13 @@ interface Props {
 
 type Channel = "phone" | "chat" | "email";
 
-const channels: { id: Channel; icon: string; label: string; desc: string; color: string }[] = [
-  { id: "phone", icon: "📞", label: "Phone Support", desc: "Talk to an agent now", color: "bg-primary-light text-primary" },
-  { id: "chat", icon: "💬", label: "Live Chat", desc: "Average wait: ~2 min", color: "bg-secondary-light text-secondary" },
-  { id: "email", icon: "📧", label: "Email Support", desc: "Response within 24 hrs", color: "bg-accent-light text-accent" },
+const channels: { id: Channel; Icon: LucideIcon; label: string; desc: string; color: string }[] = [
+  { id: "phone", Icon: Phone,         label: "Phone Support", desc: "Talk to an agent now",     color: "bg-primary-light text-primary" },
+  { id: "chat",  Icon: MessageCircle, label: "Live Chat",     desc: "Average wait: ~2 min",     color: "bg-secondary-light text-secondary" },
+  { id: "email", Icon: Mail,          label: "Email Support", desc: "Response within 24 hrs",   color: "bg-accent-light text-accent" },
 ];
+
+const channelMeta = (id: Channel | null) => channels.find((c) => c.id === id);
 
 const ContactSupportPanel = ({ open, onClose }: Props) => {
   const [selected, setSelected] = useState<Channel | null>(null);
@@ -46,6 +49,8 @@ const ContactSupportPanel = ({ open, onClose }: Props) => {
 
   if (!open) return null;
 
+  const SelectedIcon = channelMeta(selected)?.Icon;
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-foreground/40" onClick={onClose} />
@@ -54,13 +59,18 @@ const ContactSupportPanel = ({ open, onClose }: Props) => {
         <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between z-10 rounded-t-2xl">
           <div className="flex items-center gap-2">
             {selected && (
-              <button onClick={handleBack} className="text-muted-foreground bg-transparent border-none cursor-pointer text-sm">←</button>
+              <button onClick={handleBack} aria-label="Back" className="text-muted-foreground hover:text-foreground bg-transparent border-none cursor-pointer transition-colors">
+                <ArrowLeft className="w-4 h-4" />
+              </button>
             )}
-            <h2 className="text-sm font-bold text-foreground">
-              {selected === "phone" ? "📞 Phone Support" : selected === "chat" ? "💬 Live Chat" : selected === "email" ? "📧 Email Support" : "Contact Support"}
+            <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+              {SelectedIcon && <SelectedIcon className="w-4 h-4 text-primary" aria-hidden="true" />}
+              {selected === "phone" ? "Phone Support" : selected === "chat" ? "Live Chat" : selected === "email" ? "Email Support" : "Contact Support"}
             </h2>
           </div>
-          <button onClick={onClose} className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-xs text-muted-foreground cursor-pointer">✕</button>
+          <button onClick={onClose} aria-label="Close" className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground cursor-pointer transition-colors hover:text-foreground hover:border-foreground/40">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         <div className="p-4">
@@ -68,22 +78,25 @@ const ContactSupportPanel = ({ open, onClose }: Props) => {
           {!selected && (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground mb-3">Choose your preferred support channel:</p>
-              {channels.map((ch) => (
-                <button
-                  key={ch.id}
-                  onClick={() => setSelected(ch.id)}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-border bg-background hover:border-primary/40 cursor-pointer transition-all text-left"
-                >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${ch.color}`}>
-                    {ch.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold text-foreground">{ch.label}</div>
-                    <div className="text-[11px] text-muted-foreground">{ch.desc}</div>
-                  </div>
-                  <span className="text-muted-foreground text-xs">→</span>
-                </button>
-              ))}
+              {channels.map((ch) => {
+                const ChIcon = ch.Icon;
+                return (
+                  <button
+                    key={ch.id}
+                    onClick={() => setSelected(ch.id)}
+                    className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-border bg-background hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm cursor-pointer transition-all duration-200 text-left group"
+                  >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${ch.color}`}>
+                      <ChIcon className="w-5 h-5" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-foreground">{ch.label}</div>
+                      <div className="text-[11px] text-muted-foreground">{ch.desc}</div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </button>
+                );
+              })}
               <div className="mt-4 p-3 bg-background rounded-lg border border-border">
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
                   <span className="font-semibold text-foreground">Operating hours:</span> Mon–Sat, 7:00 AM – 10:00 PM WAT. Emergency roadside support available 24/7.
@@ -95,7 +108,9 @@ const ContactSupportPanel = ({ open, onClose }: Props) => {
           {/* Phone support */}
           {selected === "phone" && (
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-light flex items-center justify-center text-2xl">📞</div>
+              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-light flex items-center justify-center text-primary">
+                <Phone className="w-7 h-7" aria-hidden="true" />
+              </div>
               <h3 className="text-base font-bold text-foreground mb-1">Call Our Support Team</h3>
               <p className="text-xs text-muted-foreground mb-4">Available Mon–Sat, 7 AM – 10 PM WAT</p>
               <div className="space-y-2 mb-4">
@@ -107,13 +122,13 @@ const ContactSupportPanel = ({ open, onClose }: Props) => {
                   <a
                     key={line.label}
                     href={`tel:${line.number.replace(/\s/g, "")}`}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-background hover:border-primary/40 transition-all no-underline"
+                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-background hover:border-primary/40 hover:shadow-sm transition-all duration-200 no-underline"
                   >
                     <div className="text-left">
                       <div className="text-[11px] text-muted-foreground">{line.label}</div>
                       <div className="text-sm font-semibold text-foreground">{line.number}</div>
                     </div>
-                    <span className="text-primary text-lg">📲</span>
+                    <Smartphone className="w-4 h-4 text-primary" aria-hidden="true" />
                   </a>
                 ))}
               </div>
@@ -147,7 +162,7 @@ const ContactSupportPanel = ({ open, onClose }: Props) => {
                   className="flex-1 py-2 px-3 border border-border rounded-lg text-xs outline-none bg-background text-foreground focus:border-primary"
                   placeholder="Describe your issue..."
                 />
-                <button onClick={sendChat} className="px-4 py-2 rounded-lg border-none bg-primary text-primary-foreground text-xs font-semibold cursor-pointer">
+                <button onClick={sendChat} className="px-4 py-2 rounded-lg border-none bg-primary text-primary-foreground text-xs font-semibold cursor-pointer transition-opacity hover:opacity-90">
                   Send
                 </button>
               </div>
@@ -181,22 +196,22 @@ const ContactSupportPanel = ({ open, onClose }: Props) => {
               <button
                 onClick={sendEmail}
                 disabled={!emailForm.subject.trim() || !emailForm.message.trim()}
-                className="w-full mt-3 py-3 rounded-lg border-none bg-primary text-primary-foreground text-sm font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full mt-3 py-3 rounded-lg border-none bg-primary text-primary-foreground text-sm font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5"
               >
-                Send Email →
+                Send Email <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           )}
 
           {selected === "email" && emailSent && (
             <div className="text-center py-4">
-              <div className="text-4xl mb-3">✅</div>
+              <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-success" aria-hidden="true" />
               <h3 className="text-base font-bold text-foreground mb-1">Email Sent!</h3>
               <p className="text-xs text-muted-foreground mb-2">
                 Your ticket ID is <span className="font-mono font-semibold text-primary">#{("RA-" + Math.random().toString(36).slice(2, 8)).toUpperCase()}</span>
               </p>
               <p className="text-[11px] text-muted-foreground">We'll respond to your registered email within 24 hours.</p>
-              <button onClick={onClose} className="mt-4 px-6 py-2.5 rounded-lg border-none bg-primary text-primary-foreground text-xs font-bold cursor-pointer">
+              <button onClick={onClose} className="mt-4 px-6 py-2.5 rounded-lg border-none bg-primary text-primary-foreground text-xs font-bold cursor-pointer transition-opacity hover:opacity-90">
                 Done
               </button>
             </div>
