@@ -22,7 +22,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2041",
     provider: "Emeka Okafor Towing",
-    providerIcon: "🚐",
     type: "Tow van",
     date: "28 Apr 2026",
     time: "2:14 PM",
@@ -36,7 +35,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2035",
     provider: "Chidi AutoFix Mobile",
-    providerIcon: "🔩",
     type: "Mobile mechanic",
     date: "25 Apr 2026",
     time: "10:30 AM",
@@ -51,7 +49,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2028",
     provider: "Femi Tyres & Vulcanizer",
-    providerIcon: "🔧",
     type: "Vulcanizer",
     date: "20 Apr 2026",
     time: "4:45 PM",
@@ -66,7 +63,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2019",
     provider: "Lagos Rescue Co.",
-    providerIcon: "🚐",
     type: "Tow van",
     date: "14 Apr 2026",
     time: "8:12 AM",
@@ -80,7 +76,6 @@ const bookings: Booking[] = [
   {
     id: "RA-2011",
     provider: "Tunde Fix-It Mobile",
-    providerIcon: "🔧",
     type: "Vulcanizer",
     date: "8 Apr 2026",
     time: "1:20 PM",
