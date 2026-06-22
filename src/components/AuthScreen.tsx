@@ -3,7 +3,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
-import { Loader2, ShieldCheck, Zap, MapPin } from "lucide-react";
+import { Loader2, ShieldCheck, Zap, MapPin, Car, Truck, Disc3, Wrench, PackageOpen, type LucideIcon } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 
 interface AuthScreenProps {
@@ -13,12 +13,12 @@ interface AuthScreenProps {
 type Mode = "signup" | "login" | "forgot";
 type Role = "buyer" | "tow_operator" | "vulcanizer" | "mechanic" | "vendor";
 
-const ROLES: { id: Role; label: string; icon: string; desc: string }[] = [
-  { id: "buyer", label: "User", icon: "🚗", desc: "I need help or parts" },
-  { id: "tow_operator", label: "Tow van", icon: "🚛", desc: "I provide towing" },
-  { id: "vulcanizer", label: "Vulcanizer", icon: "🛞", desc: "Tyre fixes on the road" },
-  { id: "mechanic", label: "Mechanic", icon: "🔧", desc: "I repair vehicles" },
-  { id: "vendor", label: "Parts seller", icon: "🧰", desc: "I sell spare parts" },
+const ROLES: { id: Role; label: string; Icon: LucideIcon; desc: string }[] = [
+  { id: "buyer",        label: "User",         Icon: Car,         desc: "I need help or parts" },
+  { id: "tow_operator", label: "Tow van",      Icon: Truck,       desc: "I provide towing" },
+  { id: "vulcanizer",   label: "Vulcanizer",   Icon: Disc3,       desc: "Tyre fixes on the road" },
+  { id: "mechanic",     label: "Mechanic",     Icon: Wrench,      desc: "I repair vehicles" },
+  { id: "vendor",       label: "Parts seller", Icon: PackageOpen, desc: "I sell spare parts" },
 ];
 
 const signupSchema = z.object({
@@ -188,20 +188,25 @@ const AuthScreen = ({ onComplete }: AuthScreenProps) => {
                   <div className="mb-4">
                     <label className="text-[11px] font-semibold text-muted-foreground mb-2 block uppercase tracking-wide">I'm joining as</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {ROLES.map((r) => (
-                        <button
-                          key={r.id}
-                          type="button"
-                          onClick={() => setRole(r.id)}
-                          className={`text-left p-2.5 rounded-lg border text-xs transition-all ${
-                            role === r.id ? "border-primary bg-primary/5 ring-2 ring-primary/15" : "border-border bg-background hover:border-primary/40"
-                          }`}
-                        >
-                          <div className="text-base leading-none mb-1">{r.icon}</div>
-                          <div className="text-[12px] font-semibold text-foreground">{r.label}</div>
-                          <div className="text-[10px] text-muted-foreground leading-tight">{r.desc}</div>
-                        </button>
-                      ))}
+                      {ROLES.map((r) => {
+                        const RoleIcon = r.Icon;
+                        const active = role === r.id;
+                        return (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => setRole(r.id)}
+                            aria-pressed={active}
+                            className={`text-left p-2.5 rounded-lg border text-xs transition-all duration-200 ${
+                              active ? "border-primary bg-primary/5 ring-2 ring-primary/15" : "border-border bg-background hover:border-primary/40 hover:-translate-y-0.5"
+                            }`}
+                          >
+                            <RoleIcon className={`w-4 h-4 mb-1 ${active ? "text-primary" : "text-muted-foreground"}`} strokeWidth={1.75} aria-hidden="true" />
+                            <div className="text-[12px] font-semibold text-foreground">{r.label}</div>
+                            <div className="text-[10px] text-muted-foreground leading-tight">{r.desc}</div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
