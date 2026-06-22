@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Truck, Disc3, MapPin, Navigation, type LucideIcon } from "lucide-react";
 import ProviderCard, { type Provider } from "@/components/ProviderCard";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
@@ -11,20 +12,20 @@ interface Props {
   onSelectProvider: (p: Provider) => void;
 }
 
-const META = {
+const META: Record<Props["serviceType"], { Icon: LucideIcon; title: string; subtitle: string; filter: (p: Provider) => boolean; variant: "primary" }> = {
   tow: {
-    icon: "🚐",
+    Icon: Truck,
     title: "Tow van operators",
     subtitle: "Verified tow vans available near you",
-    filter: (p: Provider) => p.type.toLowerCase().includes("tow"),
-    variant: "primary" as const,
+    filter: (p) => p.type.toLowerCase().includes("tow"),
+    variant: "primary",
   },
   vulcanizer: {
-    icon: "🔧",
+    Icon: Disc3,
     title: "Vulcanizers",
     subtitle: "Mobile & fixed-shop vulcanizers ready to help",
-    filter: (p: Provider) => p.type.toLowerCase().includes("vulcanizer"),
-    variant: "primary" as const,
+    filter: (p) => p.type.toLowerCase().includes("vulcanizer"),
+    variant: "primary",
   },
 };
 
@@ -61,10 +62,13 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [list, dir.target, meta.variant]);
 
+  const HeaderIcon = meta.Icon;
   return (
     <div className="p-3.5 animate-fade-in">
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-xl">{meta.icon}</span>
+        <span className="w-8 h-8 rounded-lg bg-primary-light text-primary flex items-center justify-center">
+          <HeaderIcon className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+        </span>
         <h2 className="text-[15px] font-semibold">{meta.title}</h2>
       </div>
       <p className="text-[11px] text-muted-foreground mb-3">{meta.subtitle}</p>
@@ -99,8 +103,8 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
         />
       )}
 
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-        📍 Ikeja, Lagos · {list.length} available
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 inline-flex items-center gap-1">
+        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {list.length} available
       </p>
 
       {list.length === 0 ? (
@@ -113,16 +117,17 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
             <ProviderCard provider={p} onClick={() => onSelectProvider(p)} />
             <button
               onClick={(e) => { e.stopPropagation(); startFor(p); }}
-              className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+              className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"
+              aria-label={`Directions to ${p.name}`}
             >
-              🧭 Directions
+              <Navigation className="w-3 h-3" aria-hidden="true" /> Directions
             </button>
           </div>
         ))
       )}
 
-      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2">
-        Tap any provider to book · Tap 🧭 for turn-by-turn navigation
+      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2 inline-flex items-center justify-center gap-1 w-full">
+        Tap any provider to book · Tap <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
       </p>
     </div>
   );
