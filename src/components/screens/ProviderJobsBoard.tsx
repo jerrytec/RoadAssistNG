@@ -167,7 +167,7 @@ const ProviderJobsBoard = () => {
       {tab === "active" && (
         <>
           {activeJobs.length === 0 ? (
-            <Empty icon="🛠️" text="No active jobs." />
+            <Empty Icon={Wrench} text="No active jobs." />
           ) : activeJobs.map((r) => {
             const step = NEXT_STATUS[r.status];
             return (
@@ -175,13 +175,13 @@ const ProviderJobsBoard = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="text-[13px] font-semibold capitalize">{r.service_type} — {r.vehicle ?? "vehicle"}</div>
-                    <div className="text-[11px] text-muted-foreground">📍 {r.location ?? "—"}</div>
+                    <div className="text-[11px] text-muted-foreground inline-flex items-center gap-1"><MapPin className="w-2.5 h-2.5" aria-hidden="true" /> {r.location ?? "—"}</div>
                     <div className="text-[11px] mt-0.5">Agreed: <span className="font-semibold text-primary">{formatNaira(r.price_estimate_kobo)}</span></div>
                   </div>
                   <span className="text-[9px] font-bold bg-muted px-1.5 py-0.5 rounded uppercase">{r.status}</span>
                 </div>
                 <div className="flex gap-2 mt-2">
-                  <button onClick={() => setChatJob(r)} className="flex-1 py-2 rounded-md border border-border text-xs font-medium">💬 Chat</button>
+                  <button onClick={() => setChatJob(r)} className="flex-1 py-2 rounded-md border border-border text-xs font-medium inline-flex items-center justify-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> Chat</button>
                   {step && (
                     <button
                       onClick={async () => { try { await updateStatus.mutateAsync({ id: r.id, status: step.next }); toast.success("Status updated"); } catch (e: any) { toast.error(e.message); } }}
