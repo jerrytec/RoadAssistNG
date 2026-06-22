@@ -1,3 +1,5 @@
+import { ExternalLink } from "lucide-react";
+
 interface Props {
   lat: number | null;
   lng: number | null;
@@ -35,12 +37,13 @@ const LiveSOSMap = ({ lat, lng, height = 220, label = "SOS location" }: Props) =
         href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`}
         target="_blank"
         rel="noreferrer"
-        className="absolute bottom-2 right-2 bg-card/90 backdrop-blur px-2 py-1 rounded text-[10px] font-medium hover:bg-card"
+        className="absolute bottom-2 right-2 bg-card/90 backdrop-blur px-2 py-1 rounded text-[10px] font-medium hover:bg-card transition-colors inline-flex items-center gap-1"
       >
-        Open in maps ↗
+        Open in maps <ExternalLink className="w-3 h-3" aria-hidden="true" />
       </a>
     </div>
   );
 };
 
 export default LiveSOSMap;
+

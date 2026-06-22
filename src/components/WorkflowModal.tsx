@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Home } from "lucide-react";
+import { ArrowLeft, ArrowRight, Home, X, Building2, CreditCard, Car, MapPin, Wrench, CheckCircle2, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { Provider } from "@/components/ProviderCard";
 import { useCreateRequest, type ServiceKind } from "@/hooks/useServiceRequests";
@@ -302,11 +302,11 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
     </div>
   );
 
-  const servicePhaseData: Record<ServicePhase, { icon: string; title: string; desc: string; progress: number }> = {
-    en_route: { icon: "🚗", title: "Provider En Route", desc: `${provider.name} is heading to your location`, progress: 25 },
-    arrived: { icon: "📍", title: "Provider Arrived", desc: `${provider.name} has arrived at your location`, progress: 50 },
-    in_progress: { icon: "🔧", title: "Service In Progress", desc: "Work is being done on your vehicle", progress: 75 },
-    completed: { icon: "✅", title: "Service Completed", desc: "The provider has finished the work", progress: 100 },
+  const servicePhaseData: Record<ServicePhase, { Icon: LucideIcon; title: string; desc: string; progress: number }> = {
+    en_route:    { Icon: Car,           title: "Provider En Route",    desc: `${provider.name} is heading to your location`, progress: 25 },
+    arrived:     { Icon: MapPin,        title: "Provider Arrived",     desc: `${provider.name} has arrived at your location`, progress: 50 },
+    in_progress: { Icon: Wrench,        title: "Service In Progress",  desc: "Work is being done on your vehicle",            progress: 75 },
+    completed:   { Icon: CheckCircle2,  title: "Service Completed",    desc: "The provider has finished the work",            progress: 100 },
   };
 
   return (
@@ -331,8 +331,8 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
             </button>
           </div>
           <span className="text-primary-foreground text-sm font-bold flex-1 text-center truncate">Book {provider.name}</span>
-          <button onClick={handleClose} aria-label="Close" className="bg-white/20 hover:bg-white/30 active:scale-95 text-primary-foreground w-[26px] h-[26px] rounded-full text-sm flex items-center justify-center transition-all">
-            ✕
+          <button onClick={handleClose} aria-label="Close" className="bg-white/20 hover:bg-white/30 active:scale-95 text-primary-foreground w-[26px] h-[26px] rounded-full flex items-center justify-center transition-all">
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
@@ -573,21 +573,25 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
                   {/* Payment method tabs */}
                   <div className="flex gap-1.5 mb-3">
                     {([
-                      { id: "bank" as PayMethod, icon: "🏦", label: "Bank Transfer" },
-                      { id: "card" as PayMethod, icon: "💳", label: "Debit Card" },
-                    ]).map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => setPayMethod(m.id)}
-                        className={`flex-1 py-2 rounded-lg text-[11px] font-semibold border cursor-pointer transition-all ${
-                          payMethod === m.id
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-muted-foreground border-border hover:border-primary/40"
-                        }`}
-                      >
-                        {m.icon} {m.label}
-                      </button>
-                    ))}
+                      { id: "bank" as PayMethod, Icon: Building2,  label: "Bank Transfer" },
+                      { id: "card" as PayMethod, Icon: CreditCard, label: "Debit Card" },
+                    ]).map((m) => {
+                      const MIcon = m.Icon;
+                      const active = payMethod === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => setPayMethod(m.id)}
+                          className={`flex-1 py-2 rounded-lg text-[11px] font-semibold border cursor-pointer transition-all inline-flex items-center justify-center gap-1.5 ${
+                            active
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background text-muted-foreground border-border hover:border-primary/40"
+                          }`}
+                        >
+                          <MIcon className="w-3.5 h-3.5" aria-hidden="true" /> {m.label}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Card form */}
@@ -713,10 +717,13 @@ const WorkflowModal = ({ provider, onClose, prefill }: Props) => {
 
                     return (
                       <div key={phase} className={`flex items-center gap-3 ${isCurrent ? "opacity-100" : isDone ? "opacity-60" : "opacity-30"}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 ${
-                          isDone ? "bg-primary-light" : isCurrent ? "bg-primary-light ring-2 ring-primary" : "bg-border"
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                          isDone ? "bg-primary-light text-primary" : isCurrent ? "bg-primary-light text-primary ring-2 ring-primary" : "bg-border text-muted-foreground"
                         }`}>
-                          {isDone ? "✅" : servicePhaseData[phase].icon}
+                          {(() => {
+                            const PhaseIcon = isDone ? CheckCircle2 : servicePhaseData[phase].Icon;
+                            return <PhaseIcon className="w-4 h-4" aria-hidden="true" />;
+                          })()}
                         </div>
                         <div>
                           <p className={`text-xs font-semibold ${isCurrent ? "text-primary" : "text-foreground"}`}>

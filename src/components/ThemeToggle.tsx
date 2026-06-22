@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
 
 const getInitial = () => {
   if (typeof window === "undefined") return false;
@@ -23,13 +24,14 @@ const ThemeToggle = () => {
     window.dispatchEvent(new Event("themechange"));
   };
 
+  const Icon = dark ? Sun : Moon;
   return (
     <button
       onClick={toggle}
-      className="relative bg-white/[.18] text-primary-foreground text-sm px-2 py-1 rounded-full border border-white/30 cursor-pointer"
+      className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[.18] text-primary-foreground border border-white/30 cursor-pointer transition-all duration-200 hover:bg-white/[.28] hover:scale-105 focus-visible:ring-2 focus-visible:ring-white/60"
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {dark ? "☀️" : "🌙"}
+      <Icon className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
     </button>
   );
 };
