@@ -14,11 +14,15 @@ interface Props {
   title?: string;
 }
 
+const CALL_PREFIXES = ["Call · ", "Missed call", "Call declined", "Call failed"];
+const isCallMessage = (body: string) =>
+  body.startsWith("📞") || CALL_PREFIXES.some((p) => body.startsWith(p));
+
 const statusLabel = (s: CallStatus, dur: number) => {
-  if (s === "completed") return `📞 Call · ${formatDuration(dur)}`;
-  if (s === "missed") return "📞 Missed call";
-  if (s === "declined") return "📞 Call declined";
-  return "📞 Call failed";
+  if (s === "completed") return `Call · ${formatDuration(dur)}`;
+  if (s === "missed") return "Missed call";
+  if (s === "declined") return "Call declined";
+  return "Call failed";
 };
 
 const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
@@ -93,7 +97,7 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
                 >
                   <span className="flex items-center gap-1.5">
                     <Phone className={`w-3 h-3 ${c.status === "completed" ? "text-success" : c.status === "missed" ? "text-warning" : "text-destructive"}`} />
-                    <span className="font-semibold">{statusLabel(c.status, c.durationSec).replace("📞 ", "")}</span>
+                    <span className="font-semibold">{statusLabel(c.status, c.durationSec)}</span>
                   </span>
                   <span className="text-muted-foreground">{new Date(c.startedAt).toLocaleString([], { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })}</span>
                 </button>
@@ -107,7 +111,8 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
             )}
             {messages.map((m) => {
               const me = m.sender_id === user?.id;
-              const isCall = m.body.startsWith("📞");
+              const isCall = isCallMessage(m.body);
+              const body = isCall ? m.body.replace(/^📞\s*/, "") : m.body;
               return (
                 <div
                   key={m.id}
@@ -119,7 +124,10 @@ const ChatDrawer = ({ open, onClose, threadType, threadId, title }: Props) => {
                         : "self-start bg-muted text-foreground rounded-bl-md"
                   }`}
                 >
-                  {m.body}
+                  <span className="inline-flex items-center gap-1.5 justify-center">
+                    {isCall && <Phone className="w-3 h-3" aria-hidden="true" />}
+                    {body}
+                  </span>
                   <div className={`text-[9px] mt-0.5 ${isCall ? "text-muted-foreground" : me ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                     {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
