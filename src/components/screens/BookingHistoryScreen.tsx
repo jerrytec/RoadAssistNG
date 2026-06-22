@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Receipt, Calendar, MapPin, Car, Wallet, Star } from "lucide-react";
+import { getProviderIcon } from "@/lib/providerIcons";
+
 
 interface Booking {
   id: string;
@@ -112,7 +115,7 @@ const ReceiptModal = ({ booking, onClose }: { booking: Booking; onClose: () => v
       onClick={(e) => e.stopPropagation()}
     >
       <div className="text-center mb-4">
-        <div className="text-2xl mb-1">🧾</div>
+        <Receipt className="w-6 h-6 mx-auto mb-1 text-primary" aria-hidden="true" />
         <h3 className="text-[15px] font-bold">Payment Receipt</h3>
         <p className="text-[11px] text-muted-foreground">Transaction #{booking.id}</p>
       </div>
@@ -172,8 +175,8 @@ const DetailModal = ({ booking, onClose }: { booking: Booking; onClose: () => vo
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-[48px] h-[48px] rounded-lg bg-background flex items-center justify-center text-xl shrink-0">
-          {booking.providerIcon}
+        <div className="w-[48px] h-[48px] rounded-lg bg-background flex items-center justify-center text-foreground shrink-0">
+          {(() => { const I = getProviderIcon(booking.type); return <I className="w-5 h-5 text-primary" strokeWidth={1.75} aria-hidden="true" />; })()}
         </div>
         <div>
           <h3 className="text-[14px] font-bold">{booking.provider}</h3>
@@ -188,7 +191,7 @@ const DetailModal = ({ booking, onClose }: { booking: Booking; onClose: () => vo
         <div>
           <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Timeline</div>
           <div className="flex items-center gap-2">
-            <span>📅</span>
+            <Calendar className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
             <span>{booking.date} at {booking.time}</span>
             {booking.duration && booking.duration !== "—" && (
               <span className="text-muted-foreground">· {booking.duration}</span>
@@ -199,7 +202,7 @@ const DetailModal = ({ booking, onClose }: { booking: Booking; onClose: () => vo
         <div>
           <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Location</div>
           <div className="flex items-center gap-2">
-            <span>📍</span>
+            <MapPin className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
             <span>{booking.location}</span>
           </div>
         </div>
@@ -207,7 +210,7 @@ const DetailModal = ({ booking, onClose }: { booking: Booking; onClose: () => vo
         <div>
           <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Vehicle</div>
           <div className="flex items-center gap-2">
-            <span>🚗</span>
+            <Car className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
             <span>{booking.vehicle}</span>
           </div>
         </div>
@@ -224,7 +227,7 @@ const DetailModal = ({ booking, onClose }: { booking: Booking; onClose: () => vo
         <div>
           <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Pricing</div>
           <div className="flex items-center gap-2">
-            <span>💰</span>
+            <Wallet className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
             <span className="font-semibold text-primary">{booking.amount}</span>
             {booking.status === "completed" && (
               <span className="text-[10px] text-muted-foreground ml-1">· Paid via escrow</span>
@@ -235,8 +238,10 @@ const DetailModal = ({ booking, onClose }: { booking: Booking; onClose: () => vo
         {booking.rating && (
           <div>
             <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Your Rating</div>
-            <div className="text-[13px]" style={{ color: "#EF9F27" }}>
-              {"★".repeat(booking.rating)}{"☆".repeat(5 - booking.rating)}
+            <div className="flex items-center gap-0.5 text-accent">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className={`w-3.5 h-3.5 ${i < (booking.rating ?? 0) ? "fill-accent" : "opacity-30"}`} aria-hidden="true" />
+              ))}
             </div>
           </div>
         )}
@@ -514,8 +519,8 @@ const BookingHistoryScreen = ({ onUseAgain }: { onUseAgain?: (data: UseAgainData
       {bookings.map((b) => (
         <div key={b.id} className="bg-card border border-border rounded-lg p-3 mb-2 animate-fade-in">
           <div className="flex items-start gap-2.5" onClick={() => setDetailBooking(b)} role="button" tabIndex={0}>
-            <div className="w-[42px] h-[42px] rounded-lg bg-background flex items-center justify-center text-lg shrink-0">
-              {b.providerIcon}
+            <div className="w-[42px] h-[42px] rounded-lg bg-background flex items-center justify-center shrink-0">
+              {(() => { const I = getProviderIcon(b.type); return <I className="w-5 h-5 text-primary" strokeWidth={1.75} aria-hidden="true" />; })()}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
@@ -533,10 +538,12 @@ const BookingHistoryScreen = ({ onUseAgain }: { onUseAgain?: (data: UseAgainData
                 </div>
                 <div className="text-xs font-semibold text-primary">{b.amount}</div>
               </div>
-              <div className="text-[10px] text-muted-foreground mt-1">🚗 {b.vehicle}</div>
+              <div className="text-[10px] text-muted-foreground mt-1 inline-flex items-center gap-1"><Car className="w-3 h-3" aria-hidden="true" /> {b.vehicle}</div>
               {b.rating && (
-                <div className="text-[11px] mt-1" style={{ color: "#EF9F27" }}>
-                  {"★".repeat(b.rating)}{"☆".repeat(5 - b.rating)}
+                <div className="flex items-center gap-0.5 mt-1 text-accent">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className={`w-3 h-3 ${i < (b.rating ?? 0) ? "fill-accent" : "opacity-30"}`} aria-hidden="true" />
+                  ))}
                 </div>
               )}
             </div>

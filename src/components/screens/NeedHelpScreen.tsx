@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Layers, Truck, Disc3, Wrench, ShieldCheck, MapPin, Navigation, type LucideIcon } from "lucide-react";
 import ProviderCard from "@/components/ProviderCard";
 import SOSButton from "@/components/SOSButton";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
@@ -8,14 +9,20 @@ import { syntheticCoord } from "@/lib/googleMaps";
 import { allProviders } from "@/data/providers";
 import type { Provider } from "@/components/ProviderCard";
 
-const filters = ["All nearby", "🚐 Tow vans", "🔧 Vulcanizers", "🔩 Mechanics", "✅ Verified"];
+const filters: { id: string; label: string; Icon: LucideIcon }[] = [
+  { id: "all",        label: "All nearby",   Icon: Layers },
+  { id: "tow",        label: "Tow vans",     Icon: Truck },
+  { id: "vulcanizer", label: "Vulcanizers",  Icon: Disc3 },
+  { id: "mechanic",   label: "Mechanics",    Icon: Wrench },
+  { id: "verified",   label: "Verified",     Icon: ShieldCheck },
+];
 
 interface Props {
   onSelectProvider: (p: Provider) => void;
 }
 
 const NeedHelpScreen = ({ onSelectProvider }: Props) => {
-  const [activeFilter, setActiveFilter] = useState("All nearby");
+  const [activeFilter, setActiveFilter] = useState("all");
   const dir = useDirections();
 
   const startFor = (p: Provider) => {
@@ -38,13 +45,13 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
   })();
 
   const filtered = (
-    activeFilter === "All nearby"
+    activeFilter === "all"
       ? mixed
       : allProviders.filter((p) => {
-          if (activeFilter === "🚐 Tow vans") return p.type.includes("Tow");
-          if (activeFilter === "🔧 Vulcanizers") return p.type.includes("Vulcanizer");
-          if (activeFilter === "🔩 Mechanics") return p.type.includes("mechanic");
-          if (activeFilter === "✅ Verified") return p.verified;
+          if (activeFilter === "tow") return p.type.includes("Tow");
+          if (activeFilter === "vulcanizer") return p.type.includes("Vulcanizer");
+          if (activeFilter === "mechanic") return p.type.includes("mechanic");
+          if (activeFilter === "verified") return p.verified;
           return true;
         })
   ).slice(0, 10);
@@ -107,22 +114,29 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
         />
       )}
 
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">📍 Ikeja, Lagos</p>
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 inline-flex items-center gap-1">
+        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos
+      </p>
 
       <div className="flex gap-1.5 mb-3 flex-wrap">
-        {filters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setActiveFilter(f)}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer border transition-all ${
-              activeFilter === f
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-card text-muted-foreground border-border"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+        {filters.map((f) => {
+          const FIcon = f.Icon;
+          const active = activeFilter === f.id;
+          return (
+            <button
+              key={f.id}
+              onClick={() => setActiveFilter(f.id)}
+              aria-pressed={active}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer border transition-all inline-flex items-center gap-1 ${
+                active
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/40"
+              }`}
+            >
+              <FIcon className="w-3 h-3" aria-hidden="true" /> {f.label}
+            </button>
+          );
+        })}
       </div>
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Nearest providers</p>
@@ -132,15 +146,16 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
           <ProviderCard provider={p} onClick={() => onSelectProvider(p)} />
           <button
             onClick={(e) => { e.stopPropagation(); startFor(p); }}
-            className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+            className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"
+            aria-label={`Directions to ${p.name}`}
           >
-            🧭 Directions
+            <Navigation className="w-3 h-3" aria-hidden="true" /> Directions
           </button>
         </div>
       ))}
 
-      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2">
-        Tap any provider to book · Tap 🧭 for turn-by-turn navigation
+      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2 inline-flex items-center justify-center gap-1 w-full">
+        Tap any provider to book · Tap <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
       </p>
     </div>
   );

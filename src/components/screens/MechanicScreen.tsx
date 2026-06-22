@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Zap, BatteryWarning, Thermometer, Wind, Disc3, Lightbulb, Car, Droplets, HelpCircle, MapPin, Navigation, type LucideIcon } from "lucide-react";
 import ProviderCard from "@/components/ProviderCard";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
@@ -7,16 +8,16 @@ import { syntheticCoord } from "@/lib/googleMaps";
 import { mechanics } from "@/data/providers";
 import type { Provider } from "@/components/ProviderCard";
 
-const faults = [
-  { icon: "⚡", label: "Won't start" },
-  { icon: "🔋", label: "Dead battery" },
-  { icon: "🌡️", label: "Overheating" },
-  { icon: "💨", label: "Flat tyre" },
-  { icon: "🛞", label: "Brake issue" },
-  { icon: "💡", label: "Electrical" },
-  { icon: "🚗", label: "Engine noise" },
-  { icon: "💧", label: "Fluid leak" },
-  { icon: "❓", label: "Not sure" },
+const faults: { Icon: LucideIcon; label: string }[] = [
+  { Icon: Zap,            label: "Won't start" },
+  { Icon: BatteryWarning, label: "Dead battery" },
+  { Icon: Thermometer,    label: "Overheating" },
+  { Icon: Wind,           label: "Flat tyre" },
+  { Icon: Disc3,          label: "Brake issue" },
+  { Icon: Lightbulb,      label: "Electrical" },
+  { Icon: Car,            label: "Engine noise" },
+  { Icon: Droplets,       label: "Fluid leak" },
+  { Icon: HelpCircle,     label: "Not sure" },
 ];
 
 interface Props {
@@ -92,29 +93,34 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
         />
       )}
 
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-        📍 Ikeja, Lagos · {mechanics.length} mechanics nearby
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 inline-flex items-center gap-1">
+        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {mechanics.length} mechanics nearby
       </p>
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">What's the problem?</p>
 
       <div className="grid grid-cols-3 gap-2 mb-3">
-        {faults.map((f) => (
-          <button
-            key={f.label}
-            onClick={() => setSelectedFault(selectedFault === f.label ? null : f.label)}
-            className={`bg-card border rounded-lg p-2.5 text-center cursor-pointer transition-all ${
-              selectedFault === f.label
-                ? "border-secondary bg-secondary-light"
-                : "border-border hover:border-secondary"
-            }`}
-          >
-            <div className="text-lg mb-0.5">{f.icon}</div>
-            <div className={`text-[10px] font-medium ${selectedFault === f.label ? "text-secondary" : "text-foreground"}`}>
-              {f.label}
-            </div>
-          </button>
-        ))}
+        {faults.map((f) => {
+          const FaultIcon = f.Icon;
+          const active = selectedFault === f.label;
+          return (
+            <button
+              key={f.label}
+              onClick={() => setSelectedFault(active ? null : f.label)}
+              aria-pressed={active}
+              className={`bg-card border rounded-lg p-2.5 flex flex-col items-center gap-1 cursor-pointer transition-all duration-200 ${
+                active
+                  ? "border-secondary bg-secondary-light"
+                  : "border-border hover:border-secondary hover:-translate-y-0.5 hover:shadow-sm"
+              }`}
+            >
+              <FaultIcon className={`w-5 h-5 ${active ? "text-secondary" : "text-muted-foreground"}`} strokeWidth={1.75} aria-hidden="true" />
+              <div className={`text-[10px] font-medium ${active ? "text-secondary" : "text-foreground"}`}>
+                {f.label}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Nearest verified mechanics</p>
@@ -124,15 +130,16 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
           <ProviderCard provider={m} onClick={() => onSelectProvider(m)} />
           <button
             onClick={(e) => { e.stopPropagation(); startFor(m); }}
-            className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+            className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-1 rounded-full bg-primary-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"
+            aria-label={`Directions to ${m.name}`}
           >
-            🧭 Directions
+            <Navigation className="w-3 h-3" aria-hidden="true" /> Directions
           </button>
         </div>
       ))}
 
-      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2">
-        Tap any mechanic to book · Tap 🧭 for turn-by-turn navigation
+      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-2 inline-flex items-center justify-center gap-1 w-full">
+        Tap any mechanic to book · Tap <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
       </p>
     </div>
   );
