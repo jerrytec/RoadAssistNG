@@ -44,7 +44,7 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
     return out;
   })();
 
-  const filtered = (
+  const filtered =
     activeFilter === "all"
       ? mixed
       : allProviders.filter((p) => {
@@ -53,8 +53,7 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
           if (activeFilter === "mechanic") return p.type.includes("mechanic");
           if (activeFilter === "verified") return p.verified;
           return true;
-        })
-  ).slice(0, 10);
+        });
 
   const mapMarkers: MapMarker[] = useMemo(() => {
     if (dir.target) {
@@ -141,6 +140,7 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
 
       <NearestProvidersList
         providers={filtered}
+        countLabel="Providers"
         onSelect={onSelectProvider}
         onDirections={startFor}
       />
