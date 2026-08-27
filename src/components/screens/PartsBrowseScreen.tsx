@@ -1,8 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PackageOpen, ShoppingCart, SlidersHorizontal, Search, Package, Star } from "lucide-react";
 import { formatNaira } from "@/lib/format";
 import { seedParts, partCategories } from "@/data/seedParts";
+import Pager from "@/components/Pager";
+
+const PAGE_SIZE = 5;
 
 interface Props {
   onOpenCart: () => void;
@@ -28,6 +31,15 @@ const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
       return true;
     });
   }, [category, search]);
+
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  useEffect(() => { setPage(1); }, [category, search]);
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+  const visible = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page]
+  );
 
   return (
     <div className="p-3.5 animate-fade-in">
@@ -89,9 +101,13 @@ const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
         ))}
       </div>
 
+      <p className="text-[10px] text-muted-foreground mb-2">
+        {filtered.length} matching {filtered.length === 1 ? "listing" : "listings"} · Page {page} of {totalPages}
+      </p>
+
       {filtered.length > 0 ? (
         <div className="grid grid-cols-2 gap-2.5">
-          {filtered.map((p) => (
+          {visible.map((p) => (
             <button
               key={p.id}
               onClick={() => navigate(`/parts/${p.id}`)}
@@ -122,6 +138,8 @@ const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
           <p className="text-xs text-muted-foreground">No parts match your search.</p>
         </div>
       )}
+
+      <Pager page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 };

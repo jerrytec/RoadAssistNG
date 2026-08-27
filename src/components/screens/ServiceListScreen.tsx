@@ -110,6 +110,7 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
 
       <NearestProvidersList
         providers={list}
+        countLabel={serviceType === "tow" ? "Tow vans" : "Vulcanizers"}
         onSelect={onSelectProvider}
         onDirections={startFor}
       />

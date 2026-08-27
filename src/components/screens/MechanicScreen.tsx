@@ -126,6 +126,7 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
       <NearestProvidersList
         providers={mechanics}
         heading="Nearest verified mechanics"
+        countLabel="Mechanics"
         onSelect={onSelectProvider}
         onDirections={startFor}
       />
