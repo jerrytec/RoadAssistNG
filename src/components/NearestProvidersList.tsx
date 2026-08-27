@@ -1,70 +1,65 @@
-import { useEffect, useMemo, useState } from "react";
 import { Navigation } from "lucide-react";
 import ProviderCard, { type Provider } from "@/components/ProviderCard";
 import Pager from "@/components/Pager";
 
 interface Props {
+  /** Only the current page of providers (5 by default) */
   providers: Provider[];
   heading?: string;
   emptyText?: string;
-  /** Noun used in the count line, e.g. "Mechanics" */
+  /** Noun used in the summary line, e.g. "mechanics" */
   countLabel?: string;
-  pageSize?: number;
+  loading?: boolean;
+  page: number;
+  totalPages: number;
+  total: number;
+  from: number;
+  to: number;
+  onPageChange: (p: number) => void;
   onSelect: (p: Provider) => void;
   onDirections: (p: Provider) => void;
 }
 
 /**
- * Unified list used by MechanicScreen, NeedHelpScreen and ServiceListScreen
- * so the "nearest providers" UI (cards + directions chip + pagination)
- * stays visually and behaviourally identical everywhere.
+ * Unified paginated list used by MechanicScreen, NeedHelpScreen and
+ * ServiceListScreen. Receives one page at a time from the data layer.
  */
 const NearestProvidersList = ({
   providers,
   heading = "Nearest providers",
-  emptyText = "No providers available right now. Try again shortly.",
-  countLabel = "Providers",
-  pageSize = 5,
+  emptyText = "No providers match your search. Try a different filter.",
+  countLabel = "providers",
+  loading = false,
+  page,
+  totalPages,
+  total,
+  from,
+  to,
+  onPageChange,
   onSelect,
   onDirections,
-}: Props) => {
-  const [page, setPage] = useState(1);
-  const total = providers.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+}: Props) => (
+  <>
+    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+      {heading}
+    </p>
 
-  // Reset to first page whenever the dataset (filter/search) changes.
-  useEffect(() => {
-    setPage(1);
-  }, [total, providers[0]?.id]);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
-
-  const visible = useMemo(
-    () => providers.slice((page - 1) * pageSize, page * pageSize),
-    [providers, page, pageSize]
-  );
-
-  return (
-    <>
-      <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-          {heading}
-        </p>
-        {total > 0 && (
-          <p className="text-[10px] text-muted-foreground">
-            {total} {countLabel} · Page {page} of {totalPages}
-          </p>
-        )}
+    {loading && providers.length === 0 ? (
+      <div className="space-y-2" aria-busy="true">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-[74px] rounded-lg bg-muted animate-pulse" />
+        ))}
       </div>
-
-      {total === 0 ? (
-        <div className="text-center text-[12px] text-muted-foreground border border-dashed border-border rounded-lg py-8">
-          {emptyText}
-        </div>
-      ) : (
-        visible.map((p) => (
+    ) : total === 0 ? (
+      <div
+        className="text-center text-[12px] text-muted-foreground border border-dashed border-border rounded-lg py-8"
+        data-testid="empty-state"
+      >
+        {emptyText}
+      </div>
+    ) : (
+      <div data-testid="provider-list" className={loading ? "opacity-60 transition-opacity" : undefined}>
+        {providers.map((p) => (
           <div key={p.id} className="relative">
             <ProviderCard provider={p} onClick={() => onSelect(p)} />
             <button
@@ -78,17 +73,25 @@ const NearestProvidersList = ({
               <Navigation className="w-3 h-3" aria-hidden="true" /> Directions
             </button>
           </div>
-        ))
-      )}
+        ))}
+      </div>
+    )}
 
-      <Pager page={page} totalPages={totalPages} onChange={setPage} />
+    <Pager
+      page={page}
+      totalPages={totalPages}
+      total={total}
+      from={from}
+      to={to}
+      label={countLabel}
+      onChange={onPageChange}
+    />
 
-      <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-3 inline-flex items-center justify-center gap-1 w-full">
-        Tap any provider to book · Tap{" "}
-        <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
-      </p>
-    </>
-  );
-};
+    <p className="text-center text-[10px] text-muted-foreground pt-3 border-t border-border mt-3 inline-flex items-center justify-center gap-1 w-full">
+      Tap any provider to book · Tap{" "}
+      <Navigation className="w-3 h-3 inline" aria-hidden="true" /> for turn-by-turn navigation
+    </p>
+  </>
+);
 
 export default NearestProvidersList;
