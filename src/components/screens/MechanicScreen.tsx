@@ -129,9 +129,16 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
       </div>
 
       <NearestProvidersList
-        providers={mechanics}
+        providers={pageData.items}
         heading="Nearest verified mechanics"
         countLabel="Mechanics"
+        loading={pageData.loading}
+        page={pageData.page}
+        totalPages={pageData.totalPages}
+        total={pageData.total}
+        from={pageData.from}
+        to={pageData.to}
+        onPageChange={setPage}
         onSelect={onSelectProvider}
         onDirections={startFor}
       />
