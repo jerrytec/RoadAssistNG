@@ -29,6 +29,8 @@ interface Props {
 const MechanicScreen = ({ onSelectProvider }: Props) => {
   const [selectedFault, setSelectedFault] = useState<string | null>(null);
   const dir = useDirections();
+  const { page, setPage } = usePagedParams({ prefix: "mech" });
+  const pageData = usePagedProviders({ page, category: "mechanic" });
 
   const startFor = (m: Provider) => {
     const c = syntheticCoord(m.id);
@@ -39,7 +41,7 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
     if (dir.target) {
       return [{ id: dir.target.id, lat: dir.target.lat!, lng: dir.target.lng!, title: dir.target.name, variant: "accent" }];
     }
-    return mechanics.map((m) => {
+    return pageData.items.map((m) => {
       const { lat, lng } = syntheticCoord(m.id);
       return {
         id: m.id,
@@ -51,12 +53,13 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dir.target]);
+  }, [dir.target, pageData.items]);
 
   const bookSelected = () => {
-    const m = mechanics.find((x) => x.id === dir.target?.id);
+    const m = pageData.items.find((x) => x.id === dir.target?.id);
     if (m) onSelectProvider(m);
   };
+
 
   return (
     <div className="p-3.5 animate-fade-in">
