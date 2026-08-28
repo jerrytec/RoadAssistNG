@@ -1,13 +1,16 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { Layers, Truck, Disc3, Wrench, ShieldCheck, MapPin, type LucideIcon } from "lucide-react";
 import NearestProvidersList from "@/components/NearestProvidersList";
 import SOSButton from "@/components/SOSButton";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
 import { useDirections } from "@/hooks/useDirections";
+import { usePagedParams } from "@/hooks/usePagedParams";
+import { usePagedProviders } from "@/hooks/usePagedProviders";
 import { syntheticCoord } from "@/lib/googleMaps";
-import { allProviders } from "@/data/providers";
+import type { ProviderCategory } from "@/lib/pagedQuery";
 import type { Provider } from "@/components/ProviderCard";
+
 
 const filters: { id: string; label: string; Icon: LucideIcon }[] = [
   { id: "all",        label: "All nearby",   Icon: Layers },
