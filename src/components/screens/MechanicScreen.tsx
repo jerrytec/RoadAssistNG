@@ -99,7 +99,7 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
       )}
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 inline-flex items-center gap-1">
-        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {mechanics.length} mechanics nearby
+        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {pageData.total} mechanics nearby
       </p>
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">What's the problem?</p>
