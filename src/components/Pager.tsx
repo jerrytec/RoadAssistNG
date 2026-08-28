@@ -11,17 +11,16 @@ interface Props {
   onChange: (p: number) => void;
 }
 
-/** Compact window that never overflows on narrow screens: 1 … 4 5 6 … 25 */
-export const buildPageWindow = (page: number, total: number, span = 1): (number | "gap")[] => {
-  if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
-  const out: (number | "gap")[] = [1];
-  const start = Math.max(2, page - span);
-  const end = Math.min(total - 1, page + span);
-  if (start > 2) out.push("gap");
-  for (let i = start; i <= end; i++) out.push(i);
-  if (end < total - 1) out.push("gap");
-  out.push(total);
-  return out;
+/**
+ * Sliding window of up to 5 consecutive page numbers, centered on the active
+ * page where possible. Never overflows on narrow screens — deeper pages are
+ * reached via the Next button.
+ * e.g. page 1 of 25 → [1,2,3,4,5], page 12 of 25 → [10,11,12,13,14]
+ */
+export const buildPageWindow = (page: number, total: number, size = 5): number[] => {
+  const count = Math.min(size, total);
+  const start = Math.min(Math.max(1, page - Math.floor(count / 2)), Math.max(1, total - count + 1));
+  return Array.from({ length: count }, (_, i) => start + i);
 };
 
 const Pager = ({ page, totalPages, total, from, to, label = "results", onChange }: Props) => {
