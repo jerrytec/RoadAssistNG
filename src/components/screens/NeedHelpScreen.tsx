@@ -109,7 +109,7 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
           return (
             <button
               key={f.id}
-              onClick={() => setActiveFilter(f.id)}
+              onClick={() => setFilter(f.id)}
               aria-pressed={active}
               className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer border transition-all inline-flex items-center gap-1 ${
                 active
@@ -124,8 +124,15 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
       </div>
 
       <NearestProvidersList
-        providers={filtered}
+        providers={pageData.items}
         countLabel="Providers"
+        loading={pageData.loading}
+        page={pageData.page}
+        totalPages={pageData.totalPages}
+        total={pageData.total}
+        from={pageData.from}
+        to={pageData.to}
+        onPageChange={setPage}
         onSelect={onSelectProvider}
         onDirections={startFor}
       />
