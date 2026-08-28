@@ -4,9 +4,11 @@ import NearestProvidersList from "@/components/NearestProvidersList";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
 import { useDirections } from "@/hooks/useDirections";
+import { usePagedParams } from "@/hooks/usePagedParams";
+import { usePagedProviders } from "@/hooks/usePagedProviders";
 import { syntheticCoord } from "@/lib/googleMaps";
-import { mechanics } from "@/data/providers";
 import type { Provider } from "@/components/ProviderCard";
+
 
 const faults: { Icon: LucideIcon; label: string }[] = [
   { Icon: Zap,            label: "Won't start" },
