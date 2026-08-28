@@ -110,12 +110,19 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
       )}
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 inline-flex items-center gap-1">
-        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {list.length} available
+        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {pageData.total} available
       </p>
 
       <NearestProvidersList
         providers={list}
         countLabel={serviceType === "tow" ? "Tow vans" : "Vulcanizers"}
+        loading={pageData.loading}
+        page={pageData.page}
+        totalPages={pageData.totalPages}
+        total={pageData.total}
+        from={pageData.from}
+        to={pageData.to}
+        onPageChange={setPage}
         onSelect={onSelectProvider}
         onDirections={startFor}
       />
