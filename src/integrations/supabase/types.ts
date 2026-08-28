@@ -608,6 +608,81 @@ export type Database = {
         }
         Relationships: []
       }
+      providers_directory: {
+        Row: {
+          avatar_bg: string | null
+          badges: Json
+          base_fee_kobo: number | null
+          capacity_tonnes: number | null
+          created_at: string
+          distance: string | null
+          eta: string | null
+          id: string
+          location: string | null
+          name: string
+          operator: string | null
+          per_km_kobo: number | null
+          plate: string | null
+          rating: string | null
+          search_text: string
+          services: string[] | null
+          shop_type: string | null
+          sort_index: number
+          specializations: string[] | null
+          status: string | null
+          type: string
+          verified: boolean
+        }
+        Insert: {
+          avatar_bg?: string | null
+          badges?: Json
+          base_fee_kobo?: number | null
+          capacity_tonnes?: number | null
+          created_at?: string
+          distance?: string | null
+          eta?: string | null
+          id: string
+          location?: string | null
+          name: string
+          operator?: string | null
+          per_km_kobo?: number | null
+          plate?: string | null
+          rating?: string | null
+          search_text?: string
+          services?: string[] | null
+          shop_type?: string | null
+          sort_index?: number
+          specializations?: string[] | null
+          status?: string | null
+          type: string
+          verified?: boolean
+        }
+        Update: {
+          avatar_bg?: string | null
+          badges?: Json
+          base_fee_kobo?: number | null
+          capacity_tonnes?: number | null
+          created_at?: string
+          distance?: string | null
+          eta?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          operator?: string | null
+          per_km_kobo?: number | null
+          plate?: string | null
+          rating?: string | null
+          search_text?: string
+          services?: string[] | null
+          shop_type?: string | null
+          sort_index?: number
+          specializations?: string[] | null
+          status?: string | null
+          type?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       service_chat_messages: {
         Row: {
           body: string
