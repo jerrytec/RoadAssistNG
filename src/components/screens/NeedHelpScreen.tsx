@@ -25,44 +25,25 @@ interface Props {
 }
 
 const NeedHelpScreen = ({ onSelectProvider }: Props) => {
-  const [activeFilter, setActiveFilter] = useState("all");
   const dir = useDirections();
+  const { page, filter, setPage, setFilter } = usePagedParams({ prefix: "help" });
+  const activeFilter = filter as ProviderCategory;
+  const pageData = usePagedProviders({
+    page,
+    category: activeFilter,
+    mixed: activeFilter === "all",
+  });
 
   const startFor = (p: Provider) => {
     const c = syntheticCoord(p.id);
     dir.start({ id: p.id, name: p.name, lat: c.lat, lng: c.lng });
   };
 
-  const mixed = (() => {
-    const tows = allProviders.filter((p) => p.type.includes("Tow"));
-    const vulcs = allProviders.filter((p) => p.type.includes("Vulcanizer"));
-    const mechs = allProviders.filter((p) => p.type.includes("mechanic"));
-    const out: Provider[] = [];
-    const max = Math.max(tows.length, vulcs.length, mechs.length);
-    for (let i = 0; i < max && out.length < 10; i++) {
-      if (tows[i] && out.length < 10) out.push(tows[i]);
-      if (vulcs[i] && out.length < 10) out.push(vulcs[i]);
-      if (mechs[i] && out.length < 10) out.push(mechs[i]);
-    }
-    return out;
-  })();
-
-  const filtered =
-    activeFilter === "all"
-      ? mixed
-      : allProviders.filter((p) => {
-          if (activeFilter === "tow") return p.type.includes("Tow");
-          if (activeFilter === "vulcanizer") return p.type.includes("Vulcanizer");
-          if (activeFilter === "mechanic") return p.type.includes("mechanic");
-          if (activeFilter === "verified") return p.verified;
-          return true;
-        });
-
   const mapMarkers: MapMarker[] = useMemo(() => {
     if (dir.target) {
       return [{ id: dir.target.id, lat: dir.target.lat!, lng: dir.target.lng!, title: dir.target.name, variant: "accent" }];
     }
-    return filtered.map((p) => {
+    return pageData.items.map((p) => {
       const { lat, lng } = syntheticCoord(p.id);
       const variant: MapMarker["variant"] = p.type.toLowerCase().includes("mechanic") ? "accent" : "primary";
       return {
@@ -75,12 +56,13 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, dir.target]);
+  }, [pageData.items, dir.target]);
 
   const bookSelected = () => {
-    const p = allProviders.find((x) => x.id === dir.target?.id);
+    const p = pageData.items.find((x) => x.id === dir.target?.id);
     if (p) onSelectProvider(p);
   };
+
 
   return (
     <div className="p-3.5 animate-fade-in">
