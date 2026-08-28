@@ -30,7 +30,7 @@ const Pager = ({ page, totalPages, total, from, to, label = "results", onChange 
     <div className="mt-3 space-y-2">
       {typeof total === "number" && total > 0 && (
         <p className="text-[10px] text-muted-foreground text-center" data-testid="pager-summary">
-          Showing {from}–{to} of {total} {label} · Page {page} of {totalPages}
+          Showing {from}–{to} of {total} onboarded {label} · Page {page} of {totalPages}
         </p>
       )}
 
