@@ -52,8 +52,8 @@ const Pager = ({ page, totalPages, total, from, to, label = "results", onChange 
 
           <div className="flex items-center gap-1 min-w-0">
             {pages.map((p) => (
-                <button
-                  key={p}
+              <button
+                key={p}
                   onClick={() => onChange(p)}
                   aria-current={p === page ? "page" : undefined}
                   aria-label={`Page ${p}`}
