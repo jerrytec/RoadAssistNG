@@ -51,12 +51,7 @@ const Pager = ({ page, totalPages, total, from, to, label = "results", onChange 
           </button>
 
           <div className="flex items-center gap-1 min-w-0">
-            {pages.map((p, i) =>
-              p === "gap" ? (
-                <span key={`gap-${i}`} className="px-0.5 text-[11px] text-muted-foreground select-none">
-                  …
-                </span>
-              ) : (
+            {pages.map((p) => (
                 <button
                   key={p}
                   onClick={() => onChange(p)}
