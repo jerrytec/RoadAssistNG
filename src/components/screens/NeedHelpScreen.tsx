@@ -1,13 +1,16 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { Layers, Truck, Disc3, Wrench, ShieldCheck, MapPin, type LucideIcon } from "lucide-react";
 import NearestProvidersList from "@/components/NearestProvidersList";
 import SOSButton from "@/components/SOSButton";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
 import { useDirections } from "@/hooks/useDirections";
+import { usePagedParams } from "@/hooks/usePagedParams";
+import { usePagedProviders } from "@/hooks/usePagedProviders";
 import { syntheticCoord } from "@/lib/googleMaps";
-import { allProviders } from "@/data/providers";
+import type { ProviderCategory } from "@/lib/pagedQuery";
 import type { Provider } from "@/components/ProviderCard";
+
 
 const filters: { id: string; label: string; Icon: LucideIcon }[] = [
   { id: "all",        label: "All nearby",   Icon: Layers },
@@ -22,44 +25,25 @@ interface Props {
 }
 
 const NeedHelpScreen = ({ onSelectProvider }: Props) => {
-  const [activeFilter, setActiveFilter] = useState("all");
   const dir = useDirections();
+  const { page, filter, setPage, setFilter } = usePagedParams({ prefix: "help" });
+  const activeFilter = filter as ProviderCategory;
+  const pageData = usePagedProviders({
+    page,
+    category: activeFilter,
+    mixed: activeFilter === "all",
+  });
 
   const startFor = (p: Provider) => {
     const c = syntheticCoord(p.id);
     dir.start({ id: p.id, name: p.name, lat: c.lat, lng: c.lng });
   };
 
-  const mixed = (() => {
-    const tows = allProviders.filter((p) => p.type.includes("Tow"));
-    const vulcs = allProviders.filter((p) => p.type.includes("Vulcanizer"));
-    const mechs = allProviders.filter((p) => p.type.includes("mechanic"));
-    const out: Provider[] = [];
-    const max = Math.max(tows.length, vulcs.length, mechs.length);
-    for (let i = 0; i < max && out.length < 10; i++) {
-      if (tows[i] && out.length < 10) out.push(tows[i]);
-      if (vulcs[i] && out.length < 10) out.push(vulcs[i]);
-      if (mechs[i] && out.length < 10) out.push(mechs[i]);
-    }
-    return out;
-  })();
-
-  const filtered =
-    activeFilter === "all"
-      ? mixed
-      : allProviders.filter((p) => {
-          if (activeFilter === "tow") return p.type.includes("Tow");
-          if (activeFilter === "vulcanizer") return p.type.includes("Vulcanizer");
-          if (activeFilter === "mechanic") return p.type.includes("mechanic");
-          if (activeFilter === "verified") return p.verified;
-          return true;
-        });
-
   const mapMarkers: MapMarker[] = useMemo(() => {
     if (dir.target) {
       return [{ id: dir.target.id, lat: dir.target.lat!, lng: dir.target.lng!, title: dir.target.name, variant: "accent" }];
     }
-    return filtered.map((p) => {
+    return pageData.items.map((p) => {
       const { lat, lng } = syntheticCoord(p.id);
       const variant: MapMarker["variant"] = p.type.toLowerCase().includes("mechanic") ? "accent" : "primary";
       return {
@@ -72,12 +56,13 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, dir.target]);
+  }, [pageData.items, dir.target]);
 
   const bookSelected = () => {
-    const p = allProviders.find((x) => x.id === dir.target?.id);
+    const p = pageData.items.find((x) => x.id === dir.target?.id);
     if (p) onSelectProvider(p);
   };
+
 
   return (
     <div className="p-3.5 animate-fade-in">
@@ -124,7 +109,7 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
           return (
             <button
               key={f.id}
-              onClick={() => setActiveFilter(f.id)}
+              onClick={() => setFilter(f.id)}
               aria-pressed={active}
               className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer border transition-all inline-flex items-center gap-1 ${
                 active
@@ -139,8 +124,15 @@ const NeedHelpScreen = ({ onSelectProvider }: Props) => {
       </div>
 
       <NearestProvidersList
-        providers={filtered}
+        providers={pageData.items}
         countLabel="Providers"
+        loading={pageData.loading}
+        page={pageData.page}
+        totalPages={pageData.totalPages}
+        total={pageData.total}
+        from={pageData.from}
+        to={pageData.to}
+        onPageChange={setPage}
         onSelect={onSelectProvider}
         onDirections={startFor}
       />

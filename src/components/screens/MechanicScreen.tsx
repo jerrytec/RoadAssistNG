@@ -4,9 +4,11 @@ import NearestProvidersList from "@/components/NearestProvidersList";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
 import { useDirections } from "@/hooks/useDirections";
+import { usePagedParams } from "@/hooks/usePagedParams";
+import { usePagedProviders } from "@/hooks/usePagedProviders";
 import { syntheticCoord } from "@/lib/googleMaps";
-import { mechanics } from "@/data/providers";
 import type { Provider } from "@/components/ProviderCard";
+
 
 const faults: { Icon: LucideIcon; label: string }[] = [
   { Icon: Zap,            label: "Won't start" },
@@ -27,6 +29,8 @@ interface Props {
 const MechanicScreen = ({ onSelectProvider }: Props) => {
   const [selectedFault, setSelectedFault] = useState<string | null>(null);
   const dir = useDirections();
+  const { page, setPage } = usePagedParams({ prefix: "mech" });
+  const pageData = usePagedProviders({ page, category: "mechanic" });
 
   const startFor = (m: Provider) => {
     const c = syntheticCoord(m.id);
@@ -37,7 +41,7 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
     if (dir.target) {
       return [{ id: dir.target.id, lat: dir.target.lat!, lng: dir.target.lng!, title: dir.target.name, variant: "accent" }];
     }
-    return mechanics.map((m) => {
+    return pageData.items.map((m) => {
       const { lat, lng } = syntheticCoord(m.id);
       return {
         id: m.id,
@@ -49,12 +53,13 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dir.target]);
+  }, [dir.target, pageData.items]);
 
   const bookSelected = () => {
-    const m = mechanics.find((x) => x.id === dir.target?.id);
+    const m = pageData.items.find((x) => x.id === dir.target?.id);
     if (m) onSelectProvider(m);
   };
+
 
   return (
     <div className="p-3.5 animate-fade-in">
@@ -94,7 +99,7 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
       )}
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 inline-flex items-center gap-1">
-        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {mechanics.length} mechanics nearby
+        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {pageData.total} mechanics nearby
       </p>
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">What's the problem?</p>
@@ -124,9 +129,16 @@ const MechanicScreen = ({ onSelectProvider }: Props) => {
       </div>
 
       <NearestProvidersList
-        providers={mechanics}
+        providers={pageData.items}
         heading="Nearest verified mechanics"
         countLabel="Mechanics"
+        loading={pageData.loading}
+        page={pageData.page}
+        totalPages={pageData.totalPages}
+        total={pageData.total}
+        from={pageData.from}
+        to={pageData.to}
+        onPageChange={setPage}
         onSelect={onSelectProvider}
         onDirections={startFor}
       />

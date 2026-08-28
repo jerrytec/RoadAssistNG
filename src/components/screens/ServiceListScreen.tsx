@@ -5,8 +5,10 @@ import NearestProvidersList from "@/components/NearestProvidersList";
 import GoogleMap, { type MapMarker } from "@/components/GoogleMap";
 import DirectionsPanel from "@/components/DirectionsPanel";
 import { useDirections } from "@/hooks/useDirections";
+import { usePagedParams } from "@/hooks/usePagedParams";
+import { usePagedProviders } from "@/hooks/usePagedProviders";
 import { syntheticCoord } from "@/lib/googleMaps";
-import { allProviders } from "@/data/providers";
+
 
 interface Props {
   serviceType: "tow" | "vulcanizer";
@@ -32,8 +34,10 @@ const META: Record<Props["serviceType"], { Icon: LucideIcon; title: string; subt
 
 const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
   const meta = META[serviceType];
-  const list = allProviders.filter(meta.filter);
   const dir = useDirections();
+  const { page, setPage } = usePagedParams({ prefix: serviceType });
+  const pageData = usePagedProviders({ page, category: serviceType });
+  const list = pageData.items;
 
   const startFor = (p: Provider) => {
     const c = syntheticCoord(p.id);
@@ -62,6 +66,7 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [list, dir.target, meta.variant]);
+
 
   const HeaderIcon = meta.Icon;
   return (
@@ -105,12 +110,19 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
       )}
 
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 inline-flex items-center gap-1">
-        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {list.length} available
+        <MapPin className="w-3 h-3" aria-hidden="true" /> Ikeja, Lagos · {pageData.total} available
       </p>
 
       <NearestProvidersList
         providers={list}
         countLabel={serviceType === "tow" ? "Tow vans" : "Vulcanizers"}
+        loading={pageData.loading}
+        page={pageData.page}
+        totalPages={pageData.totalPages}
+        total={pageData.total}
+        from={pageData.from}
+        to={pageData.to}
+        onPageChange={setPage}
         onSelect={onSelectProvider}
         onDirections={startFor}
       />
