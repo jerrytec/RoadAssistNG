@@ -34,8 +34,10 @@ const META: Record<Props["serviceType"], { Icon: LucideIcon; title: string; subt
 
 const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
   const meta = META[serviceType];
-  const list = allProviders.filter(meta.filter);
   const dir = useDirections();
+  const { page, setPage } = usePagedParams({ prefix: serviceType });
+  const pageData = usePagedProviders({ page, category: serviceType });
+  const list = pageData.items;
 
   const startFor = (p: Provider) => {
     const c = syntheticCoord(p.id);
@@ -64,6 +66,7 @@ const ServiceListScreen = ({ serviceType, onSelectProvider }: Props) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [list, dir.target, meta.variant]);
+
 
   const HeaderIcon = meta.Icon;
   return (
