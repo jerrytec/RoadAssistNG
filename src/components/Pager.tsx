@@ -54,19 +54,18 @@ const Pager = ({ page, totalPages, total, from, to, label = "results", onChange 
             {pages.map((p) => (
               <button
                 key={p}
-                  onClick={() => onChange(p)}
-                  aria-current={p === page ? "page" : undefined}
-                  aria-label={`Page ${p}`}
-                  className={`w-9 h-9 sm:w-8 sm:h-8 shrink-0 rounded-lg border text-[11px] font-semibold transition-colors ${
-                    p === page
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
-                  }`}
-                >
-                  {p}
-                </button>
-              )
-            )}
+                onClick={() => onChange(p)}
+                aria-current={p === page ? "page" : undefined}
+                aria-label={`Page ${p}`}
+                className={`w-9 h-9 sm:w-8 sm:h-8 shrink-0 rounded-lg border text-[11px] font-semibold transition-colors ${
+                  p === page
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
           </div>
 
           <button
