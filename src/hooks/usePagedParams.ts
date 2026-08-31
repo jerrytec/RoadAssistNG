@@ -21,7 +21,7 @@ export const usePagedParams = ({ prefix = "", defaultFilter = "all" }: Options =
   const filter = params.get(key("f")) ?? defaultFilter;
 
   const patch = useCallback(
-    (values: Record<string, string | null>) => {
+    (values: Record<string, string | null>, { push = false }: { push?: boolean } = {}) => {
       setParams(
         (prev) => {
           const next = new URLSearchParams(prev);
@@ -31,19 +31,25 @@ export const usePagedParams = ({ prefix = "", defaultFilter = "all" }: Options =
           }
           return next;
         },
-        { replace: true }
+        // Page changes push a history entry so browser back/forward walks pages;
+        // search/filter typing replaces so it doesn't flood history.
+        { replace: !push }
       );
     },
     [key, setParams]
   );
 
-  const setPage = useCallback((p: number) => patch({ page: p <= 1 ? null : String(p) }), [patch]);
+  const setPage = useCallback(
+    (p: number) => patch({ page: p <= 1 ? null : String(p) }, { push: true }),
+    [patch]
+  );
   // Changing search or filter must reset to page 1 so counts stay coherent.
   const setSearch = useCallback((v: string) => patch({ q: v || null, page: null }), [patch]);
   const setFilter = useCallback(
     (v: string) => patch({ f: v === defaultFilter ? null : v, page: null }),
     [patch, defaultFilter]
   );
+
 
   return { page, search, filter, setPage, setSearch, setFilter };
 };
