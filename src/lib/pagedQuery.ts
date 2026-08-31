@@ -100,14 +100,124 @@ export const filterProviders = ({
   });
 };
 
+/* -------------------------------------------------- server-side page fetch */
+
+interface DirectoryRow {
+  id: string;
+  name: string;
+  type: string;
+  location: string | null;
+  status: string | null;
+  verified: boolean;
+  distance: string | null;
+  eta: string | null;
+  rating: string | null;
+  avatar_bg: string | null;
+  operator: string | null;
+  plate: string | null;
+  base_fee_kobo: number | null;
+  per_km_kobo: number | null;
+  capacity_tonnes: number | null;
+  shop_type: string | null;
+  services: string[] | null;
+  specializations: string[] | null;
+  badges: Provider["badges"] | null;
+}
+
+const rowToProvider = (r: DirectoryRow): Provider => ({
+  id: r.id,
+  icon: "",
+  name: r.name,
+  type: r.type,
+  location: r.location ?? "",
+  status: r.status ?? "",
+  verified: r.verified,
+  badges: r.badges ?? [],
+  distance: r.distance ?? "",
+  eta: r.eta ?? "",
+  rating: r.rating ?? "",
+  avatarBg: (r.avatar_bg as Provider["avatarBg"]) ?? "info",
+  operator: r.operator ?? undefined,
+  plate: r.plate ?? undefined,
+  baseFeeKobo: r.base_fee_kobo ?? undefined,
+  perKmKobo: r.per_km_kobo ?? undefined,
+  capacityTonnes: r.capacity_tonnes ?? undefined,
+  shopType: r.shop_type ?? undefined,
+  services: r.services ?? undefined,
+  specializations: r.specializations ?? undefined,
+});
+
+const typeFilter = (category: ProviderCategory) => {
+  switch (category) {
+    case "tow":
+      return "tow";
+    case "vulcanizer":
+      return "vulcanizer";
+    case "mechanic":
+      return "mechanic";
+    default:
+      return null;
+  }
+};
+
 /**
- * Page fetcher. Filtering, counting and slicing all happen in the data layer
- * (server-side style): the UI only ever receives `pageSize` rows plus the true
- * total, so swapping this for a real REST/SQL call needs no component changes.
+ * Page fetcher. Filtering, counting and slicing happen in the BACKEND
+ * (`providers_directory` with `.range()` + exact count), so the client only
+ * ever downloads `pageSize` rows no matter how large the dataset grows.
+ * Falls back to the bundled seed data if the backend is unreachable.
  */
 export const fetchProvidersPage = async (
   q: ProviderQuery & { page: number; pageSize?: number }
-): Promise<PageResult<Provider>> => paginate(filterProviders(q), q.page, q.pageSize ?? PAGE_SIZE);
+): Promise<PageResult<Provider>> => {
+  const pageSize = q.pageSize ?? PAGE_SIZE;
+  const page = Math.max(1, Math.floor(q.page) || 1);
+  const search = (q.search ?? "").trim().toLowerCase();
+  const category = q.category ?? "all";
+
+  try {
+    const build = () => {
+      let b = supabase
+        .from("providers_directory")
+        .select(
+          "id,name,type,location,status,verified,distance,eta,rating,avatar_bg,operator,plate,base_fee_kobo,per_km_kobo,capacity_tonnes,shop_type,services,specializations,badges",
+          { count: "exact" }
+        );
+      const t = typeFilter(category);
+      if (t) b = b.ilike("type", `%${t}%`);
+      if (category === "verified" || q.verifiedOnly) b = b.eq("verified", true);
+      if (search) b = b.ilike("search_text", `%${search}%`);
+      return b;
+    };
+
+    // First pass: learn the true total so the page can be clamped into range.
+    const probe = await build().range(0, 0);
+    if (probe.error) throw probe.error;
+    const total = probe.count ?? 0;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * pageSize;
+
+    const { data, error } = await build()
+      .order("sort_index", { ascending: true })
+      .range(start, start + pageSize - 1);
+    if (error) throw error;
+
+    const items = (data ?? []).map((r) => rowToProvider(r as DirectoryRow));
+    return {
+      items,
+      total,
+      page: safePage,
+      pageSize,
+      totalPages,
+      from: total === 0 ? 0 : start + 1,
+      to: total === 0 ? 0 : start + items.length,
+    };
+  } catch {
+    // Offline / backend unavailable → local dataset keeps the UI usable.
+    return paginate(filterProviders(q), page, pageSize);
+  }
+};
+
 
 /* ---------------------------------------------------------------------- parts */
 
