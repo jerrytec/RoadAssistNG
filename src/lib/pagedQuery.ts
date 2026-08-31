@@ -175,7 +175,11 @@ export const fetchProvidersPage = async (
   const search = (q.search ?? "").trim().toLowerCase();
   const category = q.category ?? "all";
 
+  // "All nearby" interleaves categories — that ordering only exists client-side.
+  if (q.mixed) return paginate(filterProviders(q), page, pageSize);
+
   try {
+
     const build = () => {
       let b = supabase
         .from("providers_directory")
