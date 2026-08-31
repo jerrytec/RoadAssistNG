@@ -388,6 +388,57 @@ export type Database = {
         }
         Relationships: []
       }
+      parts_directory: {
+        Row: {
+          brand: string | null
+          category: string
+          compatibility: string[]
+          condition: string
+          created_at: string
+          id: string
+          location: string | null
+          price_kobo: number
+          rating: number | null
+          search_text: string
+          seller_name: string | null
+          sort_index: number
+          stock: number
+          title: string
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          compatibility?: string[]
+          condition: string
+          created_at?: string
+          id: string
+          location?: string | null
+          price_kobo: number
+          rating?: number | null
+          search_text?: string
+          seller_name?: string | null
+          sort_index: number
+          stock?: number
+          title: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          compatibility?: string[]
+          condition?: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          price_kobo?: number
+          rating?: number | null
+          search_text?: string
+          seller_name?: string | null
+          sort_index?: number
+          stock?: number
+          title?: string
+        }
+        Relationships: []
+      }
       parts_order_items: {
         Row: {
           id: string
