@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PackageOpen, ShoppingCart, SlidersHorizontal, Search, Package, Star } from "lucide-react";
 import { formatNaira } from "@/lib/format";
-import { seedParts, partCategories } from "@/data/seedParts";
 import Pager from "@/components/Pager";
-
-const PAGE_SIZE = 5;
+import { usePagedParams } from "@/hooks/usePagedParams";
+import { usePagedParts, usePartCategories } from "@/hooks/usePagedParts";
 
 interface Props {
   onOpenCart: () => void;
@@ -20,26 +18,14 @@ const condColor: Record<string, string> = {
 
 const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
   const navigate = useNavigate();
-  const [category, setCategory] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return seedParts.filter((p) => {
-      if (category && p.category !== category) return false;
-      if (q && !(`${p.title} ${p.brand} ${p.seller_name}`.toLowerCase().includes(q))) return false;
-      return true;
-    });
-  }, [category, search]);
-
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  useEffect(() => { setPage(1); }, [category, search]);
-  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
-  const visible = useMemo(
-    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filtered, page]
-  );
+  // page / search / category live in the URL so refresh + sharing restore the view
+  const { page, search, filter, setPage, setSearch, setFilter } = usePagedParams({
+    prefix: "parts",
+    defaultFilter: "all",
+  });
+  const categories = usePartCategories();
+  const category = filter === "all" ? null : filter;
+  const { items, total, totalPages, from, to, loading } = usePagedParts({ page, category, search });
 
   return (
     <div className="p-3.5 animate-fade-in">
@@ -50,7 +36,7 @@ const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
           </span>
           <div>
             <h2 className="text-[15px] font-semibold">Spare parts marketplace</h2>
-            <p className="text-[11px] text-muted-foreground">{seedParts.length} listings from verified Lagos sellers</p>
+            <p className="text-[11px] text-muted-foreground">Verified Lagos sellers</p>
           </div>
         </div>
         <button
@@ -72,28 +58,38 @@ const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search batteries, brake pads, tyres…"
+          aria-label="Search spare parts"
           className="flex-1 py-2.5 px-3.5 border border-border rounded-xl text-sm bg-background outline-none focus:border-primary"
         />
-        <button className="px-3 rounded-xl border border-border text-sm inline-flex items-center justify-center hover:border-primary/40 transition-colors" aria-label="Filters">
+        <button
+          className="px-3 rounded-xl border border-border text-sm inline-flex items-center justify-center hover:border-primary/40 transition-colors"
+          aria-label="Filters"
+        >
           <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-2 mb-3 -mx-3.5 px-3.5">
         <button
-          onClick={() => setCategory(null)}
+          onClick={() => setFilter("all")}
+          aria-pressed={filter === "all"}
           className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all ${
-            category === null ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground"
+            filter === "all"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card border-border text-muted-foreground"
           }`}
         >
           All
         </button>
-        {partCategories.map((c) => (
+        {categories.map((c) => (
           <button
             key={c}
-            onClick={() => setCategory(c)}
+            onClick={() => setFilter(c)}
+            aria-pressed={filter === c}
             className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all ${
-              category === c ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground"
+              filter === c
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card border-border text-muted-foreground"
             }`}
           >
             {c}
@@ -101,32 +97,47 @@ const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
         ))}
       </div>
 
-      <p className="text-[10px] text-muted-foreground mb-2">
-        {filtered.length} matching {filtered.length === 1 ? "listing" : "listings"} · Page {page} of {totalPages}
-      </p>
-
-      {filtered.length > 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-2 gap-2.5" aria-busy="true">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="aspect-square bg-muted animate-pulse" />
+              <div className="p-2 space-y-1.5">
+                <div className="h-3 bg-muted rounded animate-pulse" />
+                <div className="h-2.5 w-2/3 bg-muted rounded animate-pulse" />
+                <div className="h-3 w-1/2 bg-muted rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : items.length > 0 ? (
         <div className="grid grid-cols-2 gap-2.5">
-          {visible.map((p) => (
+          {items.map((p) => (
             <button
               key={p.id}
               onClick={() => navigate(`/parts/${p.id}`)}
               className="text-left bg-card border border-border rounded-xl overflow-hidden hover:border-primary hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="aspect-square bg-muted flex items-center justify-center text-muted-foreground">
-                {p.icon ? <span className="text-4xl">{p.icon}</span> : <Package className="w-10 h-10" strokeWidth={1.5} aria-hidden="true" />}
+                <Package className="w-10 h-10" strokeWidth={1.5} aria-hidden="true" />
               </div>
               <div className="p-2">
                 <div className="text-[12px] font-semibold line-clamp-2">{p.title}</div>
-                <div className="text-[10px] text-muted-foreground truncate">{p.brand} · {p.category}</div>
+                <div className="text-[10px] text-muted-foreground truncate">
+                  {p.brand} · {p.category}
+                </div>
                 <div className="text-[13px] font-bold text-primary mt-1">{formatNaira(p.price_kobo)}</div>
                 <div className="flex items-center justify-between mt-1">
-                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${condColor[p.condition]}`}>{p.condition}</span>
+                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${condColor[p.condition]}`}>
+                    {p.condition}
+                  </span>
                   <span className="text-[9px] text-muted-foreground inline-flex items-center gap-0.5">
                     <Star className="w-2.5 h-2.5 fill-accent text-accent" aria-hidden="true" /> {p.rating}
                   </span>
                 </div>
-                <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{p.seller_name} · {p.location}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                  {p.seller_name} · {p.location}
+                </div>
                 <div className="text-[9px] text-muted-foreground">Stock: {p.stock}</div>
               </div>
             </button>
@@ -139,7 +150,15 @@ const PartsBrowseScreen = ({ onOpenCart, cartCount }: Props) => {
         </div>
       )}
 
-      <Pager page={page} totalPages={totalPages} onChange={setPage} />
+      <Pager
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        from={from}
+        to={to}
+        label="listings"
+        onChange={setPage}
+      />
     </div>
   );
 };

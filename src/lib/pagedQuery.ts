@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { allProviders } from "@/data/providers";
-import { seedParts, type SeedPart } from "@/data/seedParts";
+import { seedParts, partCategories, type SeedPart } from "@/data/seedParts";
 import type { Provider } from "@/components/ProviderCard";
 
 export const PAGE_SIZE = 5;
@@ -236,7 +236,7 @@ export interface PartsQuery {
   search?: string;
 }
 
-/** Filter + search across ALL 50 spare-parts listings. */
+/** Filter + search across ALL spare-parts listings (local fallback). */
 export const filterParts = ({ category = null, search = "" }: PartsQuery): SeedPart[] => {
   const q = search.trim().toLowerCase();
   return seedParts.filter((p) => {
@@ -246,6 +246,102 @@ export const filterParts = ({ category = null, search = "" }: PartsQuery): SeedP
   });
 };
 
+interface PartsRow {
+  id: string;
+  title: string;
+  brand: string | null;
+  category: string;
+  seller_name: string | null;
+  location: string | null;
+  price_kobo: number;
+  condition: string;
+  stock: number;
+  rating: number | null;
+  compatibility: string[] | null;
+}
+
+const iconBySeed = new Map(seedParts.map((p) => [p.id, p.icon]));
+
+const rowToPart = (r: PartsRow): SeedPart => ({
+  id: r.id,
+  title: r.title,
+  brand: r.brand ?? "",
+  category: r.category,
+  icon: iconBySeed.get(r.id) ?? "",
+  seller_name: r.seller_name ?? "",
+  location: r.location ?? "",
+  price_kobo: Number(r.price_kobo),
+  condition: (r.condition as SeedPart["condition"]) ?? "New",
+  stock: r.stock,
+  rating: Number(r.rating ?? 0),
+  compatibility: r.compatibility ?? [],
+});
+
+/**
+ * Page fetcher for spare parts. Filtering, counting and slicing happen in the
+ * BACKEND (`parts_directory` with `.range()` + exact count) so the client only
+ * downloads `pageSize` rows. Falls back to bundled seed data when offline.
+ */
 export const fetchPartsPage = async (
   q: PartsQuery & { page: number; pageSize?: number }
-): Promise<PageResult<SeedPart>> => paginate(filterParts(q), q.page, q.pageSize ?? PAGE_SIZE);
+): Promise<PageResult<SeedPart>> => {
+  const pageSize = q.pageSize ?? PAGE_SIZE;
+  const page = Math.max(1, Math.floor(q.page) || 1);
+  const search = (q.search ?? "").trim().toLowerCase();
+  const category = q.category ?? null;
+
+  try {
+    const build = () => {
+      let b = supabase
+        .from("parts_directory")
+        .select(
+          "id,title,brand,category,seller_name,location,price_kobo,condition,stock,rating,compatibility",
+          { count: "exact" }
+        );
+      if (category) b = b.eq("category", category);
+      if (search) b = b.ilike("search_text", `%${search}%`);
+      return b;
+    };
+
+    // First pass: learn the true total so the page can be clamped into range.
+    const probe = await build().range(0, 0);
+    if (probe.error) throw probe.error;
+    const total = probe.count ?? 0;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * pageSize;
+
+    const { data, error } = await build()
+      .order("sort_index", { ascending: true })
+      .range(start, start + pageSize - 1);
+    if (error) throw error;
+
+    const items = (data ?? []).map((r) => rowToPart(r as PartsRow));
+    return {
+      items,
+      total,
+      page: safePage,
+      pageSize,
+      totalPages,
+      from: total === 0 ? 0 : start + 1,
+      to: total === 0 ? 0 : start + items.length,
+    };
+  } catch {
+    return paginate(filterParts(q), page, pageSize);
+  }
+};
+
+/** Distinct categories, from the backend when available. */
+export const fetchPartCategories = async (): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase
+      .from("parts_directory")
+      .select("category")
+      .order("category", { ascending: true });
+    if (error) throw error;
+    const set = new Set((data ?? []).map((r) => (r as { category: string }).category));
+    return set.size ? [...set] : [...partCategories];
+  } catch {
+    return [...partCategories];
+  }
+};
