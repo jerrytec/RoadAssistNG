@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { allProviders } from "@/data/providers";
-import { seedParts, type SeedPart } from "@/data/seedParts";
+import { seedParts, partCategories, type SeedPart } from "@/data/seedParts";
 import type { Provider } from "@/components/ProviderCard";
 
 export const PAGE_SIZE = 5;
