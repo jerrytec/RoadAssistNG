@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.publish_provider_application() FROM anon, authenticated, PUBLIC;
