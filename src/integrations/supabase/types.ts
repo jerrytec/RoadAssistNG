@@ -578,6 +578,75 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_applications: {
+        Row: {
+          base_fee_kobo: number | null
+          capacity_tonnes: number | null
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+          operator: string | null
+          per_km_kobo: number | null
+          phone: string | null
+          plate: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          services: string[]
+          shop_type: string | null
+          specializations: string[]
+          status: Database["public"]["Enums"]["application_status"]
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_fee_kobo?: number | null
+          capacity_tonnes?: number | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+          operator?: string | null
+          per_km_kobo?: number | null
+          phone?: string | null
+          plate?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          services?: string[]
+          shop_type?: string | null
+          specializations?: string[]
+          status?: Database["public"]["Enums"]["application_status"]
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_fee_kobo?: number | null
+          capacity_tonnes?: number | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+          operator?: string | null
+          per_km_kobo?: number | null
+          phone?: string | null
+          plate?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          services?: string[]
+          shop_type?: string | null
+          specializations?: string[]
+          status?: Database["public"]["Enums"]["application_status"]
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       provider_availability: {
         Row: {
           base_location: string | null
@@ -1189,6 +1258,7 @@ export type Database = {
         | "vulcanizer"
         | "mechanic"
         | "admin"
+      application_status: "pending" | "approved" | "rejected"
       dispute_kind: "service" | "order"
       dispute_status: "open" | "investigating" | "resolved" | "rejected"
       offer_status: "pending" | "accepted" | "declined" | "withdrawn"
@@ -1370,6 +1440,7 @@ export const Constants = {
         "mechanic",
         "admin",
       ],
+      application_status: ["pending", "approved", "rejected"],
       dispute_kind: ["service", "order"],
       dispute_status: ["open", "investigating", "resolved", "rejected"],
       offer_status: ["pending", "accepted", "declined", "withdrawn"],
