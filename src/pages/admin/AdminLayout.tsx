@@ -4,7 +4,7 @@ import { useAdminRoles } from "@/hooks/useAdminRoles";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, Users, Wrench, ListTodo, CreditCard,
-  AlertTriangle, ShieldCheck, Settings, Siren, Receipt,
+  AlertTriangle, ShieldCheck, Settings, Siren, Receipt, UserPlus,
 } from "lucide-react";
 
 const NAV = [
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/admin/sos", label: "SOS", icon: Siren },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/operators", label: "Operators", icon: Wrench },
+  { to: "/admin/applications", label: "Applications", icon: UserPlus },
   { to: "/admin/requests", label: "Requests", icon: ListTodo },
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
   { to: "/admin/compliance", label: "Compliance", icon: Receipt },

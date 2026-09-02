@@ -85,6 +85,15 @@ const Profile = () => {
         </div>
 
         <div className="bg-card border border-border rounded-xl p-5 shadow-card">
+          <h2 className="text-sm font-semibold mb-3">Work with us</h2>
+          <button onClick={() => navigate("/provider/join")} className="h-10 px-4 rounded-lg border border-border text-sm font-medium hover:bg-muted flex items-center gap-2">
+            <Users className="w-4 h-4" /> Join as a provider
+          </button>
+          <p className="text-[11px] text-muted-foreground mt-2">Tow vans, vulcanizers, mechanics and parts sellers can list themselves in the directory.</p>
+        </div>
+
+
+        <div className="bg-card border border-border rounded-xl p-5 shadow-card">
           <h2 className="text-sm font-semibold mb-3">Session</h2>
           <button onClick={async () => { await signOut(); navigate("/"); }} className="h-10 px-4 rounded-lg border border-border text-sm font-medium hover:bg-muted flex items-center gap-2">
             <LogOut className="w-4 h-4" /> Sign out
