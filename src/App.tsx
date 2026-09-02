@@ -59,6 +59,7 @@ const App = () => (
             <Route path="/sos/:id" element={<SOSTracking />} />
             <Route path="/sos/track/:token" element={<SOSPublicTrack />} />
             <Route path="/profile/trusted-contacts" element={<TrustedContacts />} />
+            <Route path="/provider/join" element={<ProviderJoin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
