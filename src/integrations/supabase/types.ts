@@ -305,13 +305,6 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "parts_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       parts_cart_items: {
@@ -497,13 +490,6 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "parts_order_items_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1212,38 +1198,41 @@ export type Database = {
         }
         Relationships: []
       }
-    }
-    Views: {
-      vendors_public: {
+      vendors_public_info: {
         Row: {
-          business_name: string | null
-          created_at: string | null
-          id: string | null
-          status: Database["public"]["Enums"]["vendor_status"] | null
-          verification_status:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
+          business_name: string
+          created_at: string
+          status: Database["public"]["Enums"]["vendor_status"]
+          vendor_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
         }
         Insert: {
-          business_name?: string | null
-          created_at?: string | null
-          id?: string | null
-          status?: Database["public"]["Enums"]["vendor_status"] | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
+          business_name: string
+          created_at?: string
+          status: Database["public"]["Enums"]["vendor_status"]
+          vendor_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
         }
         Update: {
-          business_name?: string | null
-          created_at?: string | null
-          id?: string | null
-          status?: Database["public"]["Enums"]["vendor_status"] | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
+          business_name?: string
+          created_at?: string
+          status?: Database["public"]["Enums"]["vendor_status"]
+          vendor_id?: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vendors_public_info_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: true
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
+    }
+    Views: {
+      [_ in never]: never
     }
     Functions: {
       can_access_thread: {
