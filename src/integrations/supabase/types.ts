@@ -1198,6 +1198,38 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors_public_info: {
+        Row: {
+          business_name: string
+          created_at: string
+          status: Database["public"]["Enums"]["vendor_status"]
+          vendor_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          status: Database["public"]["Enums"]["vendor_status"]
+          vendor_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          status?: Database["public"]["Enums"]["vendor_status"]
+          vendor_id?: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_public_info_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: true
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
