@@ -31,6 +31,8 @@ import AdminSOS from "./pages/admin/AdminSOS.tsx";
 import SOSTracking from "./pages/SOSTracking.tsx";
 import SOSPublicTrack from "./pages/SOSPublicTrack.tsx";
 import TrustedContacts from "./pages/TrustedContacts.tsx";
+import ProviderJoin from "./pages/ProviderJoin.tsx";
+import AdminApplications from "./pages/admin/AdminApplications.tsx";
 
 const queryClient = new QueryClient();
 
