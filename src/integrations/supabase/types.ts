@@ -305,6 +305,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "parts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       parts_cart_items: {
@@ -490,6 +497,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parts_order_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1200,7 +1214,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vendors_public: {
+        Row: {
+          business_name: string | null
+          created_at: string | null
+          id: string | null
+          status: Database["public"]["Enums"]["vendor_status"] | null
+          verification_status:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"] | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"] | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_access_thread: {
