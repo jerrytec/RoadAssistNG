@@ -71,6 +71,7 @@ const App = () => (
               <Route path="roles" element={<AdminRolesPage />} />
               <Route path="compliance" element={<AdminCompliance />} />
               <Route path="sos" element={<AdminSOS />} />
+              <Route path="applications" element={<AdminApplications />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
