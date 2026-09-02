@@ -26,11 +26,19 @@ const PartDetail = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("parts")
-        .select("*, vendor:vendors(id, business_name, status), category:parts_categories(name, icon)")
+        .select("*, category:parts_categories(name, icon)")
         .eq("id", id!)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (!data) return data;
+      // Vendor details come from the public mirror (business name + status only).
+      const { data: vendor } = await (supabase as any)
+        .from("vendors_public_info")
+        .select("vendor_id, business_name, status")
+        .eq("vendor_id", (data as any).vendor_id)
+        .maybeSingle();
+      return { ...(data as any), vendor: vendor ?? null };
+
     },
   });
 

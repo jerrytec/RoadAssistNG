@@ -114,8 +114,9 @@ interface DirectoryRow {
   eta: string | null;
   rating: string | null;
   avatar_bg: string | null;
-  operator: string | null;
-  plate: string | null;
+  // operator / plate are intentionally NOT selected: they are personal data
+  // and are no longer exposed through the public directory.
+
   base_fee_kobo: number | null;
   per_km_kobo: number | null;
   capacity_tonnes: number | null;
@@ -138,8 +139,9 @@ const rowToProvider = (r: DirectoryRow): Provider => ({
   eta: r.eta ?? "",
   rating: r.rating ?? "",
   avatarBg: (r.avatar_bg as Provider["avatarBg"]) ?? "info",
-  operator: r.operator ?? undefined,
-  plate: r.plate ?? undefined,
+  operator: undefined,
+  plate: undefined,
+
   baseFeeKobo: r.base_fee_kobo ?? undefined,
   perKmKobo: r.per_km_kobo ?? undefined,
   capacityTonnes: r.capacity_tonnes ?? undefined,
@@ -184,7 +186,7 @@ export const fetchProvidersPage = async (
       let b = supabase
         .from("providers_directory")
         .select(
-          "id,name,type,location,status,verified,distance,eta,rating,avatar_bg,operator,plate,base_fee_kobo,per_km_kobo,capacity_tonnes,shop_type,services,specializations,badges",
+          "id,name,type,location,status,verified,distance,eta,rating,avatar_bg,base_fee_kobo,per_km_kobo,capacity_tonnes,shop_type,services,specializations,badges",
           { count: "exact" }
         );
       const t = typeFilter(category);
